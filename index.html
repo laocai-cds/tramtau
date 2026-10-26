@@ -2174,7 +2174,7 @@ const FB_CFG={databaseURL:'https://tramtau-default-rtdb.firebaseio.com'};
     box.setAttribute('aria-busy','true');btn.disabled=true;sub.textContent='Đang tải tin…';skeleton();
     try{
       const d=await getPool();
-      const items=d.items.filter(i=>/^https?:\/\//i.test(i.url||'')&&(mentions((i.title||'')+' '+((i.desc||'').split(/(?<=[.!?…])\s+/)[0]||'').slice(0,220),cur)||(bare(cur)&&mentions(i.title||'',bare(cur))))).sort((a,b)=>(Date.parse(b.published)||0)-(Date.parse(a.published)||0)).slice(0,30);
+      const items=d.items.filter(i=>/^https?:\/\//i.test(i.url||'')&&((i.us||[]).includes(cur)||mentions((i.title||'')+' '+((i.desc||'').split(/(?<=[.!?…])\s+/)[0]||'').slice(0,220),cur)||(bare(cur)&&mentions(i.title||'',bare(cur))))).sort((a,b)=>(Date.parse(b.published)||0)-(Date.parse(a.published)||0)).slice(0,30);
       const t=d.updatedAt?new Date(d.updatedAt).toLocaleString('vi-VN',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'}):'';
       const part=d.partial?' · một số nguồn chưa tải được':'';
       if(!items.length){
