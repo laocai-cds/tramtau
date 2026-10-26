@@ -942,6 +942,22 @@ tbody tr:hover td{background:#f5f8ff}
 .cbm-link{display:block;width:100%;margin-top:4px;padding:7px;border:0;background:none;font:600 13px var(--sans);color:var(--son);cursor:pointer;border-radius:8px}
 .cbm-link:hover{background:var(--giay);text-decoration:underline;text-underline-offset:3px}
 @media(max-width:460px){.back:has(.cbm){padding:10px}.cbm-body{padding:12px 14px 10px}.cbp-pc strong{font-size:1.8rem}.cbp-row{grid-template-columns:repeat(2,minmax(0,1fr))}}
+/* hiệu ứng khi trỏ chuột vào thẻ số liệu */
+@media(hover:hover) and (pointer:fine){
+.stat{transition:transform .35s cubic-bezier(.2,.8,.2,1),box-shadow .35s,border-color .35s;transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));will-change:transform}
+.stat::before{content:'';position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .3s;background:radial-gradient(240px circle at var(--mx,50%) var(--my,50%),color-mix(in srgb,var(--k) 26%,transparent),transparent 62%)}
+.stat::after{transition:height .3s,box-shadow .3s}
+.stat .ico{transition:transform .4s cubic-bezier(.3,1.6,.5,1),box-shadow .3s}
+.stat strong{transition:transform .35s cubic-bezier(.2,.8,.2,1);transform-origin:left center}
+.stat:hover{transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) translateY(-7px);border-color:var(--k);box-shadow:0 22px 38px -18px color-mix(in srgb,var(--k) 70%,transparent),0 6px 14px -8px #0f172a33}
+.stat:hover.tilting{transition:transform .08s linear,box-shadow .35s,border-color .35s}
+.stat:hover::before{opacity:1}
+.stat:hover::after{height:7px;box-shadow:0 0 14px var(--k)}
+.stat:hover .ico{transform:rotate(-10deg) scale(1.15);box-shadow:0 0 0 6px color-mix(in srgb,var(--k) 20%,transparent),0 12px 22px -6px var(--k);animation:icoPulse 1.4s ease-out infinite}
+.stat:hover strong{transform:scale(1.05)}
+@keyframes icoPulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--k) 45%,transparent),0 12px 22px -6px var(--k)}100%{box-shadow:0 0 0 16px transparent,0 12px 22px -6px var(--k)}}
+}
+@media(prefers-reduced-motion:reduce){.stat,.stat:hover{transform:none!important}.stat:hover .ico{animation:none}}
 </style>
 
 </head>
@@ -1610,6 +1626,12 @@ function openRemindAll(){
 }
 $('#ttRemind').onclick=openRemindAll;
 
+/* thẻ số liệu: ánh sáng và độ nghiêng theo con trỏ */
+(()=>{if(!matchMedia('(hover:hover) and (pointer:fine)').matches||matchMedia('(prefers-reduced-motion:reduce)').matches)return;
+  document.addEventListener('pointermove',e=>{const c=e.target.closest&&e.target.closest('.stat');if(!c)return;const b=c.getBoundingClientRect(),x=(e.clientX-b.left)/b.width,y=(e.clientY-b.top)/b.height;
+    c.classList.add('tilting');c.style.setProperty('--mx',(x*100).toFixed(1)+'%');c.style.setProperty('--my',(y*100).toFixed(1)+'%');c.style.setProperty('--ry',((x-.5)*9).toFixed(2)+'deg');c.style.setProperty('--rx',((.5-y)*7).toFixed(2)+'deg')});
+  document.addEventListener('pointerout',e=>{const c=e.target.closest&&e.target.closest('.stat');if(!c||c.contains(e.relatedTarget))return;c.classList.remove('tilting');c.style.setProperty('--rx','0deg');c.style.setProperty('--ry','0deg')});
+})();
 /* ===== Thẻ "Chi bộ của tôi": link riêng #cb=ten-don-vi ===== */
 const cbSlug=r=>nm(r).normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/gi,'d').toLowerCase().replace(/^(chi bo|dang bo)\s+/,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
 let cbOpen=null;
