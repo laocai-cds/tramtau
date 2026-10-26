@@ -1278,7 +1278,10 @@ const curKey=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMont
 const viewingPast=()=>!!(viewKey&&viewKey!==curKey()&&msnap[viewKey]);
 /* bỏ đơn vị toàn số 0 (không có đảng viên, hồ sơ, tiền) khỏi mọi bảng, biểu đồ, báo cáo */
 const hasData=r=>['members','exempt','moved','pending','approved','paidCount','unfiled','declared','paid'].some(k=>v(r,k)>0);
-function applyView(){const src=(viewingPast()?msnap[viewKey].rows:liveUnits).filter(r=>hasData(r));
+let hiddenUnits=[];// đơn vị không hiện trong bảng, xếp hạng; số tiền và đảng viên vẫn cộng vào tổng
+const foldName=x=>String(x||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/gi,'d').toLowerCase().replace(/[^a-z0-9]+/g,'');
+const isHiddenUnit=r=>foldName(nm(r))==='dangbocaccoquandang';
+function applyView(){const all=(viewingPast()?msnap[viewKey].rows:liveUnits).filter(r=>hasData(r));hiddenUnits=all.filter(isHiddenUnit);const src=all.filter(r=>!isHiddenUnit(r));
   units=[...src].sort((a,b)=>v(b,'progress')-v(a,'progress')||v(b,'paid')-v(a,'paid'));rankOf=new Map();units.forEach((r,i)=>rankOf.set(r,i+1))}
 function renderBanner(){let b=$('#viewBanner');if(!b){b=document.createElement('div');b.id='viewBanner';const o=$('#overview');o.insertBefore(b,o.firstChild)}
   if(!viewingPast()){b.style.display='none';return}
@@ -1411,7 +1414,7 @@ function start(){
   setInterval(tick,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)tick()});
   const h=location.hash.slice(1);page(['overview','units','import'].includes(h)?h:'overview',true);
 }
-function totals(){return units.reduce((a,r)=>{['members','pending','unfiled','declared','paid','paidCount','due','exempt','noRecord','approved'].forEach(k=>a[k]+=v(r,k));return a},{members:0,pending:0,unfiled:0,declared:0,paid:0,paidCount:0,due:0,exempt:0,noRecord:0,approved:0})}
+function totals(){return [...units,...hiddenUnits].reduce((a,r)=>{['members','pending','unfiled','declared','paid','paidCount','due','exempt','noRecord','approved'].forEach(k=>a[k]+=v(r,k));return a},{members:0,pending:0,unfiled:0,declared:0,paid:0,paidCount:0,due:0,exempt:0,noRecord:0,approved:0})}
 
 function countUp(el,to,fmt,dur){
   if(REDUCED){el.textContent=fmt(to);return}
