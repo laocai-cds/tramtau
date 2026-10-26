@@ -1337,7 +1337,22 @@ async function loadFromSheet(){const ep=sheetEndpoint();if(!ep){dataSrc='backup'
   const done=r=>{dataSrc=r.state==='ok'?'sheet':(dataSrc==='sheet'||dataSrc==='cache'?dataSrc:'backup');if(r.state==='ok'){setLoading(false);showBackupNote(false)}return r};
   try{const d=await jsonp(ep+'?action=read');if(!d||!d.ok)return done({state:'bad'});const hit=applySheet(d);
     if(hit){try{localStorage.setItem('tt_cache',JSON.stringify({headers:d.headers,rows:d.rows,lastSync:d.lastSync||null,t:Date.now()}))}catch(_){}}
+    if(!hit){const h2=await loadFromTableTab(ep);if(h2)return done({state:'ok',hit:h2,lastSync:d.lastSync})}
     return done(hit?{state:'ok',hit,lastSync:d.lastSync}:{state:'empty',lastSync:d.lastSync})}catch(e){return done({state:'fail'})}}
+/* Dự phòng: khi tab "Dữ liệu nhập" không khớp danh sách đơn vị (ví dụ chỉ có dòng tổng), đọc từ tab "Bảng đơn vị" */
+async function loadFromTableTab(ep){
+  try{const d=await jsonp(ep+'?action=read&tab='+encodeURIComponent('Bảng đơn vị'),9000);
+    if(!d||!d.ok||!Array.isArray(d.rows)||!d.rows.length)return 0;
+    const hd=(d.headers||[]).map(x=>String(x).trim()),ix=n=>hd.indexOf(n);
+    const c={stt:ix('Hạng'),name:ix('Đơn vị'),mem:ix('Tổng đảng viên'),paid:ix('Đảng viên đã nộp'),pend:ix('Chưa duyệt'),unf:ix('Chưa có hồ sơ'),dec:ix('Đã kê khai (đ)'),amt:ix('Đã nộp (đ)'),pr:ix('Tiến độ (%)')};
+    if(c.name<0||c.mem<0||c.paid<0)return 0;
+    const g=(r,i)=>i<0||r[i]==null?'':String(r[i]).trim();
+    const money=v=>{const n=Math.round(Number(String(v).replace(/\./g,'').replace(',','.'))||0);return String(n).replace(/\B(?=(\d{3})+(?!\d))/g,'.')};
+    const H=[KEYS.stt,KEYS.name,KEYS.members,KEYS.exempt,KEYS.moved,KEYS.pending,KEYS.approved,KEYS.paidCount,KEYS.unfiled,KEYS.declared,KEYS.paid,KEYS.progress];
+    const rows=d.rows.map(r=>{const p=Number(g(r,c.pr).replace(',','.'))||0;
+      return [g(r,c.stt),g(r,c.name),g(r,c.mem),'0','0',g(r,c.pend)||'0','0',g(r,c.paid),g(r,c.unf)||'0',money(g(r,c.dec)),money(g(r,c.amt)),p.toFixed(2).replace('.',',')+'%']});
+    const hit=applySheet({ok:true,headers:H,rows:rows,lastSync:d.lastSync||null});
+    return hit||0}catch(_){return 0}}
 /* trạng thái đang tải / số liệu dự phòng */
 const BACKUP_STAMP='22/10/2026';
 function setLoading(on){document.body.classList.toggle('bt-loading',!!on);const n=$('#loadNote');if(!n)return;if(on){n.className='loadnote';n.textContent='Đang tải số liệu…';n.hidden=false}else if(n.className==='loadnote')n.hidden=true}
