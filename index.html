@@ -639,18 +639,35 @@ body::before{display:none}
   .tab[aria-current=page]{background:#fff;color:var(--son-d);box-shadow:0 1px 3px #0f172a1f;font-weight:700}
   .tab[aria-current=page]::before{display:none}
   .tab[aria-current=page] svg{color:var(--son)}
-  .barright{margin:0;display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:8px;flex:none}
+  .barright{margin:0;display:grid;grid-template-columns:repeat(3,128px);gap:6px;flex:none}
   .barright::before{display:none}
-  .bar .btn{width:100%;justify-content:center;padding:8px 14px;border-radius:9px;white-space:nowrap;box-sizing:border-box;height:40px}
+  .bar .barright .btn{width:128px;height:34px;justify-content:center;padding:0 8px;gap:6px;border-radius:9px;white-space:nowrap;box-sizing:border-box;font-size:12px}
+  .bar .barright .btn svg{width:15px;height:15px}
+  .tab{white-space:nowrap;padding:6px 12px;font-size:13px;gap:6px}
+  .tab svg{width:16px;height:16px}
+  .bar .wrap{gap:16px}
 }
 @media(min-width:1024px) and (max-width:1180px){
-  .bar .wrap{gap:14px}
-  .tab{padding:7px 11px}
-  .bar .btn{padding:8px 10px}
+  .bar .wrap{gap:10px}
+  .tab{padding:6px 9px;font-size:12.5px}
+  .barright{grid-template-columns:repeat(3,116px)}
+  .bar .barright .btn{width:116px;font-size:11.5px;padding:0 6px}
 }
-.bar #goldBtn{background:#fff8e1;border-color:var(--vang);color:#7a5200;text-decoration:none}
-.bar #goldBtn:hover{background:#ffefb8;border-color:var(--vang)}
-.bar #goldBtn svg{color:#b7791f}
+/* nút hành động: mỗi nút một màu nổi bật + hiệu ứng khi rê chuột */
+.bar .barright .btn{position:relative;overflow:hidden;text-decoration:none;font-weight:700;transition:transform .18s ease,box-shadow .18s ease,filter .18s ease}
+.bar .barright .btn::after{content:"";position:absolute;top:0;bottom:0;left:-60%;width:40%;background:linear-gradient(100deg,transparent,#ffffff59,transparent);transform:skewX(-20deg);transition:left .5s ease;pointer-events:none}
+.bar .barright .btn:hover::after{left:130%}
+.bar .barright .btn:hover{transform:translateY(-2px)}
+.bar .barright .btn:active{transform:translateY(0) scale(.97)}
+.bar .barright .btn svg{transition:transform .22s ease}
+.bar .barright .btn:hover svg{transform:scale(1.18) rotate(-6deg)}
+.bar #reportBtn{background:linear-gradient(135deg,#e11d48,#9f1239);border-color:#9f1239;color:#fff;box-shadow:0 4px 10px -4px #be123c99}
+.bar #reportBtn:hover{background:linear-gradient(135deg,#f43f5e,#be123c);box-shadow:0 8px 16px -6px #be123ccc}
+.bar #exportBtn{background:linear-gradient(135deg,#10b981,#047857);border-color:#047857;color:#fff;box-shadow:0 4px 10px -4px #04785799}
+.bar #exportBtn:hover{background:linear-gradient(135deg,#34d399,#059669);border-color:#059669;box-shadow:0 8px 16px -6px #059669cc}
+.bar #goldBtn{background:linear-gradient(135deg,#fbbf24,#d97706);border-color:#b45309;color:#3b2300;box-shadow:0 4px 10px -4px #d9770699}
+.bar #goldBtn:hover{background:linear-gradient(135deg,#fcd34d,#f59e0b);border-color:#d97706;box-shadow:0 8px 16px -6px #f59e0bcc}
+.bar #goldBtn svg{color:#3b2300}
 @media(max-width:1023px){
   .bar .wrap{padding:18px 16px 15px}
   .brand small{display:none}
