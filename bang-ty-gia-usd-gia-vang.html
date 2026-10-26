@@ -161,7 +161,17 @@ input[type=number]{padding:7px 10px;font-size:13px}
 .chart-h{margin-bottom:4px}.chart-h h3{font-size:13px}
 .chart{height:100px}
 .notice{margin-top:8px;padding:6px 12px;font-size:12px}
-.foot{margin:8px 0 0;font-size:10.5px;line-height:1.45}
+.foot{margin:8px 0 0;font-size:10.5px;line-height:1.45;flex:none;position:relative;background:transparent}
+.kpis,.title-row,.notice{flex:none}
+.layout{grid-template-rows:minmax(0,1fr);overflow:hidden;padding-bottom:2px}
+.layout>.panel{min-height:0;max-height:100%}
+@media(max-height:900px) and (min-width:901px){
+  .wrap{padding-top:8px;padding-bottom:6px}
+  .title-row{margin-bottom:6px}h1{font-size:18px}.title-row p{display:none}
+  .kpi{padding:7px 12px}.kpi .val{font-size:20px;margin-top:2px}.kpi .unit{font-size:10.5px}.kpi .meta{margin-top:4px;padding-top:4px;font-size:11px}
+  .layout{margin-top:8px}
+  .foot{font-size:9.5px;margin-top:5px;line-height:1.35}
+}
 /* Thu nhỏ bảng giá */
 table{min-width:440px}
 thead th{padding:4px 9px;font-size:10px}
