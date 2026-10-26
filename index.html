@@ -2105,14 +2105,15 @@ const FB_CFG={databaseURL:'https://tramtau-default-rtdb.firebaseio.com'};
   const om=own.match(/(xã|phường)\s+(.+)$/i);
   let cur=om?(om[1].toLowerCase()+' '+om[2].trim()):(UNITS.find(u=>u.endsWith(' '+own))||'');
   if(!cur)cur=UNITS[0];
+  const DEFAULT=cur; /* xã mặc định của trang */
   const cap=t=>t.charAt(0).toUpperCase()+t.slice(1);
   const el=(tag,cls,txt)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e};
   const ICON_NEWS='<svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h13a1 1 0 0 1 1 1v12a2 2 0 0 0 2 2H6a2 2 0 0 1-2-2z"/><path d="M18 9h2v9a2 2 0 0 1-2 2"/><path d="M8 9h6M8 13h6M8 16h4"/></svg>';
-  const ICON_REF='<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>';
+  const ICON_REF='<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>';
 
   const box=el('section');
   box.id='unit-news';
-  box.innerHTML='<div class="un-head"><div><p class="un-eyebrow">Tin tức địa phương</p><h2></h2><p class="un-sub" role="status" aria-live="polite"></p></div><div class="un-tools"><select aria-label="Chọn xã, phường"></select><button type="button" class="un-refresh" aria-label="Làm mới tin" title="Làm mới tin">'+ICON_REF+'</button></div></div><div class="un-body-wrap"></div><div class="un-foot">Tin tổng hợp từ các trang có RSS, tự cập nhật mỗi 30 phút, chỉ hiển thị bài nhắc tới đúng tên đơn vị. Hiển thị tiêu đề, tóm tắt ngắn và liên kết, bấm vào để đọc bài gốc.</div>';
+  box.innerHTML='<div class="un-head"><div><p class="un-eyebrow">Tin tức địa phương</p><h2></h2><p class="un-sub" role="status" aria-live="polite"></p></div><div class="un-tools"><select aria-label="Chọn xã, phường"></select><button type="button" class="un-refresh" aria-label="Về xã mặc định" title="Về xã mặc định">'+ICON_REF+'</button></div></div><div class="un-body-wrap"></div><div class="un-foot">Tin tổng hợp từ các trang có RSS, tự cập nhật mỗi 30 phút, chỉ hiển thị bài nhắc tới đúng tên đơn vị. Hiển thị tiêu đề, tóm tắt ngắn và liên kết, bấm vào để đọc bài gốc.</div>';
   anchor.insertAdjacentElement('afterend',box);
   const h2=box.querySelector('h2'),sub=box.querySelector('.un-sub'),sel=box.querySelector('select'),btn=box.querySelector('.un-refresh'),holder=box.querySelector('.un-body-wrap');
   [...UNITS].sort((a,b)=>a.split(' ').slice(1).join(' ').localeCompare(b.split(' ').slice(1).join(' '),'vi')).forEach(u=>{const o=el('option',null,cap(u));o.value=u;sel.append(o)});
@@ -2202,7 +2203,8 @@ const FB_CFG={databaseURL:'https://tramtau-default-rtdb.firebaseio.com'};
       message(nodata?'Chưa có dữ liệu tin tức':'Chưa tải được tin',nodata?'Hệ thống đang chờ lần cập nhật đầu tiên (tự chạy mỗi 30 phút). Vui lòng quay lại sau.':'Kiểm tra kết nối mạng rồi thử lại.',true);
     }finally{box.setAttribute('aria-busy','false');btn.disabled=false}
   }
-  btn.addEventListener('click',load);load();setInterval(load,30*60*1000);
+  btn.title='Về '+cap(DEFAULT)+' (mặc định)';btn.setAttribute('aria-label',btn.title);
+  btn.addEventListener('click',()=>{cur=DEFAULT;sel.value=DEFAULT;load()});load();setInterval(load,30*60*1000);
 })();
 </script>
 </body>
