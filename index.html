@@ -2032,5 +2032,178 @@ const FB_CFG={databaseURL:'https://tramtau-default-rtdb.firebaseio.com'};
   if('requestIdleCallback' in window)requestIdleCallback(go,{timeout:3000});else setTimeout(go,1500);
 })();
 </script>
+<!-- Tin tức địa phương: mặc định xã Trạm Tấu, dùng chung dữ liệu tin của site mau -->
+<script>window.RSS_UNIT='xã Trạm Tấu';window.RSS_POOL='https://laocai-cds.github.io/mau/news/pool.json';</script>
+<style>
+#unit-news{margin:0 0 28px;background:#fff;border:1px solid var(--rule);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden;color:#202936}
+#unit-news .un-head{display:flex;align-items:flex-end;justify-content:space-between;gap:14px 18px;flex-wrap:wrap;padding:20px 22px 16px;border-bottom:1px solid var(--rule-2);background:linear-gradient(115deg,#fff 58%,#fbf4dc88)}
+#unit-news .un-eyebrow{margin:0 0 6px;font:800 10.5px var(--sans);letter-spacing:.13em;text-transform:uppercase;color:var(--son)}
+#unit-news h2{margin:0;font:800 clamp(1.1rem,1.7vw,1.35rem)/1.25 var(--sans);letter-spacing:-.015em;color:#202936}
+#unit-news .un-sub{margin:5px 0 0;font-size:12.5px;color:var(--muted);min-height:1.2em}
+#unit-news .un-tools{display:flex;align-items:center;gap:8px}
+#unit-news select{height:38px;max-width:200px;padding:0 32px 0 12px;border:1px solid var(--rule);border-radius:var(--r-s);background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='m1 1.5 5 5 5-5' fill='none' stroke='%236b7280' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 12px center;appearance:none;-webkit-appearance:none;font:600 13px var(--sans);color:#202936;cursor:pointer}
+#unit-news select:hover,#unit-news .un-refresh:hover{border-color:#cbd0d6}
+#unit-news .un-refresh{flex:none;display:grid;place-items:center;width:38px;height:38px;border:1px solid var(--rule);border-radius:var(--r-s);background:#fff;color:var(--ink-2);cursor:pointer}
+#unit-news .un-refresh svg{transition:transform .5s}
+#unit-news .un-refresh:disabled{opacity:.55;cursor:progress}
+#unit-news[aria-busy=true] .un-refresh svg{animation:unSpin .9s linear infinite}
+@keyframes unSpin{to{transform:rotate(360deg)}}
+#unit-news .un-list{list-style:none;margin:0;padding:8px 12px 10px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 16px}
+#unit-news .un-list:empty{display:none}
+#unit-news .un-item a{display:flex;gap:14px;align-items:flex-start;padding:13px 10px;border-radius:11px;color:inherit;text-decoration:none;transition:background .15s}
+#unit-news .un-item a:hover{background:#fbf6ee}
+#unit-news .un-item a:hover .un-title{color:var(--son)}
+#unit-news .un-date{flex:none;width:48px;height:54px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;border:1px solid var(--rule);border-radius:11px;background:var(--giay);line-height:1}
+#unit-news .un-thumb{flex:none;display:block;width:64px;height:48px;border-radius:8px;object-fit:cover;background:var(--giay-2);border:1px solid var(--rule)}#unit-news .un-date b{font:800 19px var(--sans);color:#202936}
+#unit-news .un-date small{font:700 9.5px var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--son)}
+#unit-news .un-body{min-width:0;flex:1}
+#unit-news .un-title{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;font:600 14.5px/1.45 var(--sans);color:#202936;transition:color .15s}
+#unit-news .un-sum{margin:4px 0 0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:13px;line-height:1.5;color:var(--muted)}#unit-news .un-item.lead .un-sum{-webkit-line-clamp:3;font-size:13.5px}#unit-news .un-moreWrap{display:flex;justify-content:center;padding:4px 12px 16px}#unit-news .un-morebtn{display:inline-flex;align-items:center;gap:6px;padding:9px 20px;border:1px solid var(--rule);border-radius:999px;background:#fff;color:var(--son);font:700 13px var(--sans);cursor:pointer;transition:border-color .15s,background .15s}#unit-news .un-morebtn:hover{border-color:var(--son);background:#fff8f8}#unit-news .un-morebtn svg{transition:transform .2s}#unit-news .un-morebtn[aria-expanded=true] svg{transform:rotate(180deg)}#unit-news .un-meta{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;margin-top:7px;font-size:12px;color:var(--muted)}
+#unit-news .un-src{padding:2px 9px;border-radius:999px;background:var(--vang-bg);color:#7a5a0a;font-weight:700;font-size:11px}
+#unit-news .un-new{padding:2px 8px;border-radius:999px;background:var(--son);color:#fff;font-weight:800;font-size:10.5px;letter-spacing:.04em}
+#unit-news .un-item.lead{grid-column:1/-1}
+#unit-news .un-item.lead a{padding:16px 12px;background:linear-gradient(120deg,#fffaf0,#fff 70%);border:1px solid #f0e3bd}
+#unit-news .un-item.lead .un-title{font-size:17px;-webkit-line-clamp:2}
+#unit-news .un-empty{display:flex;flex-direction:column;align-items:center;gap:6px;padding:34px 22px 38px;text-align:center}
+#unit-news .un-empty svg{color:#c9ced6;margin-bottom:4px}
+#unit-news .un-empty strong{font:700 15px var(--sans)}
+#unit-news .un-empty span{max-width:46ch;font-size:13px;color:var(--muted)}
+#unit-news .un-empty button{margin-top:8px;padding:8px 16px;border:1px solid var(--son);border-radius:var(--r-s);background:var(--son);color:#fff;font:700 13px var(--sans);cursor:pointer}
+#unit-news .un-sk{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 16px;padding:14px 22px 18px}
+#unit-news .un-sk i{display:block;height:58px;border-radius:11px;background:linear-gradient(90deg,#f1f2f4 25%,#f8f9fa 45%,#f1f2f4 65%);background-size:220% 100%;animation:unSh 1.3s ease-in-out infinite}
+@keyframes unSh{from{background-position:120% 0}to{background-position:-120% 0}}
+#unit-news .un-foot{padding:11px 22px;border-top:1px solid var(--rule-2);font-size:12px;color:var(--muted);background:#fcfcfd}
+@media(max-width:760px){#unit-news .un-thumb{width:56px;height:42px}#unit-news{margin-bottom:18px}#unit-news .un-head{padding:16px 16px 14px}#unit-news .un-tools{width:100%}#unit-news select{flex:1;max-width:none}#unit-news .un-list,#unit-news .un-sk{grid-template-columns:1fr;padding-left:8px;padding-right:8px}#unit-news .un-foot{padding:10px 16px}}
+@media(prefers-reduced-motion:reduce){#unit-news .un-sk i,#unit-news[aria-busy=true] .un-refresh svg{animation:none}}
+</style>
+<script>
+(()=>{
+  /* Đặt ngay sau hàng thẻ số liệu, phía trên nhóm "Tổng quan nhanh". */
+  const anchor=document.querySelector('.kpis');
+  if(!anchor||document.querySelector('#unit-news'))return;
+  /* Dữ liệu tin do GitHub Actions gom mỗi 30 phút (news/pool.json). Trang con có thể đặt
+     window.RSS_POOL='https://laocai-cds.github.io/mau/news/pool.json' để dùng chung; window.RSS_UNIT để ghi đè tên đơn vị. */
+  const POOL_URL=window.RSS_POOL||'news/pool.json';
+  /* So khớp có dấu để "Võ Lao" không trùng "vỏ lao động"; chỉ khi văn bản hoàn toàn không dấu mới so không dấu. */
+  const keep=t=>' '+String(t||'').normalize('NFC').toLowerCase().replace(/[^\p{L}\p{N}]+/gu,' ').trim()+' ';
+  const plain=t=>keep(String(t||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[đĐ]/g,'d'));
+  const hasMarks=t=>/[\u0300-\u036f]|[ăâêôơưđ]/i.test(String(t||'').normalize('NFD'));
+  const mentions=(t,ph)=>keep(t).includes(keep(ph))||(!hasMarks(t)&&plain(t).includes(plain(ph)));
+  let pool=null,poolAt=0;
+  async function getPool(){
+    if(pool&&Date.now()-poolAt<10*60*1000)return pool;
+    const r=await fetch(POOL_URL,{cache:'no-cache'});
+    if(r.status===404)throw Error('chưa có dữ liệu');
+    if(!r.ok)throw Error('HTTP '+r.status);
+    const d=await r.json();
+    if(!Array.isArray(d.items))throw Error('Dữ liệu không hợp lệ');
+    pool=d;poolAt=Date.now();return d;
+  }
+  /* 99 xã, phường của tỉnh Lào Cai (89 xã, 10 phường) */
+  const UNITS=["xã A Mú Sung","xã Bát Xát","xã Bản Hồ","xã Bản Liền","xã Bản Lầu","xã Bản Xèo","xã Bảo Hà","xã Bảo Nhai","xã Bảo Thắng","xã Bảo Yên","xã Bảo Ái","xã Bắc Hà","phường Cam Đường","xã Cao Sơn","xã Chiềng Ken","xã Châu Quế","xã Chấn Thịnh","xã Chế Tạo","xã Cát Thịnh","xã Cảm Nhân","phường Cầu Thia","xã Cốc Lầu","xã Cốc San","xã Dương Quỳ","xã Dền Sáng","xã Gia Hội","xã Gia Phú","xã Hưng Khánh","xã Hạnh Phúc","xã Hợp Thành","xã Khao Mang","xã Khánh Hòa","xã Khánh Yên","xã Lao Chải","xã Liên Sơn","phường Lào Cai","xã Lâm Giang","xã Lâm Thượng","xã Lùng Phình","xã Lương Thịnh","xã Lục Yên","xã Minh Lương","xã Mù Cang Chải","xã Mường Bo","xã Mường Hum","xã Mường Khương","xã Mường Lai","xã Mậu A","xã Mỏ Vàng","phường Nam Cường","phường Nghĩa Lộ","xã Nghĩa Tâm","xã Nghĩa Đô","xã Ngũ Chỉ Sơn","xã Nậm Chày","xã Nậm Có","xã Nậm Xé","xã Pha Long","xã Phong Dụ Hạ","xã Phong Dụ Thượng","xã Phong Hải","xã Phình Hồ","xã Phúc Khánh","xã Phúc Lợi","xã Púng Luông","xã Quy Mông","phường Sa Pa","xã Si Ma Cai","xã Sín Chéng","xã Sơn Lương","xã Thác Bà","xã Thượng Bằng La","xã Thượng Hà","phường Trung Tâm","xã Trạm Tấu","xã Trấn Yên","xã Trịnh Tường","xã Tà Xi Láng","xã Tân Hợp","xã Tân Lĩnh","xã Tú Lệ","xã Tả Củ Tỷ","xã Tả Phìn","xã Tả Van","xã Tằng Loỏng","xã Việt Hồng","xã Võ Lao","xã Văn Bàn","xã Văn Chấn","phường Văn Phú","xã Xuân Hòa","xã Xuân Quang","xã Xuân Ái","xã Y Tý","phường Yên Bái","xã Yên Bình","xã Yên Thành","phường Âu Lâu","xã Đông Cuông"];
+  const own=(window.RSS_UNIT||((document.querySelector('meta[property="og:site_name"]')||{}).content||'')).trim();
+  const om=own.match(/(xã|phường)\s+(.+)$/i);
+  let cur=om?(om[1].toLowerCase()+' '+om[2].trim()):(UNITS.find(u=>u.endsWith(' '+own))||'');
+  if(!cur)cur=UNITS[0];
+  const cap=t=>t.charAt(0).toUpperCase()+t.slice(1);
+  const el=(tag,cls,txt)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e};
+  const ICON_NEWS='<svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h13a1 1 0 0 1 1 1v12a2 2 0 0 0 2 2H6a2 2 0 0 1-2-2z"/><path d="M18 9h2v9a2 2 0 0 1-2 2"/><path d="M8 9h6M8 13h6M8 16h4"/></svg>';
+  const ICON_REF='<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>';
+
+  const box=el('section');
+  box.id='unit-news';
+  box.innerHTML='<div class="un-head"><div><p class="un-eyebrow">Tin tức địa phương</p><h2></h2><p class="un-sub" role="status" aria-live="polite"></p></div><div class="un-tools"><select aria-label="Chọn xã, phường"></select><button type="button" class="un-refresh" aria-label="Làm mới tin" title="Làm mới tin">'+ICON_REF+'</button></div></div><div class="un-body-wrap"></div><div class="un-foot">Tin tổng hợp từ các trang có RSS, tự cập nhật mỗi 30 phút, chỉ hiển thị bài nhắc tới đúng tên đơn vị. Hiển thị tiêu đề, tóm tắt ngắn và liên kết, bấm vào để đọc bài gốc.</div>';
+  anchor.insertAdjacentElement('afterend',box);
+  const h2=box.querySelector('h2'),sub=box.querySelector('.un-sub'),sel=box.querySelector('select'),btn=box.querySelector('.un-refresh'),holder=box.querySelector('.un-body-wrap');
+  [...UNITS].sort((a,b)=>a.split(' ').slice(1).join(' ').localeCompare(b.split(' ').slice(1).join(' '),'vi')).forEach(u=>{const o=el('option',null,cap(u));o.value=u;sel.append(o)});
+  sel.value=cur;
+  sel.addEventListener('change',()=>{cur=sel.value;load()});
+
+  const DAY=864e5;
+  function when(d){
+    const days=Math.floor((Date.now()-d.getTime())/DAY);
+    if(days<=0)return 'Hôm nay';if(days===1)return 'Hôm qua';if(days<7)return days+' ngày trước';
+    return d.toLocaleDateString('vi-VN');
+  }
+  /* Tóm tắt ngắn: cắt theo từ ở khoảng 170 ký tự, bỏ phần lặp lại tiêu đề ở đầu. */
+  function summary(desc,title){
+    let t=String(desc||'').replace(/\s+/g,' ').trim();
+    const ti=String(title||'').trim();
+    if(ti&&t.toLowerCase().startsWith(ti.toLowerCase()))t=t.slice(ti.length).replace(/^[\s:.\-–—]+/,'');
+    if(t.length<25)return '';
+    if(t.length<=170)return t;
+    const cut=t.slice(0,170),sp=cut.lastIndexOf(' ');
+    return cut.slice(0,sp>110?sp:170).replace(/[\s,;:.\-–—]+$/,'')+'…';
+  }
+  function skeleton(){const w=el('div','un-sk');w.setAttribute('aria-hidden','true');for(let i=0;i<4;i++)w.append(el('i'));holder.replaceChildren(w)}
+  function message(title,text,retry){
+    const w=el('div','un-empty');w.innerHTML=ICON_NEWS;
+    w.append(el('strong',null,title),el('span',null,text));
+    if(retry){const b=el('button',null,'Thử lại');b.type='button';b.addEventListener('click',load);w.append(b)}
+    holder.replaceChildren(w);
+  }
+  function card(item,i,lead){
+    const li=el('li','un-item'+(lead&&i===0?' lead':''));
+    const a=el('a');a.href=item.url;a.target='_blank';a.rel='noopener noreferrer';
+    const d=item.published?new Date(item.published):null,ok=d&&!isNaN(d);
+    const date=el('div','un-date');date.setAttribute('aria-hidden','true');
+    if(ok){date.append(el('b',null,String(d.getDate()).padStart(2,'0')),el('small',null,'Th'+(d.getMonth()+1)))}
+    else{date.append(el('b',null,'•'))}
+    const body=el('div','un-body');
+    body.append(el('div','un-title',item.title||'Tin tức'));
+    const sm=summary(item.desc,item.title);
+    if(sm)body.append(el('p','un-sum',sm));
+    const meta=el('div','un-meta');
+    if(ok&&Date.now()-d.getTime()<2*DAY)meta.append(el('span','un-new','MỚI'));
+    if(item.source)meta.append(el('span','un-src',item.source));
+    if(ok)meta.append(el('span',null,when(d)));
+    body.append(meta);
+    let lead0=date;
+    if(/^https:\/\//i.test(item.img||'')){
+      const im=el('img','un-thumb');im.src=item.img;im.alt='';im.loading='lazy';im.decoding='async';im.referrerPolicy='no-referrer';
+      im.width=64;im.height=48;
+      im.addEventListener('error',()=>im.replaceWith(date));
+      lead0=im;
+    }
+    a.append(lead0,body);li.append(a);return li;
+  }
+  async function load(){
+    h2.textContent='Tin về '+cur;
+    box.setAttribute('aria-busy','true');btn.disabled=true;sub.textContent='Đang tải tin…';skeleton();
+    try{
+      const d=await getPool();
+      const items=d.items.filter(i=>/^https?:\/\//i.test(i.url||'')&&mentions((i.title||'')+' '+(i.desc||''),cur)).sort((a,b)=>(Date.parse(b.published)||0)-(Date.parse(a.published)||0)).slice(0,30);
+      const t=d.updatedAt?new Date(d.updatedAt).toLocaleString('vi-VN',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'}):'';
+      const part=d.partial?' · một số nguồn chưa tải được':'';
+      if(!items.length){
+        sub.textContent='Không có bài nào · dữ liệu '+t+part;
+        message('Chưa có tin nhắc tới '+cur,'Các nguồn RSS hiện chưa có bài viết về đơn vị này. Hãy thử chọn xã, phường khác ở ô bên trên.');
+      }else{
+        sub.textContent=items.length+' tin · dữ liệu '+t+part;
+        const ul=el('ul','un-list'),SHOW=3;
+        items.forEach((it,i)=>{const c=card(it,i,items.length>2);if(i>=SHOW){c.className+=' un-more';c.hidden=true}ul.append(c)});
+        holder.replaceChildren(ul);
+        if(items.length>SHOW){
+          const wrap=el('div','un-moreWrap'),mb=el('button','un-morebtn');mb.type='button';mb.setAttribute('aria-expanded','false');
+          const lab=el('span',null,'Xem tiếp '+(items.length-SHOW)+' bài');
+          mb.append(lab);mb.insertAdjacentHTML('beforeend','<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>');
+          mb.addEventListener('click',()=>{
+            const open=mb.getAttribute('aria-expanded')!=='true';
+            ul.querySelectorAll('.un-more').forEach(x=>{x.hidden=!open});
+            mb.setAttribute('aria-expanded',String(open));
+            lab.textContent=open?'Thu gọn':'Xem tiếp '+(items.length-SHOW)+' bài';
+          });
+          wrap.append(mb);holder.append(wrap);
+        }
+      }
+    }catch(e){
+      const nodata=/chưa có dữ liệu/.test(e.message);
+      sub.textContent=nodata?'Chưa có dữ liệu':'Chưa tải được tin';
+      message(nodata?'Chưa có dữ liệu tin tức':'Chưa tải được tin',nodata?'Hệ thống đang chờ lần cập nhật đầu tiên (tự chạy mỗi 30 phút). Vui lòng quay lại sau.':'Kiểm tra kết nối mạng rồi thử lại.',true);
+    }finally{box.setAttribute('aria-busy','false');btn.disabled=false}
+  }
+  btn.addEventListener('click',load);load();setInterval(load,30*60*1000);
+})();
+</script>
 </body>
 </html>
