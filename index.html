@@ -2089,7 +2089,8 @@ const FB_CFG={databaseURL:'https://tramtau-default-rtdb.firebaseio.com'};
   const plain=t=>keep(String(t||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[đĐ]/g,'d'));
   const hasMarks=t=>/[\u0300-\u036f]|[ăâêôơưđ]/i.test(String(t||'').normalize('NFD'));
   const mentions=(t,ph)=>keep(t).includes(keep(ph))||(!hasMarks(t)&&plain(t).includes(plain(ph)));
-  let pool=null,poolAt=0;
+  const bare=u=>{const b=u.replace(/^(xã|phường)\s+/i,'');return /^(lào cai|yên bái)$/i.test(b)?'':b};
+    let pool=null,poolAt=0;
   async function getPool(){
     if(pool&&Date.now()-poolAt<10*60*1000)return pool;
     const r=await fetch(POOL_URL,{cache:'no-cache'});
@@ -2173,7 +2174,7 @@ const FB_CFG={databaseURL:'https://tramtau-default-rtdb.firebaseio.com'};
     box.setAttribute('aria-busy','true');btn.disabled=true;sub.textContent='Đang tải tin…';skeleton();
     try{
       const d=await getPool();
-      const items=d.items.filter(i=>/^https?:\/\//i.test(i.url||'')&&mentions((i.title||'')+' '+((i.desc||'').split(/(?<=[.!?…])\s+/)[0]||'').slice(0,220),cur)).sort((a,b)=>(Date.parse(b.published)||0)-(Date.parse(a.published)||0)).slice(0,30);
+      const items=d.items.filter(i=>/^https?:\/\//i.test(i.url||'')&&(mentions((i.title||'')+' '+((i.desc||'').split(/(?<=[.!?…])\s+/)[0]||'').slice(0,220),cur)||(bare(cur)&&mentions(i.title||'',bare(cur))))).sort((a,b)=>(Date.parse(b.published)||0)-(Date.parse(a.published)||0)).slice(0,30);
       const t=d.updatedAt?new Date(d.updatedAt).toLocaleString('vi-VN',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'}):'';
       const part=d.partial?' · một số nguồn chưa tải được':'';
       if(!items.length){
