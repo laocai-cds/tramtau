@@ -150,14 +150,14 @@ a{color:var(--son)}
 .dpanel{background:var(--paper);border:1px solid var(--rule);border-radius:var(--r);padding:22px 24px;box-shadow:var(--sh);display:flex;flex-direction:column}
 .dhead b{display:block;font:700 1.05rem/1.3 var(--serif);color:var(--ink)}
 .dhead small{color:var(--muted);font-size:12px}
-.dbody{flex:1;display:grid;grid-template-columns:minmax(0,190px) minmax(0,1fr);gap:24px;align-items:center;margin-top:14px}
+.dbody{flex:1;display:grid;grid-template-columns:minmax(0,230px) minmax(0,1fr);gap:32px;align-items:center;margin-top:14px}
 .donut{position:relative;aspect-ratio:1}
 .donut svg{display:block;width:100%;height:100%}
 .dcenter{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
-.dcenter strong{font:700 clamp(1.4rem,2.4vw,1.75rem)/1 var(--serif);color:var(--son-d)}
+.dcenter strong{font:800 clamp(1.5rem,2.3vw,1.85rem)/1 var(--sans);letter-spacing:-.01em;color:#0077b6}
 .dcenter span{font-size:11.5px;color:var(--muted);margin-top:5px;max-width:110px;line-height:1.3}
 .seg{transition:stroke-dasharray 1.4s cubic-bezier(.22,.7,.2,1)}
-@keyframes donutRotate{from{transform:rotate(-90deg)}to{transform:rotate(270deg)}}.spin{transform-box:view-box;transform-origin:110px 110px;transform:rotate(-90deg);animation:donutRotate 36s linear infinite}@media(prefers-reduced-motion:reduce){.spin{animation:none}}
+@keyframes donutRotate{from{transform:rotate(-90deg)}to{transform:rotate(270deg)}}.spin{transform-box:view-box;transform-origin:110px 110px;transform:rotate(-90deg);animation:donutRotate 24s linear infinite}@keyframes orbit{to{transform:rotate(360deg)}}.orb{transform-box:view-box;transform-origin:110px 110px;animation:orbit 4.5s linear infinite;pointer-events:none}.orb.o2{animation-duration:6.5s;animation-direction:reverse}@media(prefers-reduced-motion:reduce){.spin,.orb{animation:none}}
 .dlegend{display:grid;gap:14px}
 .dgroup p{margin:0 0 6px;font:600 10.5px var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 .dgroup div{display:flex;justify-content:space-between;gap:10px;font-size:13px;padding:4px 0;border-bottom:1px dashed var(--rule-2)}
@@ -452,7 +452,7 @@ label.f{display:block;font-size:13px;font-weight:600;margin:14px 0 6px;color:var
   .heroline b{font-size:1.1rem}
   .dpanel{padding:18px}
   .dbody{grid-template-columns:1fr;gap:16px}
-  .donut{max-width:190px;margin:0 auto;width:100%}
+  .donut{max-width:230px;margin:0 auto;width:100%}
   .strip{margin-bottom:14px}
   .strip .wrap{gap:10px}
   .stat{padding:14px 14px}
@@ -691,7 +691,7 @@ body::before{display:none}
 .glabel{display:flex;align-items:center;gap:12px;margin:8px 0 12px;font:700 11.5px var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .glabel::after{content:'';flex:1;height:1px;background:var(--rule)}
 .g{display:grid;gap:16px;margin-bottom:16px}
-.g-21{grid-template-columns:minmax(0,1.7fr) minmax(0,1fr)}
+.g-21{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
 .g-11{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
 .g>*{min-width:0;margin:0}
 #monthPanel,#tien-do{margin-bottom:16px}
@@ -717,9 +717,9 @@ body::before{display:none}
 /* biểu đồ tròn */
 .dpanel{padding:20px 22px;box-shadow:var(--sh)}
 .dhead b{font:700 15px/1.35 var(--sans)}
-.dbody{grid-template-columns:minmax(0,150px) minmax(0,1fr);gap:18px}
-.dcenter strong{font:800 1.5rem/1 var(--sans);color:var(--ink)}
-.dcenter span{max-width:96px;font-size:11px}
+.dbody{grid-template-columns:minmax(0,240px) minmax(0,1fr);gap:32px}
+.dcenter strong{font:800 clamp(1.5rem,2.3vw,1.85rem)/1 var(--sans);color:#0077b6}
+.dcenter span{max-width:104px;font-size:11.5px}
 .dgroup div{font-size:12.5px}
 
 /* tiến trình + tiền */
@@ -1434,7 +1434,8 @@ function renderDonut(t,rate,active){
   svg.setAttribute('aria-label',`Biểu đồ tròn: ${t.paidCount} trên ${t.due} đảng viên đã nộp, đạt ${pct(rate)}; ${sc.done} đơn vị hoàn thành, ${sc.part} đang thu, ${sc.empty} chưa phát sinh`);
   svg.innerHTML=`<circle cx="110" cy="110" r="94" fill="none" stroke="#eceef1" stroke-width="18"/><circle cx="110" cy="110" r="70" fill="none" stroke="#f3f4f6" stroke-width="10"/>`+
    `<circle cx="110" cy="110" r="106" fill="none" stroke="#e0b43a" stroke-opacity=".6" stroke-width=".8" stroke-dasharray="1.5 4"/><circle cx="110" cy="110" r="58" fill="#f8f9fa"/>`+
-   `<g class="spin">${ring(94,18,mem)}</g><g class="spin">${ring(70,10,[{v:sc.done,c:'#16a34a'},{v:sc.part,c:'#f59e0b'},{v:sc.empty,c:'#cbd5e1'}])}</g>`;
+   `<g class="spin">${ring(94,18,mem)}</g><g class="spin">${ring(70,10,[{v:sc.done,c:'#16a34a'},{v:sc.part,c:'#f59e0b'},{v:sc.empty,c:'#cbd5e1'}])}</g>`+
+   `<g class="orb"><circle cx="110" cy="110" r="94" fill="none" stroke="#fff" stroke-opacity=".6" stroke-width="18" pathLength="100" stroke-dasharray="8 92"/></g><g class="orb o2"><circle cx="110" cy="110" r="70" fill="none" stroke="#fff" stroke-opacity=".6" stroke-width="10" pathLength="100" stroke-dasharray="10 90"/></g>`;
   const rows=mem.filter(m=>m.v>0).map(m=>`<div style="--c:${m.c}"><span>${m.l}</span><b>${num(m.v)}</b></div>`).join('')||'<div style="--c:#d9dce1"><span>Chưa có số liệu</span><b>0</b></div>';
   $('#dlegend').innerHTML=`<div class="dgroup"><p>Đảng viên, vòng ngoài</p>${rows}</div><div class="dgroup"><p>Đơn vị, vòng trong</p><div style="--c:#16a34a"><span>Hoàn thành</span><b>${sc.done}</b></div><div style="--c:#c9a227"><span>Đang thu</span><b>${sc.part}</b></div><div style="--c:#d9dce1"><span>Chưa phát sinh</span><b>${sc.empty}</b></div></div>`;
 }
