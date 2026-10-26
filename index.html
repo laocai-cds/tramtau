@@ -1278,7 +1278,7 @@ const curKey=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMont
 const viewingPast=()=>!!(viewKey&&viewKey!==curKey()&&msnap[viewKey]);
 /* bỏ đơn vị toàn số 0 (không có đảng viên, hồ sơ, tiền) khỏi mọi bảng, biểu đồ, báo cáo */
 const hasData=r=>['members','exempt','moved','pending','approved','paidCount','unfiled','declared','paid'].some(k=>v(r,k)>0);
-function applyView(){const src=(viewingPast()?msnap[viewKey].rows:liveUnits).filter(r=>hasData(r)&&nkey(nm(r))!=='dangbocaccoquandang');
+function applyView(){const src=(viewingPast()?msnap[viewKey].rows:liveUnits).filter(r=>hasData(r));
   units=[...src].sort((a,b)=>v(b,'progress')-v(a,'progress')||v(b,'paid')-v(a,'paid'));rankOf=new Map();units.forEach((r,i)=>rankOf.set(r,i+1))}
 function renderBanner(){let b=$('#viewBanner');if(!b){b=document.createElement('div');b.id='viewBanner';const o=$('#overview');o.insertBefore(b,o.firstChild)}
   if(!viewingPast()){b.style.display='none';return}
@@ -1292,7 +1292,11 @@ function matchUnits(headers,rows){
   const map=new Map();R.forEach(row=>{const o={};H.forEach((h,i)=>o[String(h).trim()]=row[i]==null?'':String(row[i]));const k=nkey(o[KEYS.name]);if(k){if(!map.has(k))map.set(k,[]);map.get(k).push(o)}});
   if(!INITIAL_UNITS.length){const all=[];map.forEach(L=>L.forEach(o=>{if(/^\d+$/.test(String(o[KEYS.stt]).trim()))all.push(o)}));all.sort((a,b)=>Number(a[KEYS.stt])-Number(b[KEYS.stt]));return all.length?{next:all,hit:all.length}:null}
   let hit=0;const next=INITIAL_UNITS.map(u=>{const L=map.get(nkey(u[KEYS.name]));const o=L&&(L.find(x=>String(x[KEYS.stt]).trim()===String(u[KEYS.stt]).trim())||L[0]);if(o){hit++;return o}return u});
-  return hit<Math.ceil(INITIAL_UNITS.length*.8)?null:{next,hit}}
+  if(hit<Math.ceil(INITIAL_UNITS.length*.8))return null;
+  // đơn vị mới thêm trong Sheet (chưa có trong danh sách cài sẵn) vẫn được tính, để tổng tiền khớp Sheet
+  const known=new Set(INITIAL_UNITS.map(u=>nkey(u[KEYS.name])));
+  map.forEach((L,k)=>{if(!known.has(k))L.forEach(o=>{if(/^\d+$/.test(String(o[KEYS.stt]).trim()))next.push(o)})});
+  return {next,hit}}
 function applySheet(d){
   if(!d||!d.ok||!Array.isArray(d.headers)||!Array.isArray(d.rows))return 0;
   const M=matchUnits(d.headers,d.rows);if(!M)return 0;const next=M.next,hit=M.hit;
