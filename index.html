@@ -1841,18 +1841,25 @@ $('#ntSet').onclick=ntOpen;$('#ntCancel').onclick=ntClose;
 $('#ntModal').addEventListener('click',e=>{if(e.target.id==='ntModal')ntClose()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('#ntModal').classList.contains('on'))ntClose()});
 ['#ntInput','#ntColor','#ntSize'].forEach(i=>$(i).addEventListener('input',ntPrev));
-const NT_HASH='3569edcf2deaa6c8c4f18303f9221f16febfa8a231a0819fcf8dba7e83b6c2c1';
-async function ntOk(t){try{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')===NT_HASH}catch(_){return false}}
-$('#ntSave').onclick=async()=>{const msg=$('#ntInput').value.trim();if(!msg){$('#ntMsg').textContent='Nhập nội dung thông báo.';$('#ntMsg').className='fieldmsg bad';return}
+$('#ntSave').onclick=async()=>{const msg=$('#ntInput').value.trim(),m=$('#ntMsg'),btn=$('#ntSave');
+  const bad=t=>{m.textContent=t;m.className='fieldmsg bad'};
+  if(!msg)return bad('Nhập nội dung thông báo.');
   const ep=sheetEndpoint(),tk=$('#ntToken').value.trim();
-  if(!tk||!(await ntOk(tk))){$('#ntMsg').textContent=tk?'Mã đồng bộ không đúng.':'Nhập mã đồng bộ để lưu thông báo.';$('#ntMsg').className='fieldmsg bad';$('#ntToken').focus();return}
-  ntCfg={msg,color:$('#ntColor').value,size:$('#ntSize').value,speed:$('#ntSpeed').value};ntStore();ntApply();
-  try{localStorage.setItem('tt_token',tk)}catch(_){}
-  if(NT_CLOUD&&ep){
-    try{fetch(ep,{method:'POST',mode:'no-cors',redirect:'follow',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({tab:NT_TAB,headers:['Nội dung','Màu chữ','Cỡ chữ','Tốc độ','Cập nhật'],rows:[[msg,ntCfg.color,ntCfg.size,ntCfg.speed,new Date().toLocaleString('vi-VN',{hour12:false})]],token:tk,source:'website-notice'})})}catch(_){}
-    toast('Đã lưu thông báo và gửi lên Google Sheet.')}
-  else toast('Đã lưu thông báo trên máy này.');
-  ntClose()};
+  if(!tk)return bad('Nhập mã đồng bộ để lưu thông báo.');
+  const cfg={msg,color:$('#ntColor').value,size:$('#ntSize').value,speed:$('#ntSpeed').value};
+  if(!(NT_CLOUD&&ep)){ntCfg=cfg;ntStore();ntApply();toast('Đã lưu thông báo trên máy này.');ntClose();return}
+  btn.disabled=true;const old=btn.textContent;btn.textContent='Đang lưu...';m.textContent='Đang gửi lên Google Sheet...';m.className='fieldmsg';
+  let base='';try{const d0=await jsonp(ep+'?action=read&tab='+encodeURIComponent(NT_TAB),9000);const r0=d0&&d0.ok&&Array.isArray(d0.rows)&&d0.rows[0];base=r0?String(r0[4]||''):''}catch(_){}
+  try{fetch(ep,{method:'POST',mode:'no-cors',redirect:'follow',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({tab:NT_TAB,headers:['Nội dung','Màu chữ','Cỡ chữ','Tốc độ','Cập nhật'],rows:[[cfg.msg,cfg.color,cfg.size,cfg.speed,new Date().toLocaleString('vi-VN',{hour12:false})]],token:tk,source:'website-notice'})})}catch(_){}
+  /* máy chủ là nơi kiểm tra mã; đọc lại tab để biết đã lưu thật chưa */
+  let ok=false;
+  for(let i=0;i<4&&!ok;i++){
+    await new Promise(r=>setTimeout(r,i?1800:2200));
+    try{const d=await jsonp(ep+'?action=read&tab='+encodeURIComponent(NT_TAB),9000);const r=d&&d.ok&&Array.isArray(d.rows)&&d.rows[0];ok=!!(r&&String(r[4]||'')!==base&&String(r[0]||'').trim()===cfg.msg&&String(r[1]||'')===cfg.color&&String(r[2]||'')===cfg.size&&String(r[3]||'')===cfg.speed)}catch(_){}
+  }
+  btn.disabled=false;btn.textContent=old;
+  if(ok){try{localStorage.setItem('tt_token',tk)}catch(_){}ntCfg=cfg;ntStore();ntApply();toast('Đã lưu thông báo lên Google Sheet.');ntClose()}
+  else bad('Chưa lưu được lên Google Sheet. Kiểm tra mã đồng bộ (mã tạo bởi setupSheet() trong Apps Script Trạm Tấu) rồi thử lại.')};
 ntApply();setTimeout(ntLoad,1500);
 $('#reportBtn').onclick=openReportDialog;
 $('#exportBtn').onclick=()=>{
