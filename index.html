@@ -2076,6 +2076,29 @@ const FB_CFG={databaseURL:'https://tramtau-default-rtdb.firebaseio.com'};
 @media(max-width:760px){#unit-news .un-thumb{width:56px;height:42px}#unit-news{margin-bottom:18px}#unit-news .un-head{padding:16px 16px 14px}#unit-news .un-tools{width:100%}#unit-news select{flex:1;max-width:none}#unit-news .un-list,#unit-news .un-sk{grid-template-columns:1fr;padding-left:8px;padding-right:8px}#unit-news .un-foot{padding:10px 16px}}
 @media(prefers-reduced-motion:reduce){#unit-news .un-sk i,#unit-news[aria-busy=true] .un-refresh svg{animation:none}}
 </style>
+<style>
+#unit-news .un-stat{width:auto;padding:0 11px;gap:6px;display:inline-flex;align-items:center;font:700 12.5px var(--sans,system-ui)}
+#un-modal{position:fixed;inset:0;z-index:2147483000;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(16,18,24,.55);font-family:var(--sans,system-ui,-apple-system,'Segoe UI',sans-serif)}
+#un-modal.on{display:flex}
+#un-modal .um-card{width:min(720px,100%);max-height:calc(100vh - 32px);overflow:auto;background:#fff;color:#1f2937;border-radius:14px;box-shadow:0 24px 60px rgba(0,0,0,.35)}
+#un-modal .um-head{position:sticky;top:0;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px 20px;background:#fff;border-bottom:1px solid #e5e7eb}
+#un-modal h3{margin:0;font:800 17px/1.25 var(--sans,system-ui)}
+#un-modal .um-x{flex:none;width:34px;height:34px;border:1px solid #e5e7eb;border-radius:9px;background:#fff;cursor:pointer;font-size:18px;line-height:1;color:#374151}
+#un-modal .um-x:hover{background:#f3f4f6}
+#un-modal .um-body{padding:16px 20px 20px;display:grid;gap:18px}
+#un-modal .um-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+#un-modal .um-k{padding:11px 13px;border:1px solid #e5e7eb;border-radius:11px;background:#fafafa}
+#un-modal .um-k b{display:block;font:800 21px/1.2 var(--sans,system-ui);color:var(--son,#b3141c)}
+#un-modal .um-k span{display:block;margin-top:2px;font-size:12px;color:#6b7280}
+#un-modal h4{margin:0 0 8px;font:800 11px var(--sans,system-ui);letter-spacing:.1em;text-transform:uppercase;color:#6b7280}
+#un-modal .um-cols{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+#un-modal ol{margin:0;padding:0;list-style:none;display:grid;gap:6px}
+#un-modal li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;font-size:13px}
+#un-modal li i{display:block;height:5px;margin-top:3px;border-radius:3px;background:var(--son,#b3141c);opacity:.75}
+#un-modal li em{font-style:normal;font-weight:700;font-variant-numeric:tabular-nums}
+#un-modal .um-foot{font-size:12px;color:#6b7280}
+@media(max-width:620px){#un-modal .um-cols{grid-template-columns:1fr}#un-modal .um-head{padding:14px 16px}#un-modal .um-body{padding:14px 16px 18px}}
+</style>
 <script>
 (()=>{
   /* Đặt ngay sau hàng thẻ số liệu, phía trên nhóm "Tổng quan nhanh". */
@@ -2090,7 +2113,7 @@ const FB_CFG={databaseURL:'https://tramtau-default-rtdb.firebaseio.com'};
   const hasMarks=t=>/[\u0300-\u036f]|[ăâêôơưđ]/i.test(String(t||'').normalize('NFD'));
   const mentions=(t,ph)=>keep(t).includes(keep(ph))||(!hasMarks(t)&&plain(t).includes(plain(ph)));
   const bare=u=>{const b=u.replace(/^(xã|phường)\s+/i,'');return /^(lào cai|yên bái)$/i.test(b)?'':b};
-    let pool=null,poolAt=0,skew=0;
+    let pool=null,poolAt=0,skew=0;let lastCtx=null;
   /* Giờ máy chủ (header Date của GitHub Pages) và ngày theo giờ Việt Nam (UTC+7), không phụ thuộc đồng hồ máy người xem. */
   const VN=7*36e5,nowMs=()=>Date.now()+skew,vnDay=ms=>Math.floor((ms+VN)/864e5),vnDate=d=>new Date(d.getTime()+VN);
   async function getPool(){
@@ -2123,6 +2146,38 @@ const FB_CFG={databaseURL:'https://tramtau-default-rtdb.firebaseio.com'};
   [...UNITS].sort((a,b)=>a.split(' ').slice(1).join(' ').localeCompare(b.split(' ').slice(1).join(' '),'vi')).forEach(u=>{const o=el('option',null,cap(u));o.value=u;sel.append(o)});
   sel.value=cur;
   sel.addEventListener('change',()=>{cur=sel.value;load()});
+  /* Cửa sổ thống kê đầy đủ: bấm vào dòng thống kê ngắn dưới tiêu đề để mở. */
+  function openStats(){
+    if(!lastCtx)return;
+    const {d,matched,isToday,fm,cur:cu}=lastCtx;
+    const all=d.items,pct=(a,b)=>b?Math.round(a*100/b)+'%':'0%';
+    const withImg=all.filter(i=>i.img).length,tdAll=all.filter(isToday).length;
+    const count=(arr,f)=>{const m=new Map();arr.forEach(i=>{const k=f(i);if(k)m.set(k,(m.get(k)||0)+1)});return [...m].sort((a,b)=>b[1]-a[1])};
+    const bySrc=count(all,i=>i.source);
+    const kt=all.map(i=>keep((i.title||'')+' '+((i.desc||'').split(/(?<=[.!?…])\s+/)[0]||'').slice(0,220)));
+    const byUnit=UNITS.map(u=>{const k=keep(u);let n=0;all.forEach((i,x)=>{if((i.us||[]).includes(u)||kt[x].includes(k))n++});return [u,n]}).sort((a,b)=>b[1]-a[1]);
+    const withNews=byUnit.filter(x=>x[1]>0).length;
+    const mImg=matched.filter(i=>i.img).length,mToday=matched.filter(isToday).length,mSrc=count(matched,i=>i.source);
+    const kp=(v,l)=>'<div class="um-k"><b>'+v+'</b><span>'+l+'</span></div>';
+    const list=(rows,max)=>{const top=rows.slice(0,12);return '<ol>'+top.map(r=>'<li><div>'+esc(r[0])+'<i style="width:'+Math.max(4,Math.round(r[1]*100/max))+'%"></i></div><em>'+fm(r[1])+'</em></li>').join('')+'</ol>'};
+    const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+    const t=d.updatedAt?new Date(d.updatedAt).toLocaleString('vi-VN',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit',year:'numeric',timeZone:'Asia/Ho_Chi_Minh'}):'';
+    let m=document.getElementById('un-modal');
+    if(!m){
+      m=document.createElement('div');m.id='un-modal';m.setAttribute('role','dialog');m.setAttribute('aria-modal','true');m.setAttribute('aria-labelledby','um-title');
+      m.addEventListener('click',e=>{if(e.target===m||e.target.closest('.um-x'))m.classList.remove('on')});
+      document.addEventListener('keydown',e=>{if(e.key==='Escape')m.classList.remove('on')});
+      document.body.append(m);
+    }
+    m.innerHTML='<div class="um-card"><div class="um-head"><h3 id="um-title">Thống kê tin tức</h3><button class="um-x" type="button" aria-label="Đóng">×</button></div><div class="um-body">'
+      +'<section><h4>Toàn tỉnh Lào Cai</h4><div class="um-kpis">'+kp(fm(all.length),'tổng số tin')+kp(fm(bySrc.length),'nguồn báo')+kp(fm(tdAll),'tin mới hôm nay')+kp(pct(withImg,all.length),'tin có ảnh nhỏ')+kp(withNews+'/'+UNITS.length,'xã, phường có tin')+'</div></section>'
+      +'<section><h4>Đang xem: '+esc(cap(cu))+'</h4><div class="um-kpis">'+kp(fm(matched.length),'tin về đơn vị')+kp(fm(mToday),'mới hôm nay')+kp(pct(mImg,matched.length),'có ảnh nhỏ')+kp(fm(mSrc.length),'nguồn báo')+'</div></section>'
+      +'<div class="um-cols"><section><h4>Theo nguồn báo</h4>'+list(bySrc,bySrc[0]?bySrc[0][1]:1)+'</section><section><h4>Xã, phường nhiều tin nhất</h4>'+list(byUnit.map(x=>[cap(x[0]),x[1]]),byUnit[0]?byUnit[0][1]:1)+'</section></div>'
+      +'<p class="um-foot">Dữ liệu cập nhật '+esc(t)+(d.partial?' · một số nguồn chưa tải được':'')+'. Chỉ gồm tin từ báo chính thống, nội dung tích cực, nhắc đúng tên đơn vị; tự cập nhật mỗi 30 phút.</p></div></div>';
+    m.classList.add('on');
+    const x=m.querySelector('.um-x');if(x)x.focus();
+  }
+  const sb=el('button','un-refresh un-stat');sb.type='button';sb.title='Thống kê tin tức';sb.setAttribute('aria-label','Thống kê tin tức');sb.innerHTML='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span>Thống kê</span>';sb.addEventListener('click',openStats);btn.before(sb);
 
   const DAY=864e5;
   function when(d){
@@ -2177,14 +2232,17 @@ const FB_CFG={databaseURL:'https://tramtau-default-rtdb.firebaseio.com'};
     box.setAttribute('aria-busy','true');btn.disabled=true;sub.textContent='Đang tải tin…';skeleton();
     try{
       const d=await getPool();
-      const items=d.items.filter(i=>/^https?:\/\//i.test(i.url||'')&&!(window.RSS_PRAISE_ONLY&&i.bad)&&((i.us||[]).includes(cur)||mentions((i.title||'')+' '+((i.desc||'').split(/(?<=[.!?…])\s+/)[0]||'').slice(0,220),cur)||(bare(cur)&&mentions(i.title||'',bare(cur))))).sort((a,b)=>(Date.parse(b.published)||0)-(Date.parse(a.published)||0)).slice(0,30);
+      const matched=d.items.filter(i=>/^https?:\/\//i.test(i.url||'')&&!(window.RSS_PRAISE_ONLY&&i.bad)&&((i.us||[]).includes(cur)||mentions((i.title||'')+' '+((i.desc||'').split(/(?<=[.!?…])\s+/)[0]||'').slice(0,220),cur)||(bare(cur)&&mentions(i.title||'',bare(cur))))).sort((a,b)=>(Date.parse(b.published)||0)-(Date.parse(a.published)||0));const items=matched.slice(0,30);
+      const today=vnDay(nowMs()),isToday=i=>{const x=Date.parse(i.published);return !isNaN(x)&&vnDay(x)===today},fm=n=>n.toLocaleString('vi-VN');
+      lastCtx={d,matched,isToday,fm,cur};
+      const stat=fm(matched.length)+' tin'+(matched.filter(isToday).length?' · '+fm(matched.filter(isToday).length)+' mới hôm nay':'')+' · toàn tỉnh '+fm(d.items.length)+' tin từ '+fm(new Set(d.items.map(i=>i.source)).size)+' nguồn';
       const t=d.updatedAt?new Date(d.updatedAt).toLocaleString('vi-VN',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit',timeZone:'Asia/Ho_Chi_Minh'}):'';
       const part=d.partial?' · một số nguồn chưa tải được':'';
       if(!items.length){
         sub.textContent='Không có bài nào · dữ liệu '+t+part;
         message('Chưa có tin nhắc tới '+cur,'Các nguồn RSS hiện chưa có bài viết về đơn vị này. Hãy thử chọn xã, phường khác ở ô bên trên.');
       }else{
-        sub.textContent=items.length+' tin · dữ liệu '+t+part;
+        sub.textContent=stat+' · dữ liệu '+t+part;
         const ul=el('ul','un-list'),SHOW=3;
         items.forEach((it,i)=>{const c=card(it,i,items.length>2);if(i>=SHOW){c.className+=' un-more';c.hidden=true}ul.append(c)});
         holder.replaceChildren(ul);
