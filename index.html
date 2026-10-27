@@ -2074,6 +2074,7 @@ const FB_CFG={databaseURL:'https://tramtau-default-rtdb.firebaseio.com'};
 #unit-news .un-head{display:flex;align-items:flex-end;justify-content:space-between;gap:14px 18px;flex-wrap:wrap;padding:20px 22px 16px;border-bottom:1px solid var(--rule-2);background:linear-gradient(115deg,#fff 58%,#fbf4dc88)}
 #unit-news .un-eyebrow{margin:0 0 6px;font:800 10.5px var(--sans);letter-spacing:.13em;text-transform:uppercase;color:var(--son)}
 #unit-news h2{margin:0;font:800 clamp(1.1rem,1.7vw,1.35rem)/1.25 var(--sans);letter-spacing:-.015em;color:#202936}
+#unit-news .un-live{display:flex;align-items:center;gap:7px;margin:7px 0 0;font:600 12px var(--sans);color:#0f7a5f}#unit-news .un-live i{width:8px;height:8px;border-radius:50%;background:#16b27f;box-shadow:0 0 0 0 rgba(22,178,127,.6);animation:unlive 1.8s infinite}@keyframes unlive{70%{box-shadow:0 0 0 7px rgba(22,178,127,0)}100%{box-shadow:0 0 0 0 rgba(22,178,127,0)}}
 #unit-news .un-sub{margin:5px 0 0;font-size:12.5px;color:var(--muted);min-height:1.2em}
 #unit-news .un-tools{display:flex;align-items:center;gap:8px}
 #unit-news select{height:38px;max-width:200px;padding:0 32px 0 12px;border:1px solid var(--rule);border-radius:var(--r-s);background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='m1 1.5 5 5 5-5' fill='none' stroke='%236b7280' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 12px center;appearance:none;-webkit-appearance:none;font:600 13px var(--sans);color:#202936;cursor:pointer}
@@ -2333,6 +2334,42 @@ const FB_CFG={databaseURL:'https://tramtau-default-rtdb.firebaseio.com'};
       message(nodata?'Chưa có dữ liệu tin tức':'Chưa tải được tin',nodata?'Hệ thống đang chờ lần cập nhật đầu tiên (tự chạy mỗi 30 phút). Vui lòng quay lại sau.':'Kiểm tra kết nối mạng rồi thử lại.',true);
     }finally{box.setAttribute('aria-busy','false');btn.disabled=false}
   }
+  /* Người đang xem khối tin: dùng chung Realtime Database của trang TTHC (nhánh newsViewers); tự xóa khi rời trang/ẩn tab. */
+  const liveEl=el('p','un-live');liveEl.setAttribute('role','status');liveEl.hidden=true;sub.after(liveEl);
+  (()=>{
+    const CFG={apiKey:"AIzaSyCZ9gzT18b1QovsS0y4-SgmUFqtyMvkR0A",authDomain:"laocai-tthc.firebaseapp.com",projectId:"laocai-tthc",appId:"1:836624022047:web:7ee3c80e5e44b8ed3d732a",databaseURL:"https://laocai-tthc-default-rtdb.firebaseio.com"};
+    const V='https://www.gstatic.com/firebasejs/10.14.1/';
+    const ld=u=>new Promise((ok,no)=>{const s=document.createElement('script');s.src=u;s.async=false;s.onload=ok;s.onerror=no;document.head.append(s)});
+    const ready=async()=>{
+      for(let n=0;n<8&&!(window.firebase&&firebase.database);n++)await new Promise(r=>setTimeout(r,500));
+      if(!(window.firebase&&firebase.database)){await ld(V+'firebase-app-compat.js');await ld(V+'firebase-database-compat.js')}
+      return window.firebase;
+    };
+    let me=null,timer=0,root=null,conn=null,cb1=null,cb2=null;
+    const put=()=>{if(me&&document.visibilityState==='visible')me.update({unit:cur,lastSeen:firebase.database.ServerValue.TIMESTAMP}).catch(()=>{})};
+    const stop=()=>{clearInterval(timer);timer=0;try{conn&&conn.off('value',cb1);root&&root.off('value',cb2);me&&me.remove()}catch(_){}me=root=conn=null;liveEl.hidden=true};
+    const start=async()=>{
+      try{
+        if(me)return;await ready();
+        const app=firebase.apps.find(a=>a.name==='newsLive')||firebase.initializeApp(CFG,'newsLive');
+        const db=app.database();root=db.ref('newsViewers');conn=db.ref('.info/connected');
+        let sid=null;try{sid=sessionStorage.getItem('newsViewerId')}catch(_){}
+        if(!sid){sid=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():'v-'+Date.now()+'-'+Math.random().toString(36).slice(2);try{sessionStorage.setItem('newsViewerId',sid)}catch(_){}}
+        me=root.child(sid);
+        cb1=conn.on('value',sn=>{if(sn.val()===true){me&&me.onDisconnect().remove().catch(()=>{});put()}});
+        cb2=root.on('value',sn=>{
+          const now=Date.now(),rows=Object.values(sn.val()||{}).filter(x=>x&&Number(x.lastSeen)>0&&now-Number(x.lastSeen)<60000);
+          const n=rows.length,m=rows.filter(x=>x.unit===cur).length;
+          liveEl.innerHTML='<i></i><span>'+n.toLocaleString('vi-VN')+' người đang xem khối tin'+(n>0&&m>0&&cur!==PROV?' · '+m.toLocaleString('vi-VN')+' xem '+cap(cur):'')+'</span>';liveEl.hidden=false;
+        },()=>{liveEl.hidden=true});
+        timer=setInterval(put,20000);put();
+      }catch(_){liveEl.hidden=true}
+    };
+    sel.addEventListener('change',put);btn.addEventListener('click',()=>setTimeout(put,0));
+    document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){me?put():start()}else if(me){me.remove().catch(()=>{})}});
+    addEventListener('pagehide',stop);
+    setTimeout(start,1500);
+  })();
   btn.title='Về '+cap(DEFAULT)+' (mặc định)';btn.setAttribute('aria-label',btn.title);
   btn.addEventListener('click',()=>{cur=DEFAULT;sel.value=DEFAULT;load()});load();setInterval(load,30*60*1000);
 })();
