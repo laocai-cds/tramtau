@@ -1962,20 +1962,24 @@ $('#syncBtn').onclick=async()=>{
   paint();const tick=setInterval(paint,100);
   try{
     const before=await baseP;
-    await fetch(url,{method:'POST',mode:'no-cors',redirect:'follow',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({headers:(()=>{const w=Math.max(pendingHeaders.length,...pendingRows.map(r=>r.length)),h=[...pendingHeaders];while(h.length<w)h.push('');return h})(),rows:normRows(),token,source:'website-tram-tau',sentAt:new Date().toISOString()})});
-    const tSent=performance.now()-t0;
+    let tSent=null,postErr=null;
+    // Gửi dữ liệu (không chờ phản hồi để bắt đầu xác nhận): Apps Script mới ghi xong là báo lastSync ngay, trước cả khi định dạng/nhật ký xong.
+    const postP=fetch(url,{method:'POST',mode:'no-cors',redirect:'follow',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({headers:(()=>{const w=Math.max(pendingHeaders.length,...pendingRows.map(r=>r.length)),h=[...pendingHeaders];while(h.length<w)h.push('');return h})(),rows:normRows(),token,source:'website-tram-tau',sentAt:new Date().toISOString()})}).then(()=>{tSent=performance.now()-t0;stage='Đã gửi, đang chờ Google Sheet xác nhận';btnTxt='Đang xác nhận'},e=>{postErr=e});
     if(before!==null){ // script có hỗ trợ đọc: xác nhận thật bằng thời điểm đồng bộ mới
-      stage='Đã gửi, đang chờ Google Sheet xác nhận';btnTxt='Đang xác nhận';
-      // Apps Script chạy xong mới trả lời nên dữ liệu thường đã ghi: đọc lại NGAY, rồi cứ mỗi 1 giây bắn thêm một lần đọc (song song), lần nào thấy đổi trước thì dùng.
+      stage='Đang ghi vào Google Sheet';
+      // Cứ mỗi 1 giây hỏi lại (tối đa 3 lần hỏi cùng lúc), lần nào thấy lastSync đổi trước thì dùng. Chạy song song với lúc gửi.
       const d=await new Promise(resolve=>{let done=false,inflight=0;const end=v=>{if(done)return;done=true;clearInterval(iv);resolve(v)},
         fire=()=>{inflight++;jsonp(url+'?action=read',8000).then(x=>{if(x&&x.ok&&(x.lastSync||'')!==before)end(x)}).catch(()=>{}).finally(()=>{inflight--})},
-        t1=performance.now(),iv=setInterval(()=>{if(done)return;if(performance.now()-t1>30000){end(null);return}if(inflight<3)fire()},1000);fire()});
-      clearInterval(tick);const total=performance.now()-t0,det=`⏱ Hoàn tất sau ${sec(total)} giây (gửi ${sec(tSent)} · xác nhận ${sec(total-tSent)}).`;
+        t1=performance.now(),iv=setInterval(()=>{if(done)return;if(postErr){end(null);return}if(performance.now()-t1>30000){end(null);return}if(inflight<3)fire()},1000)});
+      clearInterval(tick);if(postErr)throw postErr;const total=performance.now()-t0,
+        det=`⏱ Dữ liệu đã lên Google Sheet sau ${sec(total)} giây${tSent!=null?` (Apps Script xử lý xong sau ${sec(tSent)} giây)`:' (Apps Script còn hoàn tất định dạng và nhật ký)'}.`;
       if(d){const hit=applySheet(d);if(hit)dataSrc='sheet';render();if(hit)syncMonthly();setTimeout(loadLog,800);if(hit)setTimeout(()=>syncTable(true).then(()=>loadLog()),400);
         syncMsg(`Đã đồng bộ ${pendingRows.length} dòng lên Google Sheet${hit?` và cập nhật bảng điều khiển (${hit}/${INITIAL_UNITS.length} đơn vị khớp)`:' (chưa khớp đủ danh sách đơn vị với bảng điều khiển)'}. ${det}`,hit?'ok':'bad');toast(`Đồng bộ thành công trong ${sec(total)} giây.`);showSheetLink();return}
       syncMsg(`Đã gửi nhưng chưa thấy Google Sheet cập nhật sau ${sec(total)} giây. Kiểm tra mã đồng bộ (nếu có) và quyền Web App, rồi thử lại.`,'bad');return}
+    await postP;if(postErr)throw postErr;
+    const tSent2=tSent;
     clearInterval(tick);
-    syncMsg(`Đã gửi ${pendingRows.length} dòng trong ${sec(tSent)} giây. Trình duyệt không đọc được kết quả, hãy mở Google Sheet và kiểm tra tab “Dữ liệu nhập” trước khi gửi lại. Nếu không thấy dữ liệu mới, kiểm tra URL Web App và quyền truy cập “Bất kỳ ai”.`,'ok');
+    syncMsg(`Đã gửi ${pendingRows.length} dòng trong ${sec(tSent2)} giây. Trình duyệt không đọc được kết quả, hãy mở Google Sheet và kiểm tra tab “Dữ liệu nhập” trước khi gửi lại. Nếu không thấy dữ liệu mới, kiểm tra URL Web App và quyền truy cập “Bất kỳ ai”.`,'ok');
     toast('Đã gửi. Hãy kiểm tra Google Sheet.');showSheetLink();
   }catch(e){
     clearInterval(tick);
