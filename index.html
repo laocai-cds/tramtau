@@ -2150,6 +2150,16 @@ const FB_CFG={databaseURL:'https://tramtau-default-rtdb.firebaseio.com'};
     let pool=null,poolAt=0,skew=0;let lastCtx=null;
   /* Giờ máy chủ (header Date của GitHub Pages) và ngày theo giờ Việt Nam (UTC+7), không phụ thuộc đồng hồ máy người xem. */
   const VN=7*36e5,nowMs=()=>Date.now()+skew,vnDay=ms=>Math.floor((ms+VN)/864e5),vnDate=d=>new Date(d.getTime()+VN);
+
+  /* Loại tin của tỉnh, thành khác: nguồn là báo địa phương tỉnh khác, hoặc nội dung nhắc tỉnh, thành khác mà không nhắc Lào Cai (báo Lào Cai tin cậy nên không xét). */
+  function foreign(i){
+    const src=String(i.source||'');
+    if(/Lào Cai/i.test(src))return false;
+    if(/(Báo|Đài|Cổng)[^|]*(Phú Thọ|Lai Châu|Hà Giang|Tuyên Quang|Yên Bái|Sơn La|Điện Biên|Thanh Hóa|Nghệ An|Hà Tĩnh|Quảng Ninh|Hải Phòng|Hà Nội|Thành phố Hồ Chí Minh|Sài Gòn|Đà Nẵng|Cần Thơ|Huế|Khánh Hòa|Lâm Đồng|Đắk Lắk|Gia Lai|Đồng Nai|Tây Ninh|An Giang|Cà Mau)/i.test(src)&&!/Yên Bái/i.test(src))return true;
+    const t=(i.title||'')+' '+((i.desc||'').split(/(?<=[.!?…])\s+/)[0]||'').slice(0,220);
+    if(/Lào Cai|Yên Bái/i.test(t))return false;
+    return /(^|[^\p{L}])(Phú Thọ|Vĩnh Phúc|Hòa Bình|TP\.? ?HCM|TP\.? Hồ Chí Minh|Thành phố Hồ Chí Minh|Hà Nội|Phú Quốc|Đà Nẵng|Hải Phòng|Thanh Hóa|Nghệ An|Quảng Ninh|Sơn La|Điện Biên|Lai Châu|Hà Giang|Tuyên Quang|Thái Nguyên|Bắc Ninh|Cần Thơ|Lâm Đồng|Đắk Lắk|Gia Lai|An Giang|Đồng Nai|Hưng Yên|Ninh Bình|Cao Bằng|Lạng Sơn|Hà Tĩnh|Quảng Trị|Quảng Ngãi|Cà Mau|Tây Ninh)(?![\p{L}])/u.test(t)||/(^|[^\p{L}])(tỉnh|thành phố|TP\.?)\s+(Khánh Hòa|Huế)/iu.test(t)||/(Khánh Hòa)/.test(t)&&!/(xã|phường)\s+Khánh Hòa/i.test(t);
+  }
   async function getPool(){
     if(pool&&Date.now()-poolAt<10*60*1000)return pool;
     const r=await fetch(POOL_URL,{cache:'no-cache'});
@@ -2158,6 +2168,7 @@ const FB_CFG={databaseURL:'https://tramtau-default-rtdb.firebaseio.com'};
     const d=await r.json();
     if(!Array.isArray(d.items))throw Error('Dữ liệu không hợp lệ');
     const sv=Date.parse(r.headers.get('date')||'');if(!isNaN(sv))skew=sv-Date.now();
+    d.items=d.items.filter(i=>!foreign(i));
     pool=d;poolAt=Date.now();return d;
   }
   /* 99 xã, phường của tỉnh Lào Cai (89 xã, 10 phường) */
@@ -2178,9 +2189,9 @@ const FB_CFG={databaseURL:'https://tramtau-default-rtdb.firebaseio.com'};
   anchor.insertAdjacentElement('afterend',box);
   const h2=box.querySelector('h2'),sub=box.querySelector('.un-sub'),sel=box.querySelector('select'),btn=box.querySelector('.un-refresh'),holder=box.querySelector('.un-body-wrap');
   const PROV='Tỉnh Lào Cai';
-  /* Tỉnh Lào Cai: cùng điều kiện khối tin — bài phải nhắc tới ít nhất một xã, phường của tỉnh (trong tiêu đề hoặc câu đầu tóm tắt). */
+  /* Tỉnh Lào Cai: cùng điều kiện khối tin — bài phải của báo Lào Cai hoặc nhắc rõ Lào Cai / tên xã, phường của tỉnh (tiêu đề hoặc câu đầu tóm tắt). */
   const UKEYS=UNITS.map(u=>[u,bare(u)]);
-  const inProv=i=>(i.us&&i.us.length>0)||(()=>{const t=(i.title||'')+' '+((i.desc||'').split(/(?<=[.!?…])\s+/)[0]||'').slice(0,220);return UKEYS.some(([u,b])=>mentions(t,u)||(b&&mentions(i.title||'',b)))})();{const o=el('option',null,PROV);o.value=PROV;sel.append(o)}
+  const inProv=i=>/Lào Cai/i.test(String(i.source||''))||(()=>{const t=(i.title||'')+' '+((i.desc||'').split(/(?<=[.!?…])\s+/)[0]||'').slice(0,220);return /Lào Cai|Yên Bái/i.test(t)||UKEYS.some(([u])=>mentions(t,u))})();{const o=el('option',null,PROV);o.value=PROV;sel.append(o)}
   [...UNITS].sort((a,b)=>a.split(' ').slice(1).join(' ').localeCompare(b.split(' ').slice(1).join(' '),'vi')).forEach(u=>{const o=el('option',null,cap(u));o.value=u;sel.append(o)});
   sel.value=cur;
   sel.addEventListener('change',()=>{cur=sel.value;load()});
