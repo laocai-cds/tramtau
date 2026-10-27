@@ -1463,7 +1463,7 @@ function start(){
   setInterval(tick,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)tick()});
   const h=location.hash.slice(1);page(['overview','units','import'].includes(h)?h:'overview',true);
 }
-function totals(){return [...units,...hiddenUnits].reduce((a,r)=>{['members','pending','unfiled','declared','paid','paidCount','due','exempt','noRecord','approved'].forEach(k=>a[k]+=(k==='paidCount'?Math.min(v(r,k),v(r,'due')):v(r,k)));return a},{members:0,pending:0,unfiled:0,declared:0,paid:0,paidCount:0,due:0,exempt:0,noRecord:0,approved:0})}
+function totals(){return [...units,...hiddenUnits].reduce((a,r)=>{['members','pending','unfiled','declared','paid','paidCount','due','exempt','noRecord','approved'].forEach(k=>a[k]+=v(r,k));return a},{members:0,pending:0,unfiled:0,declared:0,paid:0,paidCount:0,due:0,exempt:0,noRecord:0,approved:0})}
 
 function countUp(el,to,fmt,dur){
   if(REDUCED){el.textContent=fmt(to);return}
