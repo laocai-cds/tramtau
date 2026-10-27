@@ -1881,6 +1881,7 @@ function readExcel(file){
       const p=$('#preview');p.hidden=false;
       p.innerHTML=`<table><thead><tr>${pendingHeaders.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${pendingRows.slice(0,6).map(r=>`<tr>${r.map(c=>`<td>${esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table><div class="hint" style="padding:8px 10px">${pendingRows.length>6?'Đang xem 6 dòng đầu. ':''}Dữ liệu trong tệp chỉ được gửi khi bạn chọn đồng bộ.</div>`;
       $('#syncBtn').disabled=!pendingRows.length;
+      try{const u=checkEndpoint();if(u&&pendingRows.length)fetch(u+'?warm='+Date.now(),{mode:'no-cors'}).catch(()=>{})}catch(_){} // làm nóng Apps Script (tránh khởi động nguội) trong lúc người dùng xem bản xem trước
       const hasName=pendingHeaders.some(h=>String(h).trim()===KEYS.name);
       if(!pendingRows.length)syncMsg('Tệp không có dòng dữ liệu.','bad');
       else if(!hasName)syncMsg(`Đã đọc ${pendingRows.length} dòng nhưng không thấy cột “${KEYS.name}”. Hãy dùng đúng tệp xuất từ hệ thống đảng phí.`,'bad');
@@ -1950,21 +1951,36 @@ $('#syncBtn').onclick=async()=>{
     msnap[mk]={t:Date.now(),rows:M.next};monthly[mk]={cum:M.next.reduce((a,r)=>a+v(r,'paid'),0)};saveMonthly();
     const ep0=sheetEndpoint();if(ep0)pushMonthly(ep0,mk);render();
     syncMsg(`Đã lưu số liệu vào tháng ${mk.slice(5)}/${mk.slice(0,4)}. Bấm vào cột tháng đó ở Tổng quan để xem.`,'ok');toast('Đã lưu số liệu tháng '+mk.slice(5)+'/'+mk.slice(0,4));return}
+  // Đọc mốc "lastSync" hiện tại NGAY (chạy song song lúc người dùng đang xem hộp xác nhận) để không tốn thêm thời gian chờ sau khi bấm Đồng ý.
+  const baseP=jsonp(url+'?action=read',8000).then(d=>d&&d.ok?(d.lastSync||''):null).catch(()=>null);
   if(!confirm(`Gửi ${pendingRows.length} dòng Excel tới Google Sheet (tháng hiện tại)?\nDữ liệu sẽ thay thế nội dung trang tính đích.`))return;
-  const b=$('#syncBtn');b.disabled=true;b.textContent='Đang gửi…';syncMsg('Đang gửi dữ liệu tới Apps Script…');
+  const b=$('#syncBtn');b.disabled=true;
+  // Bộ đếm giây: chạy liên tục từ lúc bấm đến khi Google Sheet xác nhận, có tách thời gian "gửi" và "xác nhận".
+  const t0=performance.now(),sec=ms=>(ms/1000).toFixed(1).replace('.',',');
+  let stage='Đang gửi dữ liệu tới Apps Script',btnTxt='Đang gửi';
+  const paint=()=>{const s=sec(performance.now()-t0);b.textContent=`${btnTxt}… ${s} s`;syncMsg(`⏱ ${s} giây · ${stage}…`)};
+  paint();const tick=setInterval(paint,100);
   try{
-    let before=null;try{const d0=await jsonp(url+'?action=read',8000);before=d0&&d0.ok?(d0.lastSync||''):null}catch(_){}
-        await fetch(url,{method:'POST',mode:'no-cors',redirect:'follow',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({headers:(()=>{const w=Math.max(pendingHeaders.length,...pendingRows.map(r=>r.length)),h=[...pendingHeaders];while(h.length<w)h.push('');return h})(),rows:normRows(),token,source:'website-tram-tau',sentAt:new Date().toISOString()})});
+    const before=await baseP;
+    await fetch(url,{method:'POST',mode:'no-cors',redirect:'follow',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({headers:(()=>{const w=Math.max(pendingHeaders.length,...pendingRows.map(r=>r.length)),h=[...pendingHeaders];while(h.length<w)h.push('');return h})(),rows:normRows(),token,source:'website-tram-tau',sentAt:new Date().toISOString()})});
+    const tSent=performance.now()-t0;
     if(before!==null){ // script có hỗ trợ đọc: xác nhận thật bằng thời điểm đồng bộ mới
-      syncMsg('Đã gửi, đang chờ Google Sheet xác nhận…');
-      for(let i=0;i<6;i++){await new Promise(r=>setTimeout(r,2500));try{const d=await jsonp(url+'?action=read',8000);if(d&&d.ok&&(d.lastSync||'')!==before){const hit=applySheet(d);if(hit)dataSrc='sheet';render();if(hit)syncMonthly();setTimeout(loadLog,800);if(hit)setTimeout(()=>syncTable(true).then(()=>loadLog()),400);
-        syncMsg(`Đã đồng bộ ${pendingRows.length} dòng lên Google Sheet${hit?` và cập nhật bảng điều khiển (${hit}/${INITIAL_UNITS.length} đơn vị khớp)`:' (chưa khớp đủ danh sách đơn vị với bảng điều khiển)'}.`,hit?'ok':'bad');toast('Đồng bộ thành công.');showSheetLink();return}}catch(_){}}
-      syncMsg('Đã gửi nhưng chưa thấy Google Sheet cập nhật. Kiểm tra mã đồng bộ (nếu có) và quyền Web App, rồi thử lại.','bad');return}
-    syncMsg(`Đã gửi ${pendingRows.length} dòng. Trình duyệt không đọc được kết quả, hãy mở Google Sheet và kiểm tra tab “Dữ liệu nhập” trước khi gửi lại. Nếu không thấy dữ liệu mới, kiểm tra URL Web App và quyền truy cập “Bất kỳ ai”.`,'ok');
+      stage='Đã gửi, đang chờ Google Sheet xác nhận';btnTxt='Đang xác nhận';
+      // Apps Script chạy xong mới trả lời nên dữ liệu thường đã ghi: đọc lại NGAY, rồi cứ mỗi 1 giây bắn thêm một lần đọc (song song), lần nào thấy đổi trước thì dùng.
+      const d=await new Promise(resolve=>{let done=false,inflight=0;const end=v=>{if(done)return;done=true;clearInterval(iv);resolve(v)},
+        fire=()=>{inflight++;jsonp(url+'?action=read',8000).then(x=>{if(x&&x.ok&&(x.lastSync||'')!==before)end(x)}).catch(()=>{}).finally(()=>{inflight--})},
+        t1=performance.now(),iv=setInterval(()=>{if(done)return;if(performance.now()-t1>30000){end(null);return}if(inflight<3)fire()},1000);fire()});
+      clearInterval(tick);const total=performance.now()-t0,det=`⏱ Hoàn tất sau ${sec(total)} giây (gửi ${sec(tSent)} · xác nhận ${sec(total-tSent)}).`;
+      if(d){const hit=applySheet(d);if(hit)dataSrc='sheet';render();if(hit)syncMonthly();setTimeout(loadLog,800);if(hit)setTimeout(()=>syncTable(true).then(()=>loadLog()),400);
+        syncMsg(`Đã đồng bộ ${pendingRows.length} dòng lên Google Sheet${hit?` và cập nhật bảng điều khiển (${hit}/${INITIAL_UNITS.length} đơn vị khớp)`:' (chưa khớp đủ danh sách đơn vị với bảng điều khiển)'}. ${det}`,hit?'ok':'bad');toast(`Đồng bộ thành công trong ${sec(total)} giây.`);showSheetLink();return}
+      syncMsg(`Đã gửi nhưng chưa thấy Google Sheet cập nhật sau ${sec(total)} giây. Kiểm tra mã đồng bộ (nếu có) và quyền Web App, rồi thử lại.`,'bad');return}
+    clearInterval(tick);
+    syncMsg(`Đã gửi ${pendingRows.length} dòng trong ${sec(tSent)} giây. Trình duyệt không đọc được kết quả, hãy mở Google Sheet và kiểm tra tab “Dữ liệu nhập” trước khi gửi lại. Nếu không thấy dữ liệu mới, kiểm tra URL Web App và quyền truy cập “Bất kỳ ai”.`,'ok');
     toast('Đã gửi. Hãy kiểm tra Google Sheet.');showSheetLink();
   }catch(e){
+    clearInterval(tick);
     syncMsg('Không gửi được yêu cầu (lỗi mạng hoặc bị chặn). Kiểm tra kết nối mạng và URL Web App rồi thử lại.','bad');toast('Không gửi được yêu cầu đồng bộ.');
-  }finally{b.disabled=!pendingRows.length;b.textContent='Đồng bộ lên Google Sheet'}
+  }finally{clearInterval(tick);b.disabled=!pendingRows.length;b.textContent='Đồng bộ lên Google Sheet'}
 };
 try{if(/zalo/i.test(navigator.userAgent)&&!sessionStorage.getItem('zalo_ok')){const zb=document.getElementById('zalobar');zb.classList.add('on');document.getElementById('zalook').onclick=()=>{zb.classList.remove('on');try{sessionStorage.setItem('zalo_ok','1')}catch(e){}}}}catch(e){}
 start();startLoop();checkEndpoint();showSheetLink();
