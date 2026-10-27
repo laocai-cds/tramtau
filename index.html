@@ -2242,10 +2242,43 @@ const FB_CFG={databaseURL:'https://tramtau-default-rtdb.firebaseio.com'};
       +'<section><h4>Đang xem: '+esc(cap(cu))+'</h4><div class="um-kpis">'+kp(fm(matched.length),'tin về đơn vị')+kp(fm(mToday),'mới hôm nay')+kp(pct(mImg,matched.length),'có ảnh nhỏ')+kp(fm(mSrc.length),'nguồn báo')+'</div></section>'
       +todayHtml
       +'<div class="um-cols"><section><h4>Theo nguồn báo</h4>'+list(bySrc,bySrc[0]?bySrc[0][1]:1)+'</section><section><h4>Xã, phường nhiều tin nhất</h4>'+list(byUnit.map(x=>[cap(x[0]),x[1]]),byUnit[0]?byUnit[0][1]:1)+'</section></div>'
+      +'<div class="um-cols"><section id="um-views" style="grid-column:1/-1"><h4>Lượt xem mục tin theo đơn vị</h4><p class="um-foot">Đang tải…</p></section></div>'
       +'<p class="um-foot">Dữ liệu cập nhật '+esc(t)+(d.partial?' · một số nguồn chưa tải được':'')+'. Chỉ gồm tin từ báo chính thống, nội dung tích cực, nhắc đúng tên đơn vị; tự cập nhật mỗi 30 phút.</p></div></div>';
+    (async()=>{
+      const box2=m.querySelector('#um-views');if(!box2)return;
+      try{
+        const db=await vdb();
+        const [st,lv]=await Promise.all([db.ref('newsStats').once('value'),db.ref('newsViewers').once('value')]);
+        const s=st.val()||{},u=s.units||{},now=Date.now(),live=Object.values(lv.val()||{}).filter(x=>x&&now-Number(x.lastSeen)<60000);
+        const rows=Object.entries(u).map(([k,v])=>[k,Number(v)||0]).filter(r=>r[1]>0).sort((a,b)=>b[1]-a[1]);
+        const liveBy=k=>live.filter(x=>x.unit===k).length;
+        const kp=(n,l)=>'<div class="um-k"><b>'+fm(n)+'</b>'+l+'</div>';
+        box2.innerHTML='<h4>Lượt xem mục tin theo đơn vị</h4><div class="um-kpis">'+kp(Number(s.sessions)||0,'người đã xem mục tin')+kp(Number(s.total)||0,'lượt xem (mỗi đơn vị / phiên)')+kp(live.length,'đang xem lúc này')+kp(rows.length,'đơn vị được xem')+'</div>'
+          +(rows.length?'<ol>'+rows.slice(0,15).map(r=>'<li><div>'+esc(cap(r[0]))+(liveBy(r[0])?' <small style="color:#0f7a5f">● '+liveBy(r[0])+' đang xem</small>':'')+'<i style="width:'+Math.max(4,Math.round(r[1]*100/rows[0][1]))+'%"></i></div><em>'+fm(r[1])+'</em></li>').join('')+'</ol>':'<p class="um-foot">Chưa có lượt xem nào được ghi nhận.</p>');
+      }catch(e){box2.innerHTML='<h4>Lượt xem mục tin theo đơn vị</h4><p class="um-foot">Chưa đọc được số liệu lượt xem (kiểm tra quy tắc Firebase nhánh newsStats).</p>'}
+    })();
     m.classList.add('on');
     const x=m.querySelector('.um-x');if(x)x.focus();
   }
+  /* Lượt xem mục tin theo đơn vị: đếm 1 lần cho mỗi phiên và mỗi đơn vị, lưu ở Firebase (nhánh newsStats, dùng chung các trang). */
+  const VCFG={apiKey:"AIzaSyCZ9gzT18b1QovsS0y4-SgmUFqtyMvkR0A",authDomain:"laocai-tthc.firebaseapp.com",projectId:"laocai-tthc",appId:"1:836624022047:web:7ee3c80e5e44b8ed3d732a",databaseURL:"https://laocai-tthc-default-rtdb.firebaseio.com"};
+  let vdbP=null;
+  const vdb=()=>vdbP||(vdbP=(async()=>{
+    const V='https://www.gstatic.com/firebasejs/10.14.1/',ld=u=>new Promise((ok,no)=>{const s=document.createElement('script');s.src=u;s.async=false;s.onload=ok;s.onerror=no;document.head.append(s)});
+    for(let n=0;n<8&&!(window.firebase&&firebase.database);n++)await new Promise(r=>setTimeout(r,500));
+    if(!(window.firebase&&firebase.database)){await ld(V+'firebase-app-compat.js');await ld(V+'firebase-database-compat.js')}
+    return (firebase.apps.find(a=>a.name==='newsLive')||firebase.initializeApp(VCFG,'newsLive')).database();
+  })().catch(e=>{vdbP=null;throw e}));
+  const seenKey='newsViewedUnits';
+  const countView=async u=>{
+    try{
+      let seen=[];try{seen=JSON.parse(sessionStorage.getItem(seenKey)||'[]')}catch(_){}
+      if(seen.includes(u))return;seen.push(u);try{sessionStorage.setItem(seenKey,JSON.stringify(seen))}catch(_){}
+      const db=await vdb(),inc=v=>(Number(v)||0)+1;
+      db.ref('newsStats/units/'+u).transaction(inc);db.ref('newsStats/total').transaction(inc);
+      if(seen.length===1)db.ref('newsStats/sessions').transaction(inc);
+    }catch(_){}
+  };
   const sb=el('button','un-refresh un-stat');sb.type='button';sb.title='Thống kê tin tức';sb.setAttribute('aria-label','Thống kê tin tức');sb.innerHTML='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span>Thống kê</span>';sb.addEventListener('click',openStats);btn.before(sb);
 
   const DAY=864e5;
@@ -2303,7 +2336,7 @@ const FB_CFG={databaseURL:'https://tramtau-default-rtdb.firebaseio.com'};
       const d=await getPool();
       const matched=d.items.filter(i=>/^https?:\/\//i.test(i.url||'')&&!(window.RSS_PRAISE_ONLY&&i.bad)&&((cur===PROV&&inProv(i))||(i.us||[]).includes(cur)||mentions((i.title||'')+' '+((i.desc||'').split(/(?<=[.!?…])\s+/)[0]||'').slice(0,220),cur)||(bare(cur)&&mentions(i.title||'',bare(cur))))).sort((a,b)=>(Date.parse(b.published)||0)-(Date.parse(a.published)||0));const items=matched.slice(0,30);
       const today=vnDay(nowMs()),isToday=i=>{const x=Date.parse(i.published);return !isNaN(x)&&vnDay(x)===today},fm=n=>n.toLocaleString('vi-VN');
-      lastCtx={d,matched,isToday,fm,cur};
+      lastCtx={d,matched,isToday,fm,cur};countView(cur);
       const stat=fm(matched.length)+' tin'+(matched.filter(isToday).length?' · '+fm(matched.filter(isToday).length)+' mới hôm nay':'')+' · toàn tỉnh '+fm(d.items.length)+' tin từ '+fm(new Set(d.items.map(i=>i.source)).size)+' nguồn';
       const t=d.updatedAt?new Date(d.updatedAt).toLocaleString('vi-VN',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit',timeZone:'Asia/Ho_Chi_Minh'}):'';
       const part=d.partial?' · một số nguồn chưa tải được':'';
