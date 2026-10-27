@@ -2033,7 +2033,7 @@ const FB_CFG={databaseURL:'https://tramtau-default-rtdb.firebaseio.com'};
 })();
 </script>
 <!-- Tin tức địa phương: mặc định xã Trạm Tấu, dùng chung dữ liệu tin của site mau -->
-<script>window.RSS_UNIT='xã Trạm Tấu';window.RSS_POOL='https://laocai-cds.github.io/mau/news/pool.json';</script>
+<script>window.RSS_PRAISE_ONLY=true;window.RSS_UNIT='xã Trạm Tấu';window.RSS_POOL='https://laocai-cds.github.io/mau/news/pool.json';</script>
 <style>
 #unit-news{margin:0 0 28px;background:#fff;border:1px solid var(--rule);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden;color:#202936}
 #unit-news .un-head{display:flex;align-items:flex-end;justify-content:space-between;gap:14px 18px;flex-wrap:wrap;padding:20px 22px 16px;border-bottom:1px solid var(--rule-2);background:linear-gradient(115deg,#fff 58%,#fbf4dc88)}
@@ -2090,7 +2090,9 @@ const FB_CFG={databaseURL:'https://tramtau-default-rtdb.firebaseio.com'};
   const hasMarks=t=>/[\u0300-\u036f]|[ăâêôơưđ]/i.test(String(t||'').normalize('NFD'));
   const mentions=(t,ph)=>keep(t).includes(keep(ph))||(!hasMarks(t)&&plain(t).includes(plain(ph)));
   const bare=u=>{const b=u.replace(/^(xã|phường)\s+/i,'');return /^(lào cai|yên bái)$/i.test(b)?'':b};
-    let pool=null,poolAt=0;
+    let pool=null,poolAt=0,skew=0;
+  /* Giờ máy chủ (header Date của GitHub Pages) và ngày theo giờ Việt Nam (UTC+7), không phụ thuộc đồng hồ máy người xem. */
+  const VN=7*36e5,nowMs=()=>Date.now()+skew,vnDay=ms=>Math.floor((ms+VN)/864e5),vnDate=d=>new Date(d.getTime()+VN);
   async function getPool(){
     if(pool&&Date.now()-poolAt<10*60*1000)return pool;
     const r=await fetch(POOL_URL,{cache:'no-cache'});
@@ -2098,6 +2100,7 @@ const FB_CFG={databaseURL:'https://tramtau-default-rtdb.firebaseio.com'};
     if(!r.ok)throw Error('HTTP '+r.status);
     const d=await r.json();
     if(!Array.isArray(d.items))throw Error('Dữ liệu không hợp lệ');
+    const sv=Date.parse(r.headers.get('date')||'');if(!isNaN(sv))skew=sv-Date.now();
     pool=d;poolAt=Date.now();return d;
   }
   /* 99 xã, phường của tỉnh Lào Cai (89 xã, 10 phường) */
@@ -2123,9 +2126,9 @@ const FB_CFG={databaseURL:'https://tramtau-default-rtdb.firebaseio.com'};
 
   const DAY=864e5;
   function when(d){
-    const days=Math.floor((Date.now()-d.getTime())/DAY);
+    const days=vnDay(nowMs())-vnDay(d.getTime());
     if(days<=0)return 'Hôm nay';if(days===1)return 'Hôm qua';if(days<7)return days+' ngày trước';
-    return d.toLocaleDateString('vi-VN');
+    const v=vnDate(d);return String(v.getUTCDate()).padStart(2,'0')+'/'+String(v.getUTCMonth()+1).padStart(2,'0')+'/'+v.getUTCFullYear();
   }
   /* Tóm tắt ngắn: cắt theo từ ở khoảng 170 ký tự, bỏ phần lặp lại tiêu đề ở đầu. */
   function summary(desc,title){
@@ -2149,14 +2152,14 @@ const FB_CFG={databaseURL:'https://tramtau-default-rtdb.firebaseio.com'};
     const a=el('a');a.href=item.url;a.target='_blank';a.rel='noopener noreferrer';
     const d=item.published?new Date(item.published):null,ok=d&&!isNaN(d);
     const date=el('div','un-date');date.setAttribute('aria-hidden','true');
-    if(ok){date.append(el('b',null,String(d.getDate()).padStart(2,'0')),el('small',null,'Th'+(d.getMonth()+1)))}
+    if(ok){date.append(el('b',null,String(vnDate(d).getUTCDate()).padStart(2,'0')),el('small',null,'Th'+(vnDate(d).getUTCMonth()+1)))}
     else{date.append(el('b',null,'•'))}
     const body=el('div','un-body');
     body.append(el('div','un-title',item.title||'Tin tức'));
     const sm=summary(item.desc,item.title);
     if(sm)body.append(el('p','un-sum',sm));
     const meta=el('div','un-meta');
-    if(ok&&Date.now()-d.getTime()<2*DAY)meta.append(el('span','un-new','MỚI'));
+    if(ok&&vnDay(nowMs())===vnDay(d.getTime()))meta.append(el('span','un-new','MỚI'));
     if(item.source)meta.append(el('span','un-src',item.source));
     if(ok)meta.append(el('span',null,when(d)));
     body.append(meta);
@@ -2174,8 +2177,8 @@ const FB_CFG={databaseURL:'https://tramtau-default-rtdb.firebaseio.com'};
     box.setAttribute('aria-busy','true');btn.disabled=true;sub.textContent='Đang tải tin…';skeleton();
     try{
       const d=await getPool();
-      const items=d.items.filter(i=>/^https?:\/\//i.test(i.url||'')&&((i.us||[]).includes(cur)||mentions((i.title||'')+' '+((i.desc||'').split(/(?<=[.!?…])\s+/)[0]||'').slice(0,220),cur)||(bare(cur)&&mentions(i.title||'',bare(cur))))).sort((a,b)=>(Date.parse(b.published)||0)-(Date.parse(a.published)||0)).slice(0,30);
-      const t=d.updatedAt?new Date(d.updatedAt).toLocaleString('vi-VN',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'}):'';
+      const items=d.items.filter(i=>/^https?:\/\//i.test(i.url||'')&&!(window.RSS_PRAISE_ONLY&&i.bad)&&((i.us||[]).includes(cur)||mentions((i.title||'')+' '+((i.desc||'').split(/(?<=[.!?…])\s+/)[0]||'').slice(0,220),cur)||(bare(cur)&&mentions(i.title||'',bare(cur))))).sort((a,b)=>(Date.parse(b.published)||0)-(Date.parse(a.published)||0)).slice(0,30);
+      const t=d.updatedAt?new Date(d.updatedAt).toLocaleString('vi-VN',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit',timeZone:'Asia/Ho_Chi_Minh'}):'';
       const part=d.partial?' · một số nguồn chưa tải được':'';
       if(!items.length){
         sub.textContent='Không có bài nào · dữ liệu '+t+part;
