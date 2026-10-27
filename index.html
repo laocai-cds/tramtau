@@ -2177,7 +2177,10 @@ const FB_CFG={databaseURL:'https://tramtau-default-rtdb.firebaseio.com'};
   box.innerHTML='<div class="un-head"><div><p class="un-eyebrow">Tin tức địa phương</p><h2></h2><p class="un-sub" role="status" aria-live="polite"></p></div><div class="un-tools"><select aria-label="Chọn xã, phường"></select><button type="button" class="un-refresh" aria-label="Về xã mặc định" title="Về xã mặc định">'+ICON_REF+'</button></div></div><div class="un-body-wrap"></div><div class="un-foot">Tin tổng hợp từ các trang có RSS, tự cập nhật mỗi 30 phút, chỉ hiển thị bài nhắc tới đúng tên đơn vị. Hiển thị tiêu đề, tóm tắt ngắn và liên kết, bấm vào để đọc bài gốc.</div>';
   anchor.insertAdjacentElement('afterend',box);
   const h2=box.querySelector('h2'),sub=box.querySelector('.un-sub'),sel=box.querySelector('select'),btn=box.querySelector('.un-refresh'),holder=box.querySelector('.un-body-wrap');
-  const PROV='Tỉnh Lào Cai';{const o=el('option',null,PROV);o.value=PROV;sel.append(o)}
+  const PROV='Tỉnh Lào Cai';
+  /* Tỉnh Lào Cai: cùng điều kiện khối tin — bài phải nhắc tới ít nhất một xã, phường của tỉnh (trong tiêu đề hoặc câu đầu tóm tắt). */
+  const UKEYS=UNITS.map(u=>[u,bare(u)]);
+  const inProv=i=>(i.us&&i.us.length>0)||(()=>{const t=(i.title||'')+' '+((i.desc||'').split(/(?<=[.!?…])\s+/)[0]||'').slice(0,220);return UKEYS.some(([u,b])=>mentions(t,u)||(b&&mentions(i.title||'',b)))})();{const o=el('option',null,PROV);o.value=PROV;sel.append(o)}
   [...UNITS].sort((a,b)=>a.split(' ').slice(1).join(' ').localeCompare(b.split(' ').slice(1).join(' '),'vi')).forEach(u=>{const o=el('option',null,cap(u));o.value=u;sel.append(o)});
   sel.value=cur;
   sel.addEventListener('change',()=>{cur=sel.value;load()});
@@ -2196,7 +2199,7 @@ const FB_CFG={databaseURL:'https://tramtau-default-rtdb.firebaseio.com'};
     const hm=i=>{const v=new Date(Date.parse(i.published)+7*36e5);return String(v.getUTCHours()).padStart(2,'0')+':'+String(v.getUTCMinutes()).padStart(2,'0')};
     const unitOf=(i,x)=>(i.us&&i.us[0])||(UNITS.find(u=>kt[x].includes(keep(u)))||'');
     const todayRows=all.map((i,x)=>[i,x]).filter(r=>isToday(r[0])&&/^https?:\/\//i.test(r[0].url||'')).sort((a,b)=>Date.parse(b[0].published)-Date.parse(a[0].published));
-    const isCur=r=>cu===PROV||(r[0].us||[]).includes(cu)||kt[r[1]].includes(keep(cu))||(bare(cu)&&keep(r[0].title||'').includes(keep(bare(cu))));
+    const isCur=r=>(cu===PROV&&inProv(r[0]))||(r[0].us||[]).includes(cu)||kt[r[1]].includes(keep(cu))||(bare(cu)&&keep(r[0].title||'').includes(keep(bare(cu))));
     const rowHtml=(r,showUnit)=>{const i=r[0],u=showUnit?unitOf(i,r[1]):'';return '<li class="um-n"><a href="'+esc(i.url)+'" target="_blank" rel="noopener noreferrer"><span class="um-t">'+esc(i.title||'Tin tức')+'</span><span class="um-m">'+hm(i)+' · '+esc(i.source||'')+(u?' · '+esc(cap(u)):'')+'</span></a></li>'};
     const curToday=todayRows.filter(isCur),otherToday=todayRows.filter(r=>!isCur(r));
     const todayHtml='<section><h4>Tin trong ngày hôm nay</h4>'
@@ -2278,7 +2281,7 @@ const FB_CFG={databaseURL:'https://tramtau-default-rtdb.firebaseio.com'};
     box.setAttribute('aria-busy','true');btn.disabled=true;sub.textContent='Đang tải tin…';skeleton();
     try{
       const d=await getPool();
-      const matched=d.items.filter(i=>/^https?:\/\//i.test(i.url||'')&&!(window.RSS_PRAISE_ONLY&&i.bad)&&(cur===PROV||(i.us||[]).includes(cur)||mentions((i.title||'')+' '+((i.desc||'').split(/(?<=[.!?…])\s+/)[0]||'').slice(0,220),cur)||(bare(cur)&&mentions(i.title||'',bare(cur))))).sort((a,b)=>(Date.parse(b.published)||0)-(Date.parse(a.published)||0));const items=matched.slice(0,30);
+      const matched=d.items.filter(i=>/^https?:\/\//i.test(i.url||'')&&!(window.RSS_PRAISE_ONLY&&i.bad)&&((cur===PROV&&inProv(i))||(i.us||[]).includes(cur)||mentions((i.title||'')+' '+((i.desc||'').split(/(?<=[.!?…])\s+/)[0]||'').slice(0,220),cur)||(bare(cur)&&mentions(i.title||'',bare(cur))))).sort((a,b)=>(Date.parse(b.published)||0)-(Date.parse(a.published)||0));const items=matched.slice(0,30);
       const today=vnDay(nowMs()),isToday=i=>{const x=Date.parse(i.published);return !isNaN(x)&&vnDay(x)===today},fm=n=>n.toLocaleString('vi-VN');
       lastCtx={d,matched,isToday,fm,cur};
       const stat=fm(matched.length)+' tin'+(matched.filter(isToday).length?' · '+fm(matched.filter(isToday).length)+' mới hôm nay':'')+' · toàn tỉnh '+fm(d.items.length)+' tin từ '+fm(new Set(d.items.map(i=>i.source)).size)+' nguồn';
