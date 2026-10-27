@@ -1000,7 +1000,7 @@ tbody tr:hover td{background:#f5f8ff}
     <div class="barright">
       <button class="btn" id="reportBtn" title="Tạo báo cáo (In/PDF, Excel, Word)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h4"/></svg><span class="lbl">Tạo báo cáo</span></button>
       <button class="btn" id="exportBtn" title="Xuất báo cáo CSV"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="m7 11 5 5 5-5"/><path d="M5 20h14"/></svg><span class="lbl">Xuất CSV</span></button>
-      <a class="btn" id="goldBtn" href="bang-ty-gia-usd-gia-vang.html" target="_blank" rel="noopener" title="Xem bảng giá vàng và tỷ giá USD"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M15 9.2c-.5-1-1.6-1.6-3-1.6-1.7 0-3 .9-3 2.2 0 3 6.2 1.4 6.2 4.4 0 1.3-1.3 2.2-3.2 2.2-1.5 0-2.7-.7-3.2-1.8"/><path d="M12 6v1.6M12 16.4V18"/></svg><span class="lbl">Giá vàng và USD</span></a>
+      <button class="btn" id="goldBtn" type="button" aria-haspopup="dialog" title="Xem bản tin thị trường: tỷ giá USD và giá vàng"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M15 9.2c-.5-1-1.6-1.6-3-1.6-1.7 0-3 .9-3 2.2 0 3 6.2 1.4 6.2 4.4 0 1.3-1.3 2.2-3.2 2.2-1.5 0-2.7-.7-3.2-1.8"/><path d="M12 6v1.6M12 16.4V18"/></svg><span class="lbl">Bản tin thị trường</span></button>
     </div>
   </div>
 </header>
@@ -2285,6 +2285,16 @@ const FB_CFG={databaseURL:'https://tramtau-default-rtdb.firebaseio.com'};
   }
   btn.title='Về '+cap(DEFAULT)+' (mặc định)';btn.setAttribute('aria-label',btn.title);
   btn.addEventListener('click',()=>{cur=DEFAULT;sel.value=DEFAULT;load()});load();setInterval(load,30*60*1000);
+})();
+</script>
+<div class="mkt-ov" id="mktOv" role="dialog" aria-modal="true" aria-label="Bản tin thị trường"><div class="mkt-box"><button class="mkt-x" id="mktX" type="button" aria-label="Đóng">✕</button><iframe id="mktFr" title="Bản tin thị trường" loading="lazy"></iframe></div></div>
+<script>
+(function(){const ov=document.getElementById('mktOv'),fr=document.getElementById('mktFr'),b=document.getElementById('goldBtn');
+function open(){if(!fr.getAttribute('src'))fr.src='bang-ty-gia-usd-gia-vang.html';ov.classList.add('on');document.body.style.overflow='hidden'}
+function close(){ov.classList.remove('on');document.body.style.overflow=''}
+b.addEventListener('click',open);document.getElementById('mktX').addEventListener('click',close);
+ov.addEventListener('click',e=>{if(e.target===ov)close()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&ov.classList.contains('on'))close()});
 })();
 </script>
 </body>
