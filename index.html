@@ -2296,12 +2296,16 @@ const FB_CFG={databaseURL:'https://tramtau-default-rtdb.firebaseio.com'};
 </script>
 <div class="mkt-ov" id="mktOv" role="dialog" aria-modal="true" aria-label="Bản tin thị trường"><div class="mkt-box"><button class="mkt-x" id="mktX" type="button" aria-label="Đóng">✕</button><iframe id="mktFr" title="Bản tin thị trường" loading="lazy"></iframe></div></div>
 <script>
-(function(){const ov=document.getElementById('mktOv'),fr=document.getElementById('mktFr'),b=document.getElementById('goldBtn');
-function open(){if(!fr.getAttribute('src'))fr.src='bang-ty-gia-usd-gia-vang.html';ov.classList.add('on');document.body.style.overflow='hidden'}
-function close(){ov.classList.remove('on');document.body.style.overflow=''}
-b.addEventListener('click',open);document.getElementById('mktX').addEventListener('click',close);
-ov.addEventListener('click',e=>{if(e.target===ov)close()});
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&ov.classList.contains('on'))close()});
+(function(){
+function ov(){return document.getElementById('mktOv')}
+function openMkt(){const o=ov(),f=document.getElementById('mktFr');if(!o)return;if(f&&!f.getAttribute('src'))f.src='bang-ty-gia-usd-gia-vang.html';o.classList.add('on');document.body.style.overflow='hidden'}
+function closeMkt(){const o=ov();if(o)o.classList.remove('on');document.body.style.overflow=''}
+window.openMkt=openMkt;window.closeMkt=closeMkt;
+document.addEventListener('click',function(e){const t=e.target;if(!t||!t.closest)return;
+ if(t.closest('#goldBtn')){e.preventDefault();e.stopPropagation();openMkt();return}
+ if(t.closest('#mktX')||t===ov()){closeMkt()}
+},true);
+document.addEventListener('keydown',function(e){const o=ov();if(e.key==='Escape'&&o&&o.classList.contains('on'))closeMkt()});
 })();
 </script>
 </body>
