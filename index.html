@@ -1162,6 +1162,17 @@ tbody tr:hover td{background:#f5f8ff}
           </div>
           <p class="hint" style="margin:12px 0 0">Trình duyệt không đọc được phản hồi của Apps Script, nên sau khi gửi hãy mở Google Sheet kiểm tra trước khi gửi lại.</p>
         </div>
+        <div class="panel pad step" id="apiPanel">
+          <div class="ph"><h2>⚡ Nút API · đồng bộ thẳng từ gqtthc.dcs.vn</h2></div>
+          <p class="hint" style="margin:0 0 10px">Không cần xuất file Excel: bấm một lần trên trang gqtthc, số liệu Đảng bộ xã Trạm Tấu được lấy qua API và gửi lên Google Sheet (tháng hiện tại).</p>
+          <ol style="margin:0 0 10px 18px;padding:0;font-size:13.5px;line-height:1.6">
+            <li>Kéo nút <a id="apiBm" href="#" draggable="true" style="display:inline-block;padding:4px 10px;border-radius:8px;background:#b3261e;color:#fff;font-weight:700;text-decoration:none">ĐP Trạm Tấu</a> lên thanh dấu trang (Ctrl+Shift+B để hiện thanh). Nếu không kéo được: <button class="btn" type="button" id="apiCopy" style="padding:3px 10px">sao chép mã</button> rồi bấm chuột phải thanh dấu trang → <b>Thêm trang…</b>, dán mã vào ô <b>URL</b>.</li>
+            <li>Mở <b>gqtthc.dcs.vn</b> (đã đăng nhập), bấm dấu trang đó <b>một lần chuột trái</b>.</li>
+            <li>Lần đầu nhập <b>mã đồng bộ</b> (giống ô ở bước 2); máy sẽ nhớ cho lần sau. Góc phải trên trang báo kết quả.</li>
+          </ol>
+          <p class="hint" style="margin:0">Cách khác nếu dấu trang bị chặn: mở gqtthc.dcs.vn → F12 → Console → <button class="btn" type="button" id="apiCopyJs" style="padding:3px 10px">sao chép mã Console</button> → dán → Enter.</p>
+          <div class="state" id="apiMsg" role="status" style="margin-top:10px" hidden></div>
+        </div>
         <div class="panel pad step" id="logPanel">
           <div class="ph"><h2>Nhật ký đồng bộ</h2><button class="btn" id="logReload" type="button">↻ Tải lại</button></div>
           <div class="logwrap"><table class="logtb"><thead><tr><th>Thời gian</th><th>Nội dung</th><th class="n">Số dòng</th><th>Kết quả</th></tr></thead><tbody id="logBody"><tr><td colspan="4" class="logempty">Đang tải nhật ký…</td></tr></tbody></table></div>
@@ -1996,6 +2007,53 @@ $('#syncBtn').onclick=async()=>{
 };
 try{if(/zalo/i.test(navigator.userAgent)&&!sessionStorage.getItem('zalo_ok')){const zb=document.getElementById('zalobar');zb.classList.add('on');document.getElementById('zalook').onclick=()=>{zb.classList.remove('on');try{sessionStorage.setItem('zalo_ok','1')}catch(e){}}}}catch(e){}
 start();startLoop();checkEndpoint();showSheetLink();
+/* ===== Nút API: dấu trang chạy trên gqtthc.dcs.vn → lấy số liệu qua API → gửi lên Google Sheet ===== */
+function apiBookmarklet(C){
+  (async()=>{
+    const box=document.createElement('div');
+    box.style.cssText='position:fixed;z-index:2147483647;top:14px;right:14px;max-width:380px;padding:12px 16px;border-radius:12px;background:#12315f;color:#fff;font:600 14px/1.45 system-ui,sans-serif;box-shadow:0 8px 28px rgba(0,0,0,.35)';
+    const say=(m,bad)=>{box.textContent=m;box.style.background=bad?'#a50d26':'#12315f';if(!box.parentNode)document.body.appendChild(box)};
+    const jp=(u,ms)=>new Promise(res=>{const cb='__apibm'+Date.now()+Math.random().toString(36).slice(2),sc=document.createElement('script');const t=setTimeout(()=>{delete window[cb];sc.remove();res(null)},ms||9000);window[cb]=v=>{clearTimeout(t);delete window[cb];sc.remove();res(v)};sc.onerror=()=>{clearTimeout(t);res(null)};sc.src=u+(u.includes('?')?'&':'?')+'callback='+cb+'&t='+Date.now();document.head.appendChild(sc)});
+    try{
+      if(!/gqtthc\.dcs\.vn$/.test(location.hostname)){alert('Hãy bấm dấu trang này khi đang mở trang gqtthc.dcs.vn (đã đăng nhập).');return}
+      const tk=localStorage.getItem('token');
+      if(!tk){alert('Chưa đăng nhập gqtthc.dcs.vn.');return}
+      if(!C.ep){alert('Chưa có địa chỉ Google Sheet trên trang đồng bộ.');return}
+      let pw=localStorage.getItem(C.k)||'';
+      if(!pw){pw=(prompt('Mã đồng bộ ('+C.name+'):')||'').trim();if(!pw)return}
+      say('Đang lấy số liệu từ API…');
+      const d=new Date(),p2=n=>String(n).padStart(2,'0'),mm=p2(d.getMonth()+1),yy=d.getFullYear();
+      const body={kyNopStart:'01/'+mm+'/'+yy,kyNopEnd:new Date(yy,d.getMonth()+1,0).getDate()+'/'+mm+'/'+yy,parentId:C.pid,hasChildren:true,page:1,size:1000};
+      const r=await fetch('https://gateway-gqtthc.dcs.vn/report/dashboard/danh-sach-theo-doi-dang-phi',{method:'POST',headers:{Authorization:'Bearer '+tk,'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify(body)});
+      if(!r.ok)throw new Error('API trả lỗi '+r.status+(r.status===401?' — hãy đăng nhập lại.':''));
+      const j=await r.json(),list=j.data||[];
+      if(!list.length)throw new Error('API không trả đơn vị nào.');
+      const n=x=>Number(x)||0;
+      const h1=['STT','Tên đơn vị','Đảng viên','','','','','Hồ sơ đảng phí','','','','Số tiền','',''];
+      const h2=['','','Tổng sl đảng viên (1)','Số lượng ĐV sinh hoạt chính thức (2)','Số lượng ĐV sinh hoạt tạm thời (3)','Số lượng ĐV đã chuyển sinh hoạt đảng tạm thời (4)','Số lượng được miễn giảm ĐP (5)','Chưa duyệt (6)','Đã duyệt, chưa nộp (7)','Đã duyệt, đã nộp (8)','Số đảng viên chưa có hồ sơ (9)','Tổng tiền theo hồ sơ đã khai báo','Tổng tiền đã nộp','Tỷ lệ hoàn thành\n đảng phí thực tế'];
+      const rows=[h2].concat(list.map((x,i)=>[i+1,x.tenDonVi,n(x.tongSoLuongDangVien),n(x.soLuongDangVienChinhThuc),n(x.soLuongDangVienTamThoi),n(x.soLuongChuyenTamThoi),n(x.soLuongDangVienMienGiam),n(x.tongSoHoSoChuaDuyet),n(x.tongSoHoSoDaDuyetChuaNop),n(x.tongSoHoSoDaDuyetDaNop),n(x.soLuongHoSoChuaKhaiBao),n(x.tongSoTienDaKhaiBao),n(x.tongSoTienDaNop),Math.round(n(x.mucDoThucHien)*100)/10000]));
+      say('Đang gửi '+list.length+' đơn vị lên Google Sheet…');
+      const T=C.m?('Thang'+(d.getMonth()+1)):'',rd=C.ep+'?action=read'+(T?'&tab='+encodeURIComponent(T):'');
+      const b0=await jp(rd),before=b0&&b0.ok?(b0.lastSync||''):null;
+      await fetch(C.ep,{method:'POST',mode:'no-cors',redirect:'follow',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(Object.assign(T?{tab:T}:{},{headers:h1,rows:rows,token:pw,source:C.src,sentAt:new Date().toISOString()}))});
+      let ok=null;
+      for(let k=0;k<12&&!ok;k++){await new Promise(r2=>setTimeout(r2,2000));const x=await jp(rd,9000);if(x&&x.ok&&(x.lastSync||'')!==before)ok=x}
+      if(ok){try{localStorage.setItem(C.k,pw)}catch(e){}say('✓ Đã đồng bộ '+list.length+' đơn vị lên Google Sheet.');setTimeout(()=>box.remove(),12000)}
+      else{try{localStorage.removeItem(C.k)}catch(e){}say('Đã gửi '+list.length+' đơn vị nhưng chưa thấy Google Sheet cập nhật. Kiểm tra mã đồng bộ rồi bấm lại (sẽ hỏi lại mã).',true);setTimeout(()=>box.remove(),20000)}
+    }catch(e){say('✕ '+e.message,true);setTimeout(()=>box.remove(),15000)}
+  })();
+}
+function apiBmSrc(){return '('+apiBookmarklet.toString()+')('+JSON.stringify({pid:2124966,name:'Đảng bộ xã Trạm Tấu',k:'tmt_apipw',src:'website-tram-tau-api',m:false,ep:(sheetEndpoint())||''})+');void 0'}
+(function(){
+  const a=document.getElementById('apiBm'),c=document.getElementById('apiCopy'),cj=document.getElementById('apiCopyJs'),m=document.getElementById('apiMsg');if(!a)return;
+  const say=t=>{m.hidden=false;m.textContent=t};
+  const refresh=()=>{a.href='javascript:'+encodeURIComponent(apiBmSrc())};refresh();
+  a.addEventListener('click',e=>{e.preventDefault();say('Hãy KÉO nút này lên thanh dấu trang (đừng bấm tại đây).')});
+  const cp=async t=>{try{await navigator.clipboard.writeText(t);return true}catch(e){return false}};
+  c.onclick=async()=>say(await cp('javascript:'+encodeURIComponent(apiBmSrc()))?'Đã sao chép mã dấu trang.':'Không sao chép được — hãy kéo nút lên thanh dấu trang.');
+  cj.onclick=async()=>say(await cp(apiBmSrc())?'Đã sao chép. Mở gqtthc.dcs.vn → F12 → Console → dán → Enter.':'Không sao chép được.');
+})();
+
 
 
 /* ===== Đồng bộ bảng "Tình hình các đơn vị" lên tab "Bảng đơn vị" ===== */
