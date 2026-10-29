@@ -2027,6 +2027,8 @@ function apiBookmarklet(C){
       T0=performance.now();
       if(navigator.onLine===false)throw new Error('Máy đang mất kết nối mạng. Kiểm tra mạng rồi bấm lại.');
       say('Đang lấy số liệu từ API…',false,true);
+      const dd=new Date(),T=C.m?('Thang'+(dd.getMonth()+1)):'',rd=C.ep+'?action=read'+(T?'&tab='+encodeURIComponent(T):'');
+      const b0P=jp(rd);/* đọc trước lastSync + làm nóng Apps Script song song với lúc chờ API */
       const tA=performance.now();
       const d=new Date(),p2=n=>String(n).padStart(2,'0'),mm=p2(d.getMonth()+1),yy=d.getFullYear();
       const body={kyNopStart:'01/'+mm+'/'+yy,kyNopEnd:new Date(yy,d.getMonth()+1,0).getDate()+'/'+mm+'/'+yy,parentId:C.pid,hasChildren:true,page:1,size:1000};
@@ -2043,8 +2045,7 @@ function apiBookmarklet(C){
       const rows=[h2].concat(list.map((x,i)=>[i+1,x.tenDonVi,n(x.tongSoLuongDangVien),n(x.soLuongDangVienChinhThuc),n(x.soLuongDangVienTamThoi),n(x.soLuongChuyenTamThoi),n(x.soLuongDangVienMienGiam),n(x.tongSoHoSoChuaDuyet),n(x.tongSoHoSoDaDuyetChuaNop),n(x.tongSoHoSoDaDuyetDaNop),n(x.soLuongHoSoChuaKhaiBao),n(x.tongSoTienDaKhaiBao),n(x.tongSoTienDaNop),Math.round(n(x.mucDoThucHien)*100)/10000]));
       say('Đang gửi '+list.length+' đơn vị lên Google Sheet…',false,true);
       const tD=performance.now();
-      const T=C.m?('Thang'+(d.getMonth()+1)):'',rd=C.ep+'?action=read'+(T?'&tab='+encodeURIComponent(T):'');
-      const b0=await jp(rd),before=b0&&b0.ok?(b0.lastSync||''):null;
+      const b0=await b0P,before=b0&&b0.ok?(b0.lastSync||''):null;
       await fetch(C.ep,{method:'POST',mode:'no-cors',redirect:'follow',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(Object.assign(T?{tab:T}:{},{headers:h1,rows:rows,token:pw,source:C.src,sentAt:new Date().toISOString()}))});
       const tE=performance.now();
       say('Đang xác nhận kết quả trên Google Sheet…',false,true);
