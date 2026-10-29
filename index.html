@@ -2011,8 +2011,11 @@ start();startLoop();checkEndpoint();showSheetLink();
 function apiBookmarklet(C){
   (async()=>{
     const box=document.createElement('div');
-    box.style.cssText='position:fixed;z-index:2147483647;top:14px;right:14px;max-width:380px;padding:12px 16px;border-radius:12px;background:#12315f;color:#fff;font:600 14px/1.45 system-ui,sans-serif;box-shadow:0 8px 28px rgba(0,0,0,.35)';
-    const say=(m,bad)=>{box.textContent=m;box.style.background=bad?'#a50d26':'#12315f';if(!box.parentNode)document.body.appendChild(box)};
+    box.style.cssText='position:fixed;z-index:2147483647;top:14px;right:14px;max-width:380px;padding:12px 16px;border-radius:12px;background:#12315f;color:#fff;font:600 14px/1.45 system-ui,sans-serif;white-space:pre-line;box-shadow:0 8px 28px rgba(0,0,0,.35)';
+    let T0=performance.now(),curMsg='',curBad=false,tick=null;
+    const f1=ms=>(ms/1000).toFixed(1).replace('.',',')+'s';
+    const paint=()=>{box.textContent=curMsg+(tick?'   ⏱ '+f1(performance.now()-T0):'');box.style.background=curBad?'#a50d26':'#12315f';if(!box.parentNode)document.body.appendChild(box)};
+    const say=(m,bad,run)=>{curMsg=m;curBad=!!bad;if(run){if(!tick)tick=setInterval(paint,100)}else if(tick){clearInterval(tick);tick=null}paint()};
     const jp=(u,ms)=>new Promise(res=>{const cb='__apibm'+Date.now()+Math.random().toString(36).slice(2),sc=document.createElement('script');const t=setTimeout(()=>{delete window[cb];sc.remove();res(null)},ms||9000);window[cb]=v=>{clearTimeout(t);delete window[cb];sc.remove();res(v)};sc.onerror=()=>{clearTimeout(t);res(null)};sc.src=u+(u.includes('?')?'&':'?')+'callback='+cb+'&t='+Date.now();document.head.appendChild(sc)});
     try{
       if(!/gqtthc\.dcs\.vn$/.test(location.hostname)){alert('Hãy bấm dấu trang này khi đang mở trang gqtthc.dcs.vn (đã đăng nhập).');return}
@@ -2021,26 +2024,40 @@ function apiBookmarklet(C){
       if(!C.ep){alert('Chưa có địa chỉ Google Sheet trên trang đồng bộ.');return}
       let pw=localStorage.getItem(C.k)||'';
       if(!pw){pw=(prompt('Mã đồng bộ ('+C.name+'):')||'').trim();if(!pw)return}
-      say('Đang lấy số liệu từ API…');
+      T0=performance.now();
+      if(navigator.onLine===false)throw new Error('Máy đang mất kết nối mạng. Kiểm tra mạng rồi bấm lại.');
+      say('Đang lấy số liệu từ API…',false,true);
+      const tA=performance.now();
       const d=new Date(),p2=n=>String(n).padStart(2,'0'),mm=p2(d.getMonth()+1),yy=d.getFullYear();
       const body={kyNopStart:'01/'+mm+'/'+yy,kyNopEnd:new Date(yy,d.getMonth()+1,0).getDate()+'/'+mm+'/'+yy,parentId:C.pid,hasChildren:true,page:1,size:1000};
-      const r=await fetch('https://gateway-gqtthc.dcs.vn/report/dashboard/danh-sach-theo-doi-dang-phi',{method:'POST',headers:{Authorization:'Bearer '+tk,'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify(body)});
+      const ac=new AbortController(),to=setTimeout(()=>ac.abort(),30000);
+      const r=await fetch('https://gateway-gqtthc.dcs.vn/report/dashboard/danh-sach-theo-doi-dang-phi',{signal:ac.signal,method:'POST',headers:{Authorization:'Bearer '+tk,'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify(body)});
+      clearTimeout(to);const tB=performance.now();
       if(!r.ok)throw new Error('API trả lỗi '+r.status+(r.status===401?' — hãy đăng nhập lại.':''));
-      const j=await r.json(),list=j.data||[];
+      const raw=await r.text(),tC=performance.now();
+      const j=JSON.parse(raw),list=j.data||[];
       if(!list.length)throw new Error('API không trả đơn vị nào.');
       const n=x=>Number(x)||0;
       const h1=['STT','Tên đơn vị','Đảng viên','','','','','Hồ sơ đảng phí','','','','Số tiền','',''];
       const h2=['','','Tổng sl đảng viên (1)','Số lượng ĐV sinh hoạt chính thức (2)','Số lượng ĐV sinh hoạt tạm thời (3)','Số lượng ĐV đã chuyển sinh hoạt đảng tạm thời (4)','Số lượng được miễn giảm ĐP (5)','Chưa duyệt (6)','Đã duyệt, chưa nộp (7)','Đã duyệt, đã nộp (8)','Số đảng viên chưa có hồ sơ (9)','Tổng tiền theo hồ sơ đã khai báo','Tổng tiền đã nộp','Tỷ lệ hoàn thành\n đảng phí thực tế'];
       const rows=[h2].concat(list.map((x,i)=>[i+1,x.tenDonVi,n(x.tongSoLuongDangVien),n(x.soLuongDangVienChinhThuc),n(x.soLuongDangVienTamThoi),n(x.soLuongChuyenTamThoi),n(x.soLuongDangVienMienGiam),n(x.tongSoHoSoChuaDuyet),n(x.tongSoHoSoDaDuyetChuaNop),n(x.tongSoHoSoDaDuyetDaNop),n(x.soLuongHoSoChuaKhaiBao),n(x.tongSoTienDaKhaiBao),n(x.tongSoTienDaNop),Math.round(n(x.mucDoThucHien)*100)/10000]));
-      say('Đang gửi '+list.length+' đơn vị lên Google Sheet…');
+      say('Đang gửi '+list.length+' đơn vị lên Google Sheet…',false,true);
+      const tD=performance.now();
       const T=C.m?('Thang'+(d.getMonth()+1)):'',rd=C.ep+'?action=read'+(T?'&tab='+encodeURIComponent(T):'');
       const b0=await jp(rd),before=b0&&b0.ok?(b0.lastSync||''):null;
       await fetch(C.ep,{method:'POST',mode:'no-cors',redirect:'follow',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(Object.assign(T?{tab:T}:{},{headers:h1,rows:rows,token:pw,source:C.src,sentAt:new Date().toISOString()}))});
+      const tE=performance.now();
+      say('Đang xác nhận kết quả trên Google Sheet…',false,true);
       let ok=null;
-      for(let k=0;k<12&&!ok;k++){await new Promise(r2=>setTimeout(r2,2000));const x=await jp(rd,9000);if(x&&x.ok&&(x.lastSync||'')!==before)ok=x}
-      if(ok){try{localStorage.setItem(C.k,pw)}catch(e){}say('✓ Đã đồng bộ '+list.length+' đơn vị lên Google Sheet.');setTimeout(()=>box.remove(),12000)}
-      else{try{localStorage.removeItem(C.k)}catch(e){}say('Đã gửi '+list.length+' đơn vị nhưng chưa thấy Google Sheet cập nhật. Kiểm tra mã đồng bộ rồi bấm lại (sẽ hỏi lại mã).',true);setTimeout(()=>box.remove(),20000)}
-    }catch(e){say('✕ '+e.message,true);setTimeout(()=>box.remove(),15000)}
+      for(let k=0;k<12&&!ok;k++){await new Promise(r2=>setTimeout(r2,1000));const x=await jp(rd,9000);if(x&&x.ok&&(x.lastSync||'')!==before)ok=x}
+      const tF=performance.now();
+      if(ok){try{localStorage.setItem(C.k,pw)}catch(e){}}else{try{localStorage.removeItem(C.k)}catch(e){}}
+      const apiT=tC-tA,nc=navigator.connection||{};
+      const speed=apiT<2500?'🟢 Nhanh':apiT<6000?'🟡 Bình thường':'🔴 Chậm';
+      const detail='\n⏱ Tổng '+f1(tF-T0)+' · Kết nối '+speed+'\nAPI '+f1(apiT)+' (chờ '+f1(tB-tA)+', tải '+Math.max(1,Math.round(raw.length/1024))+' KB) · Gửi Sheet '+f1(tE-tD)+' · Xác nhận '+f1(tF-tE)+(nc.effectiveType?'\nMạng: '+nc.effectiveType+(nc.rtt?' · rtt '+nc.rtt+' ms':''):'');
+      say(ok?'✓ Đã đồng bộ '+list.length+' đơn vị lên Google Sheet.'+detail:'Đã gửi '+list.length+' đơn vị nhưng chưa thấy Google Sheet cập nhật. Kiểm tra mã đồng bộ rồi bấm lại (sẽ hỏi lại mã).'+detail,!ok);
+      setTimeout(()=>box.remove(),ok?25000:30000);
+    }catch(e){say('✕ '+(e&&e.name==='AbortError'?'API phản hồi quá chậm (quá 30 giây). Kiểm tra mạng rồi bấm lại.':e.message)+'   (sau '+f1(performance.now()-T0)+')',true);setTimeout(()=>box.remove(),20000)}
   })();
 }
 function apiBmSrc(){return '('+apiBookmarklet.toString()+')('+JSON.stringify({pid:2124966,name:'Đảng bộ xã Trạm Tấu',k:'tmt_apipw',src:'website-tram-tau-api',m:false,ep:(sheetEndpoint())||''})+');void 0'}
