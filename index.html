@@ -2253,7 +2253,17 @@ const FB_CFG={databaseURL:'https://tramtau-default-rtdb.firebaseio.com'};
     const d=await r.json();
     if(!Array.isArray(d.items))throw Error('Dữ liệu không hợp lệ');
     const sv=Date.parse(r.headers.get('date')||'');if(!isNaN(sv))skew=sv-Date.now();
-    d.items=d.items.filter(i=>!foreign(i));
+    /* Lọc bỏ tin lỗi: thiếu tiêu đề/liên kết, ngày sai hoặc ở tương lai, tiêu đề là trang báo lỗi, còn mã HTML, tin trùng. */
+    {const seenU=new Set(),seenT=new Set(),lim=Date.now()+skew+864e5;
+    const errT=/^\s*(404|403|500|502|503)\b|not found|access denied|forbidden|just a moment|attention required|bad gateway|service unavailable|trang (web )?(không|chưa) (tồn tại|tìm thấy)|không tìm thấy (trang|bài)|lỗi (máy chủ|truy cập|hệ thống)|^\s*(error|lỗi)\s*$/i;
+    const bad=i=>{if(!i||typeof i!=='object')return true;const t=String(i.title||'').replace(/\s+/g,' ').trim();
+      if(t.length<10||/<[a-z\/!][^>]*>|&#?\w+;/i.test(t))return true;
+      if(t.length<70&&errT.test(t))return true;
+      if(!/^https?:\/\/[^\s]+$/i.test(String(i.url||'')))return true;
+      const ms=Date.parse(i.published);if(isNaN(ms)||ms>lim)return true;
+      const ku=String(i.url).replace(/[#?].*$/,'').replace(/\/+$/,'').toLowerCase(),kt=t.toLowerCase().replace(/[^\p{L}\p{N}]+/gu,' ').trim();
+      if(seenU.has(ku)||seenT.has(kt))return true;seenU.add(ku);seenT.add(kt);return false};
+    d.items=d.items.filter(i=>!foreign(i)&&!bad(i));}
     pool=d;poolAt=Date.now();return d;
   }
   /* 99 xã, phường của tỉnh Lào Cai (89 xã, 10 phường) */
