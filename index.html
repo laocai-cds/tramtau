@@ -2012,10 +2012,10 @@ function apiBookmarklet(C){
   (async()=>{
     const box=document.createElement('div');
     box.style.cssText='position:fixed;z-index:2147483647;top:14px;right:14px;max-width:380px;padding:12px 16px;border-radius:12px;background:#12315f;color:#fff;font:600 14px/1.45 system-ui,sans-serif;white-space:pre-line;box-shadow:0 8px 28px rgba(0,0,0,.35)';
-    let T0=performance.now(),curMsg='',curBad=false,tick=null;
+    let T0=performance.now(),curMsg='',curBad=false,curOk=false,tick=null;
     const f1=ms=>(ms/1000).toFixed(1).replace('.',',')+'s';
-    const paint=()=>{box.textContent=curMsg+(tick?'   ⏱ '+f1(performance.now()-T0):'');box.style.background=curBad?'#a50d26':'#12315f';if(!box.parentNode)document.body.appendChild(box)};
-    const say=(m,bad,run)=>{curMsg=m;curBad=!!bad;if(run){if(!tick)tick=setInterval(paint,100)}else if(tick){clearInterval(tick);tick=null}paint()};
+    const paint=()=>{box.textContent=curMsg+(tick?'   ⏱ '+f1(performance.now()-T0):'');box.style.background=curBad?'#a50d26':curOk?'#0f8a3c':'#12315f';if(!box.parentNode)document.body.appendChild(box)};
+    const say=(m,bad,run,good)=>{curMsg=m;curBad=!!bad;curOk=!!good;if(run){if(!tick)tick=setInterval(paint,100)}else if(tick){clearInterval(tick);tick=null}paint()};
     const jp=(u,ms)=>new Promise(res=>{const cb='__apibm'+Date.now()+Math.random().toString(36).slice(2),sc=document.createElement('script');const t=setTimeout(()=>{delete window[cb];sc.remove();res(null)},ms||9000);window[cb]=v=>{clearTimeout(t);delete window[cb];sc.remove();res(v)};sc.onerror=()=>{clearTimeout(t);res(null)};sc.src=u+(u.includes('?')?'&':'?')+'callback='+cb+'&t='+Date.now();document.head.appendChild(sc)});
     try{
       if(!/gqtthc\.dcs\.vn$/.test(location.hostname)){alert('Hãy bấm dấu trang này khi đang mở trang gqtthc.dcs.vn (đã đăng nhập).');return}
@@ -2056,7 +2056,7 @@ function apiBookmarklet(C){
       const apiT=tC-tA,nc=navigator.connection||{};
       const speed=apiT<2500?'🟢 Nhanh':apiT<6000?'🟡 Bình thường':'🔴 Chậm';
       const detail='\n⏱ Tổng '+f1(tF-T0)+' · Kết nối '+speed+'\nAPI '+f1(apiT)+' (chờ '+f1(tB-tA)+', tải '+Math.max(1,Math.round(raw.length/1024))+' KB) · Gửi Sheet '+f1(tE-tD)+' · Xác nhận '+f1(tF-tE)+(nc.effectiveType?'\nMạng: '+nc.effectiveType+(nc.rtt?' · rtt '+nc.rtt+' ms':''):'');
-      say(ok?'✓ Đã đồng bộ '+list.length+' đơn vị lên Google Sheet.'+detail:'Đã gửi '+list.length+' đơn vị nhưng chưa thấy Google Sheet cập nhật. Kiểm tra mã đồng bộ rồi bấm lại (sẽ hỏi lại mã).'+detail,!ok);
+      say(ok?'✅ HOÀN THÀNH — đã đồng bộ '+list.length+' đơn vị lên Google Sheet.'+detail:'Đã gửi '+list.length+' đơn vị nhưng chưa thấy Google Sheet cập nhật. Kiểm tra mã đồng bộ rồi bấm lại (sẽ hỏi lại mã).'+detail,!ok,false,!!ok);
       setTimeout(()=>box.remove(),ok?25000:30000);
     }catch(e){say('✕ '+(e&&e.name==='AbortError'?'API phản hồi quá chậm (quá 30 giây). Kiểm tra mạng rồi bấm lại.':e.message)+'   (sau '+f1(performance.now()-T0)+')',true);setTimeout(()=>box.remove(),20000)}
   })();
