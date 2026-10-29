@@ -992,6 +992,19 @@ tbody tr:hover td{background:#f5f8ff}
 </style>
 
 </head>
+<style>/* ===== Đăng nhập quản trị ===== */
+html:not(.is-admin) .admin-only{display:none!important}
+.admtb{width:100%;border-collapse:collapse;font-size:13.5px}
+.admtb th{text-align:left;font-weight:700;color:var(--muted);font-size:12px;padding:6px 8px;border-bottom:1px solid var(--rule)}
+.admtb td{padding:8px;border-bottom:1px solid var(--rule-2);vertical-align:middle}
+.admtb .n{text-align:right;white-space:nowrap}
+.admadd{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.admadd .input{flex:1;min-width:200px}
+.admstat{display:flex;gap:14px;flex-wrap:wrap;margin:0 0 12px}
+.admstat div{flex:1;min-width:140px;padding:12px 14px;border:1px solid var(--rule);border-radius:var(--r-s);background:var(--giay)}
+.admstat small{display:block;color:var(--muted);font-size:12px}
+.admstat b{font:700 1.4rem var(--serif);color:var(--son-d)}
+</style>
 <body>
 <div class="zalobar" id="zalobar"><span>Đang mở trong Zalo. Nếu không tải được file báo cáo, bấm dấu ⋯ rồi chọn “Mở bằng trình duyệt”.</span><button type="button" id="zalook">Đã hiểu</button></div>
 <header class="bar">
@@ -1003,9 +1016,10 @@ tbody tr:hover td{background:#f5f8ff}
     <nav class="tabs" aria-label="Chuyên mục">
       <button class="tab" data-page="overview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg><span>Tổng quan</span></button>
       <button class="tab" data-page="units"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"/><path d="M5 21V10l7-5 7 5v11"/><path d="M9 21v-6h6v6"/></svg><span>Đơn vị trực thuộc</span></button>
-      <button class="tab" data-page="import"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg><span>Nhập dữ liệu</span></button>
+      <button class="tab admin-only" data-page="import"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.2 8.3-8 9-4.8-.7-8-4.5-8-9V6z"/><path d="m9 12 2 2 4-4"/></svg><span>Quản trị</span></button>
     </nav>
     <div class="barright">
+      <button class="btn" id="loginBtn" type="button" title="Đăng nhập quản trị bằng Gmail"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="m10 17 5-5-5-5"/><path d="M15 12H3"/></svg><span class="lbl" id="loginLbl">Đăng nhập</span></button>
       <button class="btn" id="reportBtn" title="Tạo báo cáo (In/PDF, Excel, Word)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h4"/></svg><span class="lbl">Tạo báo cáo</span></button>
       <button class="btn" id="exportBtn" title="Xuất báo cáo CSV"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="m7 11 5 5 5-5"/><path d="M5 20h14"/></svg><span class="lbl">Xuất CSV</span></button>
       <button class="btn" id="goldBtn" type="button" aria-haspopup="dialog" title="Xem bản tin thị trường: tỷ giá USD và giá vàng"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M15 9.2c-.5-1-1.6-1.6-3-1.6-1.7 0-3 .9-3 2.2 0 3 6.2 1.4 6.2 4.4 0 1.3-1.3 2.2-3.2 2.2-1.5 0-2.7-.7-3.2-1.8"/><path d="M12 6v1.6M12 16.4V18"/></svg><span class="lbl">Bản tin thị trường</span></button>
@@ -1017,7 +1031,7 @@ tbody tr:hover td{background:#f5f8ff}
   <div class="nt-badge"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10v4h3l6 4V6L7 10H4z"/><path d="M16.5 9a4 4 0 0 1 0 6"/></svg><span>Thông báo</span></div>
   <div class="nt-track" id="ntTrack"><span class="nt-text" id="ntText"></span></div>
   <div class="livepill" id="livePill" hidden aria-label="Thống kê truy cập"><span class="lp" title="Số người đang mở trang"><span class="ldot"></span><small>Đang online</small><b data-live="online">0</b></span><span class="lp" title="Tổng số lượt truy cập"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 12s3.6-6.5 9.5-6.5S21.5 12 21.5 12s-3.6 6.5-9.5 6.5S2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/></svg><small>Tổng truy cập</small><b data-live="total">0</b></span></div>
-  <button class="nt-set" id="ntSet" type="button" title="Cài đặt thông báo" aria-label="Cài đặt thông báo"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+  <button class="nt-set admin-only" id="ntSet" type="button" title="Cài đặt thông báo" aria-label="Cài đặt thông báo"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
 </section>
 
 <main>
@@ -1136,9 +1150,20 @@ tbody tr:hover td{background:#f5f8ff}
 
 <section class="page" id="import" aria-label="Nhập dữ liệu">
   <div class="wrap">
-    <div class="pagehead"><h1>Nhập Excel và đồng bộ Google Sheet</h1><p>Làm lần lượt 3 bước: kết nối, chọn tệp, gửi dữ liệu.</p></div>
+    <div class="pagehead"><h1>Quản trị hệ thống</h1><p>Tài khoản quản trị, thông báo, thống kê truy cập, nhập Excel và đồng bộ Google Sheet. Mục này chỉ hiện khi đăng nhập bằng tài khoản được cấp quyền.</p></div>
     <div class="imp">
       <div class="impmain">
+        <div class="panel pad step" id="admPanel">
+          <div class="ph"><h2>Tài khoản quản trị</h2><button class="btn" id="admReload" type="button">↻ Tải lại</button></div>
+          <table class="admtb"><thead><tr><th>Gmail</th><th>Quyền</th><th></th></tr></thead><tbody id="admBody"><tr><td colspan="3" class="logempty">Đang tải…</td></tr></tbody></table>
+          <div class="admadd"><input class="input" id="admEmail" type="email" placeholder="Thêm Gmail, ví dụ: ten@gmail.com" autocomplete="off" autocapitalize="off" spellcheck="false"><button class="btn solid" id="admAdd" type="button">Thêm quản trị viên</button></div>
+          <p class="hint" style="margin:10px 0 0" id="admMsg">Tài khoản “Quản trị gốc” được đặt trong Apps Script và không xóa được ở đây.</p>
+        </div>
+        <div class="panel pad step" id="statPanel">
+          <div class="ph"><h2>Thống kê truy cập và thông báo</h2></div>
+          <div class="admstat"><div><small>Đang online</small><b data-live="online">0</b></div><div><small>Tổng lượt truy cập</small><b data-live="total">0</b></div></div>
+          <button class="btn" id="admNt" type="button">Cài đặt thông báo chạy chữ</button>
+        </div>
         <div class="panel pad step">
           <div class="ph"><h2><span class="sn">1</span>Chọn tệp Excel</h2><small>.xlsx, .xls, .csv</small></div>
           <div class="drop" id="drop">
@@ -1235,6 +1260,71 @@ tbody tr:hover td{background:#f5f8ff}
   </div>
 </div>
 
+<script>
+/* ===== Đăng nhập quản trị bằng Google (Firebase Authentication) =====
+   Trang vẫn xem công khai. Đăng nhập chỉ để mở mục "Quản trị". Quyền do Google Apps Script quyết định
+   (kiểm tra mã đăng nhập idToken và danh sách Gmail quản trị), không dựa vào trình duyệt. */
+window.AUTH=(function(){
+  const CFG={apiKey:"AIzaSyDXbg1CyQa05NKW6mWHtTnBFD-jXANbdOU",authDomain:"tramtau.firebaseapp.com",projectId:"tramtau",appId:"1:925054670364:web:9d22114079e036e79bf1d9"};
+  const V='https://www.gstatic.com/firebasejs/10.12.2/';
+  const H=document.documentElement,g=id=>document.getElementById(id);
+  let auth=null,user=null,tok='',loading=null,role=null,gen=0;
+  const say=t=>{try{toast(t)}catch(_){alert(t)}};
+  const load=u=>new Promise((ok,no)=>{const s=document.createElement('script');s.src=u;s.onload=ok;s.onerror=no;document.head.appendChild(s)});
+  function paint(){const l=g('loginLbl'),b=g('loginBtn');if(!l||!b)return;
+    l.textContent=role==='admin'?'Đăng xuất':'Đăng nhập';
+    b.title=role==='admin'?'Đã đăng nhập: '+((user&&user.email)||'')+'. Bấm để đăng xuất':'Đăng nhập quản trị bằng Gmail'}
+  function setRole(r){
+    role=r;H.classList.toggle('is-admin',r==='admin');paint();
+    try{r==='admin'?localStorage.setItem('bt_adm','1'):localStorage.removeItem('bt_adm')}catch(_){}
+    if(r==='admin'){if(location.hash==='#import')page('import',true);if(window.admLoad)admLoad()}
+    else{const on=document.querySelector('.page.on');if(on&&on.id==='import')page('overview')}
+  }
+  async function onTok(u){
+    user=u;const my=++gen;
+    if(!u){tok='';setRole(null);return}
+    try{tok=await u.getIdToken()}catch(_){tok=''}
+    const ep=sheetEndpoint();
+    if(!ep){say('Chưa cấu hình địa chỉ Google Sheet nên chưa kiểm tra được quyền.');return}
+    try{
+      const d=await jsonp(ep+'?action=whoami&idToken='+encodeURIComponent(tok),12000);
+      if(my!==gen)return;
+      if(d&&d.ok&&d.role==='admin'){if(role!=='admin'){say('Đã đăng nhập quản trị: '+(d.email||''))}setRole('admin')}
+      else if(d&&d.ok){setRole(null);say('Tài khoản '+(d.email||u.email||'')+' chưa được cấp quyền quản trị.');try{await auth.signOut()}catch(_){}}
+      else{setRole(null);say('Chưa kiểm tra được quyền quản trị. Hãy cập nhật mã Apps Script có phần đăng nhập rồi thử lại.')}
+    }catch(_){if(my===gen){setRole(null);say('Không kết nối được máy chủ để kiểm tra quyền. Hãy thử lại.')}}
+  }
+  function ensure(){return loading||(loading=load(V+'firebase-app-compat.js').then(()=>load(V+'firebase-auth-compat.js')).then(()=>{
+    const app=firebase.apps.find(a=>a.name==='auth')||firebase.initializeApp(CFG,'auth');
+    auth=app.auth();auth.onIdTokenChanged(onTok)}).catch(e=>{loading=null;throw e}))}
+  async function login(){
+    const b=g('loginBtn');b.disabled=true;
+    try{
+      await ensure();
+      const p=new firebase.auth.GoogleAuthProvider();p.setCustomParameters({prompt:'select_account'});
+      try{await auth.signInWithPopup(p)}
+      catch(e){
+        const c=e&&e.code;
+        if(c==='auth/popup-blocked'||c==='auth/operation-not-supported-in-this-environment'){try{await auth.signInWithRedirect(p);return}catch(_){}}
+        if(c==='auth/popup-closed-by-user'||c==='auth/cancelled-popup-request')return;
+        if(c==='auth/unauthorized-domain'){say('Tên miền trang chưa được cho phép trong Firebase (Authorized domains).');return}
+        if(c==='auth/operation-not-allowed'){say('Chưa bật đăng nhập Google trong Firebase.');return}
+        say('Không đăng nhập được'+(c?' ('+c+')':'')+'. Hãy thử lại.')}
+    }catch(_){say('Không tải được dịch vụ đăng nhập. Kiểm tra mạng rồi thử lại.')}
+    finally{b.disabled=false}
+  }
+  async function logout(){try{await auth.signOut()}catch(_){}setRole(null);say('Đã đăng xuất.')}
+  const fresh=()=>user?user.getIdToken().then(t=>{tok=t;return t}).catch(()=>tok):Promise.resolve('');
+  function init(){
+    const b=g('loginBtn');if(b)b.onclick=()=>role==='admin'?logout():login();
+    let hint=false;try{hint=localStorage.getItem('bt_adm')==='1'}catch(_){}
+    if(hint){const go=()=>ensure().catch(()=>{});if('requestIdleCallback' in window)requestIdleCallback(go,{timeout:4000});else setTimeout(go,2000)}
+    setInterval(()=>{if(user&&!document.hidden)fresh()},10*60*1000);
+    document.addEventListener('visibilitychange',()=>{if(!document.hidden)fresh()});
+  }
+  return{init,fresh,t:()=>tok,isAdmin:()=>role==='admin',ask:()=>say('Mục Quản trị cần đăng nhập bằng tài khoản được cấp quyền (nút Đăng nhập).')};
+})();
+</script>
 <script>
 const INITIAL_UNITS=[
 {"STT":"1","Tên đơn vị":"Chi bộ Ban Xây dựng Đảng","Tổng sl đảng viên (1)":"7","Số lượng ĐV đã chuyển sinh hoạt đảng tạm thời (4)":"0","Số lượng được miễn giảm ĐP (5)":"0","Chưa duyệt (6)":"0","Đã duyệt, chưa nộp (7)":"0","Đã duyệt, đã nộp (8)":"7","Số đảng viên chưa có hồ sơ (9)":"0","Tổng tiền theo hồ sơ đã khai báo":"637.000","Tổng tiền đã nộp":"637.000","Tỷ lệ hoàn thành\n đảng phí thực tế":"100,00%"},
@@ -1424,7 +1514,7 @@ function fillSyncMonth(){const el=$('#syncMonth');if(!el)return;const now=new Da
 function pushMonthly(ep,k){
   const tk=($('#syncToken')&&$('#syncToken').value.trim())||'';
   if(!tk)return;// chỉ máy đã nhập mã đồng bộ mới ghi lên Google Sheet (tránh ghi lỗi vào nhật ký mỗi lần có người mở trang)
-  const post=b=>{try{fetch(ep,{method:'POST',mode:'no-cors',redirect:'follow',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(b)})}catch(_){}};
+  const post=b=>{try{fetch(ep,{method:'POST',mode:'no-cors',redirect:'follow',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(Object.assign({idToken:AUTH.t()},b))})}catch(_){}};
   if(k&&msnap[k]){const rows=msnap[k].rows.map(r=>MCOLS.map((h,i)=>{const x=r[h];if(x==null)return '';return i>=2&&i<=12?pnum(x):(i===13?v(r,'progress'):x)}));
     post({tab:monthTab(k),headers:MGROUP,rows:[MCOLS,...rows],token:tk,source:'website-month-sheet'})}
   const stamp='Lúc '+new Date().toLocaleString('vi-VN',{hour12:false});
@@ -1631,6 +1721,7 @@ function fillTables(){
 function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),3000)}
 
 function page(id,silent){
+  if(id==='import'&&!document.documentElement.classList.contains('is-admin')){if(!silent)AUTH.ask();id='overview'}
   $$('.page').forEach(e=>e.classList.toggle('on',e.id===id));
   $$('.tab').forEach(e=>{if(e.dataset.page===id)e.setAttribute('aria-current','page');else e.removeAttribute('aria-current')});
   if(!silent){history.replaceState(null,'','#'+id);window.scrollTo(0,0)}
@@ -1845,7 +1936,8 @@ async function ntLoad(){const ep=sheetEndpoint();if(!NT_CLOUD||!ep)return;
     const r=d&&d.ok&&Array.isArray(d.rows)&&d.rows[0];
     if(r&&String(r[0]||'').trim()&&!(Array.isArray(d.headers)&&d.headers.length>5)){ntCfg={msg:String(r[0]).trim(),color:/^#[0-9a-f]{6}$/i.test(r[1])?r[1]:NT_DEF.color,size:['12','13.5','15'].includes(String(r[2]))?String(r[2]):NT_DEF.size,speed:['60','90','140'].includes(String(r[3]))?String(r[3]):NT_DEF.speed};ntStore();ntApply()}}catch(_){}}
 function ntPrev(){const p=$('#ntPrev');p.textContent=$('#ntInput').value.trim()||NT_DEF.msg;p.style.color=$('#ntColor').value;p.style.fontSize=$('#ntSize').value+'px'}
-function ntOpen(){$('#ntInput').value=ntCfg.msg;$('#ntColor').value=ntCfg.color;$('#ntSize').value=ntCfg.size;$('#ntSpeed').value=ntCfg.speed;
+function ntOpen(){if(!AUTH.isAdmin()){AUTH.ask();return}
+  $('#ntInput').value=ntCfg.msg;$('#ntColor').value=ntCfg.color;$('#ntSize').value=ntCfg.size;$('#ntSpeed').value=ntCfg.speed;
   try{$('#ntToken').value=localStorage.getItem('tmt_token')||''}catch(_){}$('#ntMsg').textContent='';$('#ntMsg').className='fieldmsg';ntPrev();$('#ntModal').classList.add('on');$('#ntInput').focus()}
 function ntClose(){$('#ntModal').classList.remove('on')}
 $('#ntSet').onclick=ntOpen;$('#ntCancel').onclick=ntClose;
@@ -1861,7 +1953,7 @@ $('#ntSave').onclick=async()=>{const msg=$('#ntInput').value.trim(),m=$('#ntMsg'
   if(!(NT_CLOUD&&ep)){ntCfg=cfg;ntStore();ntApply();toast('Đã lưu thông báo trên máy này.');ntClose();return}
   btn.disabled=true;const old=btn.textContent;btn.textContent='Đang lưu...';m.textContent='Đang gửi lên Google Sheet...';m.className='fieldmsg';
   let base='';try{const d0=await jsonp(ep+'?action=read&tab='+encodeURIComponent(NT_TAB),9000);const r0=d0&&d0.ok&&Array.isArray(d0.rows)&&d0.rows[0];base=r0?String(r0[4]||''):''}catch(_){}
-  try{fetch(ep,{method:'POST',mode:'no-cors',redirect:'follow',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({tab:NT_TAB,headers:['Nội dung','Màu chữ','Cỡ chữ','Tốc độ','Cập nhật'],rows:[[cfg.msg,cfg.color,cfg.size,cfg.speed,new Date().toLocaleString('vi-VN',{hour12:false})]],token:tk,source:'website-notice'})})}catch(_){}
+  try{fetch(ep,{method:'POST',mode:'no-cors',redirect:'follow',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({tab:NT_TAB,headers:['Nội dung','Màu chữ','Cỡ chữ','Tốc độ','Cập nhật'],rows:[[cfg.msg,cfg.color,cfg.size,cfg.speed,new Date().toLocaleString('vi-VN',{hour12:false})]],token:tk,idToken:AUTH.t(),source:'website-notice'})})}catch(_){}
   /* máy chủ là nơi kiểm tra mã; đọc lại tab để biết đã lưu thật chưa */
   let ok=false;
   for(let i=0;i<4&&!ok;i++){
@@ -2088,7 +2180,7 @@ async function syncTable(silent){
   const stamp='Lúc '+new Date().toLocaleString('vi-VN',{hour12:false});
   try{
     const m=tableMatrix(stamp);
-    await fetch(ep,{method:'POST',mode:'no-cors',redirect:'follow',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({tab:TABLE_TAB,headers:m.headers,rows:m.rows,token:($('#syncToken')&&$('#syncToken').value.trim())||'',source:'website-tram-tau-bang',sentAt:new Date().toISOString()})});
+    await fetch(ep,{method:'POST',mode:'no-cors',redirect:'follow',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({tab:TABLE_TAB,headers:m.headers,rows:m.rows,token:($('#syncToken')&&$('#syncToken').value.trim())||'',idToken:AUTH.t(),source:'website-tram-tau-bang',sentAt:new Date().toISOString()})});
     for(let i=0;i<6;i++){await new Promise(r=>setTimeout(r,2500));
       try{const d=await jsonp(ep+'?action=read&tab='+encodeURIComponent(TABLE_TAB),8000);
         if(d&&d.ok&&d.rows&&d.rows.length&&String(d.rows[0][d.rows[0].length-1])===stamp){loadLog();if(!silent)toast(`Đã đồng bộ bảng ${m.rows.length} đơn vị lên Google Sheet (tab “${TABLE_TAB}”).`);return true}}catch(_){}}
@@ -2115,6 +2207,41 @@ async function loadLog(){
 $('#logReload').onclick=loadLog;
 document.querySelectorAll('[data-page="import"]').forEach(b=>b.addEventListener('click',()=>setTimeout(loadLog,200)));
 if(location.hash==='#import')loadLog();
+
+/* ===== Tài khoản quản trị (lưu trong Apps Script, chỉ admin đọc/ghi được) ===== */
+async function admLoad(){
+  const box=$('#admBody');if(!box||!AUTH.isAdmin())return null;const ep=sheetEndpoint();
+  const msg=t=>{box.innerHTML=`<tr><td colspan="3" class="logempty">${esc(t)}</td></tr>`};
+  if(!ep){msg('Chưa cấu hình địa chỉ Google Sheet.');return null}
+  try{
+    const idt=await AUTH.fresh();
+    const d=await jsonp(ep+'?action=admins&idToken='+encodeURIComponent(idt),10000);
+    if(!d||!d.ok){msg('Chưa đọc được danh sách. Hãy cập nhật mã Apps Script có phần đăng nhập.');return null}
+    const rows=[...(d.boot||[]).map(e=>({e,boot:1})),...(d.admins||[]).map(e=>({e}))];
+    box.innerHTML=rows.map(r=>`<tr><td>${esc(r.e)}</td><td>${r.boot?'Quản trị gốc':'Quản trị viên'}</td><td class="n">${r.boot?'':`<button class="btn" type="button" data-admdel="${esc(r.e)}">Xóa</button>`}</td></tr>`).join('');
+    return d;
+  }catch(_){msg('Không tải được danh sách (lỗi mạng).');return null}
+}
+async function admPost(action,email){
+  const ep=sheetEndpoint();if(!ep)return;const idt=await AUTH.fresh();
+  await fetch(ep,{method:'POST',mode:'no-cors',redirect:'follow',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action,email,idToken:idt,source:'website-admin'})});
+}
+async function admApply(action,email){
+  const m=$('#admMsg');m.textContent='Đang cập nhật…';
+  try{await admPost(action,email)}catch(_){m.textContent='Không gửi được yêu cầu. Kiểm tra mạng rồi thử lại.';return}
+  for(let i=0;i<6;i++){await new Promise(r=>setTimeout(r,1200));const d=await admLoad();
+    if(d){const has=(d.admins||[]).includes(email);if((action==='admin_add')===has){m.textContent=action==='admin_add'?'Đã thêm '+email+'.':'Đã xóa '+email+'.';return}}}
+  m.textContent='Chưa thấy thay đổi. Hãy bấm “Tải lại”; nếu vẫn chưa được, kiểm tra Apps Script đã triển khai bản mới.';
+}
+$('#admReload').onclick=admLoad;
+$('#admAdd').onclick=()=>{const inp=$('#admEmail'),e=inp.value.trim().toLowerCase();
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)){$('#admMsg').textContent='Gmail chưa đúng định dạng.';return}
+  inp.value='';admApply('admin_add',e)};
+$('#admEmail').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('#admAdd').click()}});
+$('#admBody').addEventListener('click',e=>{const b=e.target.closest('[data-admdel]');if(!b)return;const em=b.dataset.admdel;
+  if(confirm('Xóa quyền quản trị của '+em+'?'))admApply('admin_remove',em)});
+$('#admNt').onclick=ntOpen;
+AUTH.init();
 
 /* ===== Đang online & Tổng truy cập (Firebase Realtime Database) ===== */
 const FB_CFG={databaseURL:'https://tramtau-default-rtdb.firebaseio.com'};
