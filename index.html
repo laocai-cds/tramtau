@@ -1005,6 +1005,49 @@ html:not(.is-admin) .admin-only{display:none!important}
 .admstat small{display:block;color:var(--muted);font-size:12px}
 .admstat b{font:700 1.4rem var(--serif);color:var(--son-d)}
 </style>
+<script>(function(){
+var THEMES=[
+ {id:'mac-dinh',name:'Mặc định của site',h:null},
+ {id:'do-co',name:'Đỏ cờ Đảng',h:355,s:1,sw:['#b3141c','#8c0f16','#d4262e']},
+ {id:'xanh-bien',name:'Xanh biển',h:212,s:1,sw:['#0f5fa8','#0b4a85','#2f86d1']},
+ {id:'nau-cafe',name:'Nâu cà phê',h:24,s:.55,sw:['#7b4a2e','#5f3820','#a2693f']},
+ {id:'xanh-la',name:'Xanh lá',h:150,s:.8,sw:['#1f7a4c','#165d3a','#35a06b']},
+ {id:'tim',name:'Tím',h:270,s:.75,sw:['#6b3fa0','#54317f','#8d5cc8']},
+ {id:'than',name:'Xám than',h:215,s:.14,sw:['#374151','#273039','#566274']}
+];
+var K='theme_'+(location.pathname.split('/')[1]||'site');
+function toHsl(r,g,b){r/=255;g/=255;b/=255;var mx=Math.max(r,g,b),mn=Math.min(r,g,b),l=(mx+mn)/2,h=0,s=0,d=mx-mn;if(d){s=l>.5?d/(2-mx-mn):d/(mx+mn);h=mx==r?((g-b)/d+(g<b?6:0)):mx==g?(b-r)/d+2:(r-g)/d+4;h*=60}return[h,s,l]}
+function toRgb(h,s,l){h/=360;function f(p,q,t){if(t<0)t+=1;if(t>1)t-=1;return t<1/6?p+(q-p)*6*t:t<.5?q:t<2/3?p+(q-p)*(2/3-t)*6:p}var q=l<.5?l*(1+s):l+s-l*s,p=2*l-q;return[f(p,q,h+1/3),f(p,q,h),f(p,q,h-1/3)].map(function(x){return Math.round(x*255)})}
+function hx(n){var x=n.toString(16);return x.length<2?'0'+x:x}
+var H0=null,KEEP={};
+function styles(){return Array.prototype.filter.call(document.querySelectorAll('style'),function(e){return !e.hasAttribute('data-notheme')&&e.id!=='themeCss'})}
+function prep(){styles().forEach(function(e){if(e.__o===undefined)e.__o=e.textContent});
+  if(H0!==null)return;
+  styles().some(function(e){var m=e.__o.match(/--(?:son|lac)\s*:\s*#([0-9a-fA-F]{6})/);if(m){var n=parseInt(m[1],16);H0=toHsl(n>>16,(n>>8)&255,n&255)[0];return true}});
+  if(H0===null)H0=355;
+  styles().forEach(function(e){var re=/--(?:do|do-bg|red|bad|danger|err|error)[\w-]*\s*:\s*#([0-9a-fA-F]{6})/g,m;while((m=re.exec(e.__o)))KEEP[m[1].toLowerCase()]=1})}
+function tf(r,g,b,T){var c=toHsl(r,g,b),dh=((c[0]-H0+540)%360)-180;if(Math.abs(dh)>20||c[1]<.35||c[2]>.99||c[2]<.03)return null;return toRgb((T.h+dh+360)%360,Math.min(1,c[1]*T.s),c[2])}
+function conv(txt,T){
+  txt=txt.replace(/#([0-9a-fA-F]{6})([0-9a-fA-F]{2})?(?![0-9a-zA-Z_-])/g,function(m,c6,a){if(KEEP[c6.toLowerCase()])return m;var n=parseInt(c6,16),o=tf(n>>16,(n>>8)&255,n&255,T);return o?'#'+hx(o[0])+hx(o[1])+hx(o[2])+(a||''):m});
+  return txt.replace(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/g,function(m,r,g,b){var o=tf(+r,+g,+b,T);return o?m.slice(0,m.indexOf('(')+1)+o[0]+','+o[1]+','+o[2]:m})}
+window.THEMES=THEMES;window.THEME_KEY=K;window.THEME_CUR=null;
+window.applyTheme=function(id){
+  var T=THEMES.filter(function(x){return x.id===id})[0];if(!T)return;
+  prep();window.THEME_CUR=id;
+  styles().forEach(function(e){var o=e.__o;if(T.h===null){if(e.textContent!==o)e.textContent=o}else{e.textContent=conv(o,T)}})};
+window.themeBase=function(){prep();var m,o=(styles().map(function(e){return e.__o}).join('')),r=[];m=o.match(/--(?:son|lac)\s*:\s*(#[0-9a-fA-F]{6})/);r.push(m?m[1]:'#b3141c');m=o.match(/--(?:son-d|lac-d)\s*:\s*(#[0-9a-fA-F]{6})/);r.push(m?m[1]:'#8c0f16');m=o.match(/--(?:vang|gold)\s*:\s*(#[0-9a-fA-F]{6})/);r.push(m?m[1]:'#c9a227');return r};
+var sv=null;try{sv=localStorage.getItem(K)}catch(e){}
+function go(){if(sv&&sv!=='mac-dinh')window.applyTheme(sv)}
+go();document.addEventListener('DOMContentLoaded',go);
+})()</script>
+<style data-notheme>
+.thmgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin:4px 0 12px}
+.thmopt{display:flex;flex-direction:column;gap:8px;align-items:flex-start;padding:10px 12px;border:1.5px solid var(--rule);border-radius:10px;background:#fff;cursor:pointer;text-align:left;font-weight:600;font-size:13px}
+.thmopt:hover{border-color:var(--son)}
+.thmopt[aria-pressed=true]{border-color:var(--son);box-shadow:0 0 0 3px #00000014}
+.thmopt i{display:flex;height:22px;width:100%;border-radius:6px;overflow:hidden}
+.thmopt i b{flex:1}
+</style>
 <body>
 <div class="zalobar" id="zalobar"><span>Đang mở trong Zalo. Nếu không tải được file báo cáo, bấm dấu ⋯ rồi chọn “Mở bằng trình duyệt”.</span><button type="button" id="zalook">Đã hiểu</button></div>
 <header class="bar">
@@ -1158,6 +1201,13 @@ html:not(.is-admin) .admin-only{display:none!important}
           <table class="admtb"><thead><tr><th>Gmail</th><th>Quyền</th><th></th></tr></thead><tbody id="admBody"><tr><td colspan="3" class="logempty">Đang tải…</td></tr></tbody></table>
           <div class="admadd"><input class="input" id="admEmail" type="email" placeholder="Thêm Gmail, ví dụ: ten@gmail.com" autocomplete="off" autocapitalize="off" spellcheck="false"><button class="btn solid" id="admAdd" type="button">Thêm quản trị viên</button></div>
           <p class="hint" style="margin:10px 0 0" id="admMsg">Tài khoản “Quản trị gốc” được đặt trong Apps Script và không xóa được ở đây.</p>
+        </div>
+        <div class="panel pad step" id="thmPanel">
+          <div class="ph"><h2>Giao diện của site</h2></div>
+          <p class="hint" style="margin:0 0 10px">Chọn một mẫu để xem trước ngay, rồi bấm “Lưu giao diện” để áp dụng cho mọi máy (lưu trong tab “Giao diện” của Google Sheet, cần Mã đồng bộ ở mục Kết nối Google Sheet).</p>
+          <div class="thmgrid" id="thmGrid"></div>
+          <div class="macts" style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn solid" id="thmSave" type="button">Lưu giao diện</button><button class="btn" id="thmUndo" type="button">Hoàn tác xem trước</button></div>
+          <p class="hint" style="margin:10px 0 0" id="thmMsg"></p>
         </div>
         <div class="panel pad step" id="statPanel">
           <div class="ph"><h2>Thống kê truy cập và thông báo</h2></div>
@@ -2241,6 +2291,33 @@ $('#admEmail').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefau
 $('#admBody').addEventListener('click',e=>{const b=e.target.closest('[data-admdel]');if(!b)return;const em=b.dataset.admdel;
   if(confirm('Xóa quyền quản trị của '+em+'?'))admApply('admin_remove',em)});
 $('#admNt').onclick=ntOpen;
+
+/* ===== Chọn giao diện (admin) — lưu vào tab "Giao diện" ===== */
+const TH_TAB='Giao diện',TH_HEAD='Mẫu giao diện';
+let thSaved=(function(){try{return localStorage.getItem(THEME_KEY)||'mac-dinh'}catch(_){return 'mac-dinh'}})(),thPick=thSaved;
+function thMark(){document.querySelectorAll('.thmopt').forEach(b=>b.setAttribute('aria-pressed',b.dataset.id===thPick?'true':'false'))}
+function thBuild(){const g=document.getElementById('thmGrid');if(!g)return;
+  const base=themeBase();g.innerHTML=THEMES.map(t=>{const sw=t.sw||base;return '<button type="button" class="thmopt" data-id="'+t.id+'" aria-pressed="false"><i>'+sw.map(c=>'<b style="background:'+c+'"></b>').join('')+'</i>'+t.name+'</button>'}).join('');
+  g.querySelectorAll('.thmopt').forEach(b=>b.onclick=()=>{thPick=b.dataset.id;applyTheme(thPick);thMark();const m=document.getElementById('thmMsg');m.textContent='Đang xem trước. Bấm “Lưu giao diện” để áp dụng cho mọi máy.';m.className='hint'});
+  thMark()}
+async function thLoad(){const ep=sheetEndpoint();if(!ep)return;
+  try{const d=await jsonp(ep+'?action=read&tab='+encodeURIComponent(TH_TAB),9000);
+    const r=d&&d.ok&&Array.isArray(d.rows)&&d.rows[0];
+    if(r&&Array.isArray(d.headers)&&d.headers[0]===TH_HEAD&&THEMES.some(t=>t.id===String(r[0]))){thSaved=thPick=String(r[0]);try{localStorage.setItem(THEME_KEY,thSaved)}catch(_){}applyTheme(thSaved);thMark()}}catch(_){}}
+(function(){const sv=document.getElementById('thmSave'),un=document.getElementById('thmUndo'),m=document.getElementById('thmMsg');if(!sv)return;
+  un.onclick=()=>{thPick=thSaved;applyTheme(thSaved);thMark();m.textContent='';};
+  sv.onclick=async()=>{const bad=t=>{m.textContent=t;m.className='hint';m.style.color='#b3261e'},ep=sheetEndpoint(),tk=(document.getElementById('syncToken')&&document.getElementById('syncToken').value.trim())||'';
+    m.style.color='';if(!AUTH.isAdmin())return bad('Cần đăng nhập quản trị.');if(!ep)return bad('Chưa cấu hình URL Web App.');if(!tk)return bad('Nhập Mã đồng bộ ở mục Kết nối Google Sheet rồi lưu lại.');
+    sv.disabled=true;m.className='hint';m.textContent='Đang lưu lên Google Sheet...';
+    let base='';try{const d0=await jsonp(ep+'?action=read&tab='+encodeURIComponent(TH_TAB),9000);const r0=d0&&d0.ok&&Array.isArray(d0.rows)&&d0.rows[0];base=r0?String(r0[1]||''):''}catch(_){}
+    const stamp=new Date().toLocaleString('vi-VN',{hour12:false});
+    try{fetch(ep,{method:'POST',mode:'no-cors',redirect:'follow',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({tab:TH_TAB,headers:[TH_HEAD,'Cập nhật'],rows:[[thPick,stamp]],token:tk,idToken:AUTH.t(),source:'website-theme'})})}catch(_){}
+    let ok=false;for(let i=0;i<4&&!ok;i++){await new Promise(r=>setTimeout(r,i?1800:2200));
+      try{const d=await jsonp(ep+'?action=read&tab='+encodeURIComponent(TH_TAB),9000);const r=d&&d.ok&&Array.isArray(d.rows)&&d.rows[0];ok=!!(r&&Array.isArray(d.headers)&&d.headers[0]===TH_HEAD&&String(r[0])===thPick&&String(r[1]||'')!==base)}catch(_){}}
+    sv.disabled=false;
+    if(ok){thSaved=thPick;try{localStorage.setItem(THEME_KEY,thSaved)}catch(_){}m.textContent='Đã lưu giao diện. Các máy khác sẽ đổi khi tải lại trang.'}
+    else bad('Chưa lưu được. Kiểm tra Mã đồng bộ, đăng nhập quản trị và Apps Script đã cập nhật (tab “Giao diện”), rồi thử lại.')}})();
+thBuild();setTimeout(thLoad,1200);
 AUTH.init();
 
 /* ===== Đang online & Tổng truy cập (Firebase Realtime Database) ===== */
