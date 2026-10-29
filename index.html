@@ -2760,5 +2760,50 @@ document.addEventListener('keydown',function(e){const o=ov();if(e.key==='Escape'
 .bar .barright .btn{width:auto!important;min-width:0;height:36px;padding:0 14px!important;font-size:12.5px!important;white-space:nowrap;flex:none}
 }
 </style>
+<style id="admTabsCss">
+#import .imp{display:block!important}
+#import .imp>.panel{margin:0 0 16px}
+#import .impmain{display:none}
+#import .admhide{display:none!important}
+.admtabs{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 18px;padding:6px;border:1px solid var(--rule,#e3e7ee);border-radius:12px;background:var(--paper,#fff);position:sticky;top:8px;z-index:5}
+.admtabs button{flex:1 1 auto;display:inline-flex;align-items:center;justify-content:center;gap:7px;border:0;background:transparent;padding:10px 14px;border-radius:9px;font:600 13.5px/1.2 inherit;font-family:inherit;color:var(--muted,#5b6675);cursor:pointer;white-space:nowrap}
+.admtabs button:hover{background:var(--giay,#f3f5f8);color:var(--ink,#111827)}
+.admtabs button[aria-selected=true]{background:var(--son,var(--lac,#b3141c));color:#fff;box-shadow:0 3px 10px -4px #00000055}
+.admtabs .ct{font-size:11px;opacity:.85}
+.admtabs small{display:block;font-weight:500;font-size:11px;opacity:.8}
+@media(max-width:700px){.admtabs button{flex:1 1 45%;padding:9px 8px;font-size:12.5px}.admtabs small{display:none}}
+</style>
+<script id="admTabsJs">
+(function(){
+  const imp=document.querySelector('#import .imp');if(!imp)return;
+  const P=sel=>{const e=document.querySelector(sel);return e?e.closest('.panel'):null};
+  const GROUPS=[
+    {id:'tq',t:'📊 Tổng quan',d:'Truy cập · thông báo',p:['#statPanel']},
+    {id:'gd',t:'🎨 Giao diện',d:'Màu sắc của site',p:['#thmPanel']},
+    {id:'dl',t:'📥 Dữ liệu',d:'Kết nối · nhập Excel · đồng bộ',p:['#endpoint','#drop','#syncBtn','#apiPanel']},
+    {id:'pq',t:'🔐 Phân quyền',d:'Tài khoản quản trị',p:['#admPanel']},
+    {id:'nk',t:'🕘 Nhật ký',d:'Lịch sử đồng bộ',p:['#logPanel']}
+  ].map(g=>({...g,els:g.p.map(P).filter(Boolean)})).filter(g=>g.els.length);
+  if(!GROUPS.length)return;
+  GROUPS.forEach(g=>g.els.forEach(el=>{el.dataset.grp=g.id;imp.appendChild(el)}));
+  /* đánh số lại các bước ở tab Dữ liệu: 1 Kết nối → 2 Chọn tệp → 3 Gửi */
+  const dl=GROUPS.find(g=>g.id==='dl');
+  if(dl){dl.els.forEach((el,i)=>{const sn=el.querySelector('.sn');if(sn&&i<3)sn.textContent=String(i+1)})}
+  const nav=document.createElement('div');nav.className='admtabs';nav.setAttribute('role','tablist');nav.setAttribute('aria-label','Nhóm chức năng quản trị');
+  nav.innerHTML=GROUPS.map(g=>'<button type="button" role="tab" data-g="'+g.id+'"><span>'+g.t+'<small>'+g.d+'</small></span></button>').join('');
+  imp.parentNode.insertBefore(nav,imp);
+  function show(id,save){
+    if(!GROUPS.some(g=>g.id===id))id=GROUPS[0].id;
+    nav.querySelectorAll('button').forEach(b=>b.setAttribute('aria-selected',b.dataset.g===id?'true':'false'));
+    imp.querySelectorAll('[data-grp]').forEach(el=>el.classList.toggle('admhide',el.dataset.grp!==id));
+    if(save){try{localStorage.setItem('adm_tab',id)}catch(_){}}
+  }
+  nav.addEventListener('click',e=>{const b=e.target.closest('button[data-g]');if(b)show(b.dataset.g,true)});
+  let st='tq';try{st=localStorage.getItem('adm_tab')||'tq'}catch(_){}
+  show(st,false);
+  /* nhật ký chỉ tải khi mở tab */
+  nav.addEventListener('click',e=>{const b=e.target.closest('button[data-g="nk"]');const r=document.getElementById('logReload');if(b&&r)setTimeout(()=>r.click(),50)});
+})();
+</script>
 </body>
 </html>
