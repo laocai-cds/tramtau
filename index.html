@@ -2240,7 +2240,8 @@ function apiBookmarklet(C){
       const tE=performance.now();
       say('Đang xác nhận kết quả trên Google Sheet…',false,true);
       let ok=null;
-      for(let k=0;k<12&&!ok;k++){await new Promise(r2=>setTimeout(r2,1000));const x=await jp(rd,9000);if(x&&x.ok&&(x.lastSync||'')!==before)ok=x}
+      const sigRows=a=>{let n=0,s=0,p=0;(a||[]).forEach(r=>{if(r&&/^\d+$/.test(String(r[0]==null?'':r[0]).trim())){n++;s+=Number(String(r[2]).replace(/[^\d]/g,''))||0;p+=Number(String(r[12]).replace(/[^\d]/g,''))||0}});return n+'|'+s+'|'+p},want=sigRows(rows);
+      for(let k=0;k<12&&!ok;k++){await new Promise(r2=>setTimeout(r2,1000));const x=await jp(rd,9000);if(x&&x.ok&&((x.lastSync||'')!==before||sigRows(x.rows)===want))ok=x}
       const tF=performance.now();
       if(ok){try{localStorage.setItem(C.k,pw)}catch(e){}}else{try{localStorage.removeItem(C.k)}catch(e){}}
       const apiT=tC-tA,nc=navigator.connection||{};
