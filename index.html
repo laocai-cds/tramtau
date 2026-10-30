@@ -2473,6 +2473,10 @@ const FB_CFG={databaseURL:'https://tramtau-default-rtdb.firebaseio.com'};
   /* Dữ liệu tin do GitHub Actions gom mỗi 15 phút (news/pool.json). Trang con có thể đặt
      window.RSS_POOL='https://laocai-cds.github.io/tthc/news/pool.json' để dùng chung; window.RSS_UNIT để ghi đè tên đơn vị. */
   const POOL_URL=window.RSS_POOL||'news/pool.json';
+  /* Mỗi xã/phường có file tin riêng (nhỏ, tải nhanh) ở news/units/<tên>.json; thiếu thì dùng file chung. */
+  const UNIT_BASE=POOL_URL.replace(/pool\.json(\?.*)?$/,'units/');
+  const unitSlug=u=>String(u).normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[đĐ]/g,'d').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+  const unitUrl=u=>UNIT_BASE+unitSlug(u)+'.json';
   /* So khớp có dấu để "Võ Lao" không trùng "vỏ lao động"; chỉ khi văn bản hoàn toàn không dấu mới so không dấu. */
   const keep=t=>' '+String(t||'').normalize('NFC').toLowerCase().replace(/[^\p{L}\p{N}]+/gu,' ').trim()+' ';
   const plain=t=>keep(String(t||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[đĐ]/g,'d'));
@@ -2493,9 +2497,11 @@ const FB_CFG={databaseURL:'https://tramtau-default-rtdb.firebaseio.com'};
     if(/Lào Cai|Yên Bái/i.test(t))return false;
     return /(^|[^\p{L}])(Phú Thọ|Vĩnh Phúc|Hòa Bình|TP\.? ?HCM|TP\.? Hồ Chí Minh|Thành phố Hồ Chí Minh|Hà Nội|Phú Quốc|Đà Nẵng|Hải Phòng|Thanh Hóa|Nghệ An|Quảng Ninh|Sơn La|Điện Biên|Lai Châu|Hà Giang|Tuyên Quang|Thái Nguyên|Bắc Ninh|Cần Thơ|Lâm Đồng|Đắk Lắk|Gia Lai|An Giang|Đồng Nai|Hưng Yên|Ninh Bình|Cao Bằng|Lạng Sơn|Hà Tĩnh|Quảng Trị|Quảng Ngãi|Cà Mau|Tây Ninh)(?![\p{L}])/u.test(t)||/(^|[^\p{L}])(tỉnh|thành phố|TP\.?)\s+(Khánh Hòa|Huế)/iu.test(t)||/(Khánh Hòa)/.test(t)&&!/(xã|phường)\s+Khánh Hòa/i.test(t);
   }
-  async function getPool(){
-    if(pool&&Date.now()-poolAt<10*60*1000)return pool;
-    const r=await fetch(POOL_URL,{cache:'no-cache'});
+  const poolCache={};
+  async function getPool(url){
+    url=url||POOL_URL;
+    const pc=poolCache[url];if(pc&&Date.now()-pc.at<10*60*1000)return pc.d;
+    const r=await fetch(url,{cache:'no-cache'});
     if(r.status===404)throw Error('chưa có dữ liệu');
     if(!r.ok)throw Error('HTTP '+r.status);
     const d=await r.json();
@@ -2512,7 +2518,7 @@ const FB_CFG={databaseURL:'https://tramtau-default-rtdb.firebaseio.com'};
       const ku=String(i.url).replace(/[#?].*$/,'').replace(/\/+$/,'').toLowerCase(),kt=t.toLowerCase().replace(/[^\p{L}\p{N}]+/gu,' ').trim();
       if(seenU.has(ku)||seenT.has(kt))return true;seenU.add(ku);seenT.add(kt);return false};
     d.items=d.items.filter(i=>!foreign(i)&&!bad(i));}
-    pool=d;poolAt=Date.now();return d;
+    poolCache[url]={d,at:Date.now()};pool=d;poolAt=Date.now();return d;
   }
   /* 99 xã, phường của tỉnh Lào Cai (89 xã, 10 phường) */
   const UNITS=["xã A Mú Sung","xã Bát Xát","xã Bản Hồ","xã Bản Liền","xã Bản Lầu","xã Bản Xèo","xã Bảo Hà","xã Bảo Nhai","xã Bảo Thắng","xã Bảo Yên","xã Bảo Ái","xã Bắc Hà","phường Cam Đường","xã Cao Sơn","xã Chiềng Ken","xã Châu Quế","xã Chấn Thịnh","xã Chế Tạo","xã Cát Thịnh","xã Cảm Nhân","phường Cầu Thia","xã Cốc Lầu","xã Cốc San","xã Dương Quỳ","xã Dền Sáng","xã Gia Hội","xã Gia Phú","xã Hưng Khánh","xã Hạnh Phúc","xã Hợp Thành","xã Khao Mang","xã Khánh Hòa","xã Khánh Yên","xã Lao Chải","xã Liên Sơn","phường Lào Cai","xã Lâm Giang","xã Lâm Thượng","xã Lùng Phình","xã Lương Thịnh","xã Lục Yên","xã Minh Lương","xã Mù Cang Chải","xã Mường Bo","xã Mường Hum","xã Mường Khương","xã Mường Lai","xã Mậu A","xã Mỏ Vàng","phường Nam Cường","phường Nghĩa Lộ","xã Nghĩa Tâm","xã Nghĩa Đô","xã Ngũ Chỉ Sơn","xã Nậm Chày","xã Nậm Có","xã Nậm Xé","xã Pha Long","xã Phong Dụ Hạ","xã Phong Dụ Thượng","xã Phong Hải","xã Phình Hồ","xã Phúc Khánh","xã Phúc Lợi","xã Púng Luông","xã Quy Mông","phường Sa Pa","xã Si Ma Cai","xã Sín Chéng","xã Sơn Lương","xã Thác Bà","xã Thượng Bằng La","xã Thượng Hà","phường Trung Tâm","xã Trạm Tấu","xã Trấn Yên","xã Trịnh Tường","xã Tà Xi Láng","xã Tân Hợp","xã Tân Lĩnh","xã Tú Lệ","xã Tả Củ Tỷ","xã Tả Phìn","xã Tả Van","xã Tằng Loỏng","xã Việt Hồng","xã Võ Lao","xã Văn Bàn","xã Văn Chấn","phường Văn Phú","xã Xuân Hòa","xã Xuân Quang","xã Xuân Ái","xã Y Tý","phường Yên Bái","xã Yên Bình","xã Yên Thành","phường Âu Lâu","xã Đông Cuông"];
@@ -2541,6 +2547,7 @@ const FB_CFG={databaseURL:'https://tramtau-default-rtdb.firebaseio.com'};
   /* Cửa sổ thống kê đầy đủ: bấm vào dòng thống kê ngắn dưới tiêu đề để mở. */
   function openStats(){
     if(!lastCtx)return;
+    if(lastCtx.d.provTotal!=null){getPool().then(f=>{lastCtx.d=f;openStats()}).catch(()=>{});return} /* thống kê toàn tỉnh cần file chung: chỉ tải khi mở */
     const {d,matched,isToday,fm,cur:cu}=lastCtx;
     const all=d.items,pct=(a,b)=>b?Math.round(a*100/b)+'%':'0%';
     const withImg=all.filter(i=>i.img).length,tdAll=all.filter(isToday).length;
@@ -2573,7 +2580,7 @@ const FB_CFG={databaseURL:'https://tramtau-default-rtdb.firebaseio.com'};
     }
     m.innerHTML='<div class="um-card"><div class="um-head"><h3 id="um-title">Thống kê tin tức</h3><button class="um-x" type="button" aria-label="Đóng">×</button></div><div class="um-body">'
       +'<section><h4>Toàn tỉnh Lào Cai</h4><div class="um-kpis">'+kp(fm(all.length),'tổng số tin')+kp(fm(bySrc.length),'nguồn báo')+kp(fm(tdAll),'tin mới hôm nay')+kp(pct(withImg,all.length),'tin có ảnh nhỏ')+kp(withNews+'/'+UNITS.length,'xã, phường có tin')+'</div></section>'
-      +'<section><h4>Đang xem: '+esc(cap(cu))+'</h4><div class="um-kpis">'+kp(fm(matched.length),'tin về đơn vị')+kp(fm(mToday),'mới hôm nay')+kp(pct(mImg,matched.length),'có ảnh nhỏ')+kp(fm(mSrc.length),'nguồn báo')+'</div></section>'
+      +'<section><h4>Đang xem: '+esc(cap(cu))+'</h4><div class="um-kpis">'+kp(fm(lastCtx.mt!=null?lastCtx.mt:matched.length),'tin về đơn vị')+kp(fm(mToday),'mới hôm nay')+kp(pct(mImg,matched.length),'có ảnh nhỏ')+kp(fm(mSrc.length),'nguồn báo')+'</div></section>'
       +todayHtml
       +'<div class="um-cols"><section><h4>Theo nguồn báo</h4>'+list(bySrc,bySrc[0]?bySrc[0][1]:1)+'</section><section><h4>Xã, phường nhiều tin nhất</h4>'+list(byUnit.map(x=>[cap(x[0]),x[1]]),byUnit[0]?byUnit[0][1]:1)+'</section></div>'
       +'<div class="um-cols"><section id="um-views" style="grid-column:1/-1"><h4>Lượt xem mục tin theo đơn vị</h4><p class="um-foot">Đang tải…</p></section></div>'
@@ -2667,11 +2674,11 @@ const FB_CFG={databaseURL:'https://tramtau-default-rtdb.firebaseio.com'};
     h2.textContent='Tin về '+cur;
     box.setAttribute('aria-busy','true');btn.disabled=true;sub.textContent='Đang tải tin…';skeleton();
     try{
-      const d=await getPool();
+      let d;try{d=await getPool(unitUrl(cur))}catch(_){d=await getPool()}
       const matched=d.items.filter(i=>/^https?:\/\//i.test(i.url||'')&&!(window.RSS_PRAISE_ONLY&&i.bad)&&((cur===PROV&&inProv(i))||(i.us||[]).includes(cur)||mentions((i.title||'')+' '+((i.desc||'').split(/(?<=[.!?…])\s+/)[0]||'').slice(0,220),cur)||(bare(cur)&&headMention(i.title||'',bare(cur))))).sort((a,b)=>(Date.parse(b.published)||0)-(Date.parse(a.published)||0));const items=matched.slice(0,30);
       const today=vnDay(nowMs()),isToday=i=>{const x=Date.parse(i.published);return !isNaN(x)&&vnDay(x)===today},fm=n=>n.toLocaleString('vi-VN');
-      lastCtx={d,matched,isToday,fm,cur};countView(cur);
-      const stat=fm(matched.length)+' tin'+(matched.filter(isToday).length?' · '+fm(matched.filter(isToday).length)+' mới hôm nay':'')+' · toàn tỉnh '+fm(d.items.length)+' tin từ '+fm(new Set(d.items.map(i=>i.source)).size)+' nguồn';
+      lastCtx={d,matched,isToday,fm,cur,mt:d.matchedTotal};countView(cur);
+      const stat=fm(d.matchedTotal!=null?d.matchedTotal:matched.length)+' tin'+(matched.filter(isToday).length?' · '+fm(matched.filter(isToday).length)+' mới hôm nay':'')+' · toàn tỉnh '+fm(d.provTotal!=null?d.provTotal:d.items.length)+' tin từ '+fm(d.provSources!=null?d.provSources:new Set(d.items.map(i=>i.source)).size)+' nguồn';
       const t=d.updatedAt?new Date(d.updatedAt).toLocaleString('vi-VN',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit',timeZone:'Asia/Ho_Chi_Minh'}):'';
       const part=d.partial?' · một số nguồn chưa tải được':'';
       if(!items.length){
