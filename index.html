@@ -707,17 +707,6 @@ body::before{display:none}
 .fp-banner:hover{transform:translateY(-2px);box-shadow:0 14px 34px rgba(11,22,38,.28)}
 .fp-banner:focus-visible{outline:3px solid #f4c45c;outline-offset:3px}
 @media(max-width:760px){.fp-banner{margin-bottom:18px}}
-.fp-feed{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,500px);gap:20px 28px;align-items:center;margin:0 0 28px;padding:22px;background:#fff;border:1px solid var(--rule);border-radius:var(--r);box-shadow:var(--sh);color:#202936}
-.fp-eyebrow{margin:0 0 6px;font:800 10.5px var(--sans);letter-spacing:.13em;text-transform:uppercase;color:var(--son)}
-.fp-info h2{margin:0 0 8px;font:800 clamp(1.2rem,2vw,1.6rem)/1.2 var(--sans);letter-spacing:-.015em}
-.fp-desc{margin:0 0 16px;font-size:14px;line-height:1.55;color:var(--muted)}
-.fp-btn{display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border-radius:999px;background:#f4c45c;color:#0e1a2c;font:800 14px var(--sans);text-decoration:none;box-shadow:0 6px 16px rgba(244,196,92,.4);transition:transform .2s,box-shadow .2s}
-.fp-btn:hover{transform:translateY(-2px);box-shadow:0 10px 22px rgba(244,196,92,.5)}
-.fp-note{margin:12px 0 0;font-size:12px;line-height:1.5;color:var(--muted)}
-.fp-frame{min-height:520px;border:1px solid var(--rule);border-radius:12px;overflow:hidden;background:#f4f5f7}
-.fp-frame iframe{display:block;width:100%;height:520px;border:0}
-@media(max-width:860px){.fp-feed{grid-template-columns:1fr;padding:16px}.fp-frame{justify-self:center;width:100%;max-width:500px}}
-
 .stat{padding:18px 20px;border-radius:var(--r);box-shadow:var(--sh)}
 .stat::after{display:none}
 .stat .ico{width:34px;height:34px;border-radius:9px;background:var(--xam-bg);color:var(--muted)}
@@ -1113,22 +1102,6 @@ go();document.addEventListener('DOMContentLoaded',go);
     <a class="fp-banner" href="https://www.facebook.com/share/1MB9vVYNYA/" target="_blank" rel="noopener noreferrer" aria-label="Trạm Tấu mến yêu - mở Fanpage trên Facebook">
       <img src="banner-tram-tau-ngang.jpg" width="1200" height="300" alt="Trạm Tấu mến yêu - Fanpage" loading="lazy" decoding="async">
     </a>
-
-    <!-- Bài đăng mới từ Fanpage: nằm dưới khối tin tức địa phương (tin được chèn ngay sau banner) -->
-    <section class="fp-feed" id="fp-feed" aria-labelledby="fp-feed-t">
-      <div class="fp-info">
-        <p class="fp-eyebrow">Fanpage</p>
-        <h2 id="fp-feed-t">Trạm Tấu mến yêu</h2>
-        <p class="fp-desc">Bài đăng mới nhất từ Fanpage, cập nhật tự động. Bấm vào bài để xem đầy đủ trên Facebook.</p>
-        <a class="fp-btn" href="https://www.facebook.com/people/Tr%E1%BA%A1m-T%E1%BA%A5u-m%E1%BA%BFn-y%C3%AAu/100067098360964/" target="_blank" rel="noopener noreferrer">Mở Fanpage trên Facebook
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
-        <p class="fp-note">Không cần đăng nhập vẫn xem được các bài công khai. Nếu khung bên cạnh không hiện, hãy bấm nút trên.</p>
-      </div>
-      <div class="fp-frame">
-        <iframe title="Bài đăng mới từ Fanpage Trạm Tấu mến yêu" loading="lazy" scrolling="no" allow="encrypted-media" referrerpolicy="origin-when-cross-origin"
-          src="https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2Fpeople%2FTr%25E1%25BA%25A1m-T%25E1%25BA%25A5u-m%25E1%25BA%25BFn-y%25C3%25AAu%2F100067098360964%2F&amp;tabs=timeline&amp;width=500&amp;height=520&amp;small_header=true&amp;adapt_container_width=true&amp;hide_cover=false&amp;show_facepile=false&amp;locale=vi_VN"></iframe>
-      </div>
-    </section>
 
     <p class="glabel">Tổng quan nhanh</p>
     <div class="g g-21">
