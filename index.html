@@ -702,6 +702,11 @@ body::before{display:none}
 
 /* thẻ số liệu */
 .kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-bottom:28px}
+.fp-banner{display:block;margin:0 0 28px;border-radius:var(--r);overflow:hidden;box-shadow:var(--sh);line-height:0;background:#0b1626;transition:transform .25s ease,box-shadow .25s ease}
+.fp-banner img{display:block;width:100%;height:auto;aspect-ratio:1200/630;object-fit:cover}
+.fp-banner:hover{transform:translateY(-2px);box-shadow:0 14px 34px rgba(11,22,38,.28)}
+.fp-banner:focus-visible{outline:3px solid #f4c45c;outline-offset:3px}
+@media(max-width:760px){.fp-banner{margin-bottom:18px}}
 .stat{padding:18px 20px;border-radius:var(--r);box-shadow:var(--sh)}
 .stat::after{display:none}
 .stat .ico{width:34px;height:34px;border-radius:9px;background:var(--xam-bg);color:var(--muted)}
@@ -1092,6 +1097,11 @@ go();document.addEventListener('DOMContentLoaded',go);
     </div>
 
     <div class="kpis" id="stats"></div>
+
+    <!-- Banner Fanpage: nằm ngay trên khối tin tức địa phương -->
+    <a class="fp-banner" href="https://www.facebook.com/share/1MB9vVYNYA/" target="_blank" rel="noopener noreferrer" aria-label="Trạm Tấu mến yêu - mở Fanpage trên Facebook">
+      <img src="banner-tram-tau-men-yeu.jpg" width="1200" height="630" alt="Trạm Tấu mến yêu - Fanpage" loading="lazy" decoding="async">
+    </a>
 
     <p class="glabel">Tổng quan nhanh</p>
     <div class="g g-21">
@@ -2473,8 +2483,8 @@ const FB_CFG={databaseURL:'https://tramtau-default-rtdb.firebaseio.com'};
 </style>
 <script>
 (()=>{
-  /* Đặt ngay sau hàng thẻ số liệu, phía trên nhóm "Tổng quan nhanh". */
-  const anchor=document.querySelector('.kpis');
+  /* Đặt ngay sau banner Fanpage (nằm dưới hàng thẻ số liệu), phía trên nhóm "Tổng quan nhanh". */
+  const anchor=document.querySelector('.fp-banner')||document.querySelector('.kpis');
   if(!anchor||document.querySelector('#unit-news'))return;
   /* Dữ liệu tin do GitHub Actions gom mỗi 15 phút (news/pool.json). Trang con có thể đặt
      window.RSS_POOL='https://laocai-cds.github.io/tthc/news/pool.json' để dùng chung; window.RSS_UNIT để ghi đè tên đơn vị. */
