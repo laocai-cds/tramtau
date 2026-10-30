@@ -2391,7 +2391,7 @@ const FB_CFG={databaseURL:'https://tramtau-default-rtdb.firebaseio.com'};
 })();
 </script>
 <!-- Tin tức địa phương: mặc định xã Trạm Tấu, dùng chung dữ liệu tin của site mau -->
-<script>window.RSS_PRAISE_ONLY=true;window.RSS_UNIT='xã Trạm Tấu';window.RSS_POOL='https://laocai-cds.github.io/mau/news/pool.json';</script>
+<script>window.RSS_PRAISE_ONLY=true;window.RSS_UNIT='xã Trạm Tấu';window.RSS_POOL='https://laocai-cds.github.io/tthc/news/pool.json';</script>
 <style>
 #unit-news{margin:0 0 28px;background:#fff;border:1px solid var(--rule);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden;color:#202936}
 #unit-news .un-head{display:flex;align-items:flex-end;justify-content:space-between;gap:14px 18px;flex-wrap:wrap;padding:20px 22px 16px;border-bottom:1px solid var(--rule-2);background:linear-gradient(115deg,#fff 58%,#fbf4dc88)}
@@ -2471,7 +2471,7 @@ const FB_CFG={databaseURL:'https://tramtau-default-rtdb.firebaseio.com'};
   const anchor=document.querySelector('.kpis');
   if(!anchor||document.querySelector('#unit-news'))return;
   /* Dữ liệu tin do GitHub Actions gom mỗi 30 phút (news/pool.json). Trang con có thể đặt
-     window.RSS_POOL='https://laocai-cds.github.io/mau/news/pool.json' để dùng chung; window.RSS_UNIT để ghi đè tên đơn vị. */
+     window.RSS_POOL='https://laocai-cds.github.io/tthc/news/pool.json' để dùng chung; window.RSS_UNIT để ghi đè tên đơn vị. */
   const POOL_URL=window.RSS_POOL||'news/pool.json';
   /* So khớp có dấu để "Võ Lao" không trùng "vỏ lao động"; chỉ khi văn bản hoàn toàn không dấu mới so không dấu. */
   const keep=t=>' '+String(t||'').normalize('NFC').toLowerCase().replace(/[^\p{L}\p{N}]+/gu,' ').trim()+' ';
