@@ -2470,7 +2470,7 @@ const FB_CFG={databaseURL:'https://tramtau-default-rtdb.firebaseio.com'};
   /* Đặt ngay sau hàng thẻ số liệu, phía trên nhóm "Tổng quan nhanh". */
   const anchor=document.querySelector('.kpis');
   if(!anchor||document.querySelector('#unit-news'))return;
-  /* Dữ liệu tin do GitHub Actions gom mỗi 30 phút (news/pool.json). Trang con có thể đặt
+  /* Dữ liệu tin do GitHub Actions gom mỗi 15 phút (news/pool.json). Trang con có thể đặt
      window.RSS_POOL='https://laocai-cds.github.io/tthc/news/pool.json' để dùng chung; window.RSS_UNIT để ghi đè tên đơn vị. */
   const POOL_URL=window.RSS_POOL||'news/pool.json';
   /* So khớp có dấu để "Võ Lao" không trùng "vỏ lao động"; chỉ khi văn bản hoàn toàn không dấu mới so không dấu. */
@@ -2528,7 +2528,7 @@ const FB_CFG={databaseURL:'https://tramtau-default-rtdb.firebaseio.com'};
 
   const box=el('section');
   box.id='unit-news';
-  box.innerHTML='<div class="un-head"><div><p class="un-eyebrow">Tin tức địa phương</p><h2></h2><p class="un-sub" role="status" aria-live="polite"></p></div><div class="un-tools"><select aria-label="Chọn xã, phường"></select><button type="button" class="un-refresh" aria-label="Về xã mặc định" title="Về xã mặc định">'+ICON_REF+'</button></div></div><div class="un-body-wrap"></div><div class="un-foot">Tin tổng hợp từ các trang có RSS, tự cập nhật mỗi 30 phút, chỉ hiển thị bài nhắc tới đúng tên đơn vị. Hiển thị tiêu đề, tóm tắt ngắn và liên kết, bấm vào để đọc bài gốc.</div>';
+  box.innerHTML='<div class="un-head"><div><p class="un-eyebrow">Tin tức địa phương</p><h2></h2><p class="un-sub" role="status" aria-live="polite"></p></div><div class="un-tools"><select aria-label="Chọn xã, phường"></select><button type="button" class="un-refresh" aria-label="Về xã mặc định" title="Về xã mặc định">'+ICON_REF+'</button></div></div><div class="un-body-wrap"></div><div class="un-foot">Tin tổng hợp từ các trang có RSS, tự cập nhật mỗi 15 phút, chỉ hiển thị bài nhắc tới đúng tên đơn vị. Hiển thị tiêu đề, tóm tắt ngắn và liên kết, bấm vào để đọc bài gốc.</div>';
   anchor.insertAdjacentElement('afterend',box);
   const h2=box.querySelector('h2'),sub=box.querySelector('.un-sub'),sel=box.querySelector('select'),btn=box.querySelector('.un-refresh'),holder=box.querySelector('.un-body-wrap');
   const PROV='Tỉnh Lào Cai';
@@ -2558,7 +2558,7 @@ const FB_CFG={databaseURL:'https://tramtau-default-rtdb.firebaseio.com'};
     const curToday=todayRows.filter(isCur),otherToday=todayRows.filter(r=>!isCur(r));
     const todayHtml='<section><h4>Tin trong ngày hôm nay</h4>'
       +'<p class="um-sub">'+esc(cap(cu))+': '+fm(curToday.length)+' tin · toàn tỉnh: '+fm(todayRows.length)+' tin</p>'
-      +(todayRows.length?'<ul class="um-today">'+curToday.map(r=>rowHtml(r,false)).join('')+otherToday.slice(0,12).map(r=>rowHtml(r,true)).join('')+'</ul>'+(otherToday.length>12?'<p class="um-foot">Còn '+fm(otherToday.length-12)+' tin khác của các xã, phường khác trong ngày.</p>':''):'<p class="um-foot">Hôm nay chưa có tin mới. Dữ liệu tự cập nhật mỗi 30 phút.</p>')
+      +(todayRows.length?'<ul class="um-today">'+curToday.map(r=>rowHtml(r,false)).join('')+otherToday.slice(0,12).map(r=>rowHtml(r,true)).join('')+'</ul>'+(otherToday.length>12?'<p class="um-foot">Còn '+fm(otherToday.length-12)+' tin khác của các xã, phường khác trong ngày.</p>':''):'<p class="um-foot">Hôm nay chưa có tin mới. Dữ liệu tự cập nhật mỗi 15 phút.</p>')
       +'</section>';
     const kp=(v,l)=>'<div class="um-k"><b>'+v+'</b><span>'+l+'</span></div>';
     const list=(rows,max)=>{const top=rows.slice(0,12);return '<ol>'+top.map(r=>'<li><div>'+esc(r[0])+'<i style="width:'+Math.max(4,Math.round(r[1]*100/max))+'%"></i></div><em>'+fm(r[1])+'</em></li>').join('')+'</ol>'};
@@ -2577,7 +2577,7 @@ const FB_CFG={databaseURL:'https://tramtau-default-rtdb.firebaseio.com'};
       +todayHtml
       +'<div class="um-cols"><section><h4>Theo nguồn báo</h4>'+list(bySrc,bySrc[0]?bySrc[0][1]:1)+'</section><section><h4>Xã, phường nhiều tin nhất</h4>'+list(byUnit.map(x=>[cap(x[0]),x[1]]),byUnit[0]?byUnit[0][1]:1)+'</section></div>'
       +'<div class="um-cols"><section id="um-views" style="grid-column:1/-1"><h4>Lượt xem mục tin theo đơn vị</h4><p class="um-foot">Đang tải…</p></section></div>'
-      +'<p class="um-foot">Dữ liệu cập nhật '+esc(t)+(d.partial?' · một số nguồn chưa tải được':'')+'. Chỉ gồm tin từ báo chính thống, nội dung tích cực, nhắc đúng tên đơn vị; tự cập nhật mỗi 30 phút.</p></div></div>';
+      +'<p class="um-foot">Dữ liệu cập nhật '+esc(t)+(d.partial?' · một số nguồn chưa tải được':'')+'. Chỉ gồm tin từ báo chính thống, nội dung tích cực, nhắc đúng tên đơn vị; tự cập nhật mỗi 15 phút.</p></div></div>';
     (async()=>{
       const box2=m.querySelector('#um-views');if(!box2)return;
       try{
@@ -2698,7 +2698,7 @@ const FB_CFG={databaseURL:'https://tramtau-default-rtdb.firebaseio.com'};
     }catch(e){
       const nodata=/chưa có dữ liệu/.test(e.message);
       sub.textContent=nodata?'Chưa có dữ liệu':'Chưa tải được tin';
-      message(nodata?'Chưa có dữ liệu tin tức':'Chưa tải được tin',nodata?'Hệ thống đang chờ lần cập nhật đầu tiên (tự chạy mỗi 30 phút). Vui lòng quay lại sau.':'Kiểm tra kết nối mạng rồi thử lại.',true);
+      message(nodata?'Chưa có dữ liệu tin tức':'Chưa tải được tin',nodata?'Hệ thống đang chờ lần cập nhật đầu tiên (tự chạy mỗi 15 phút). Vui lòng quay lại sau.':'Kiểm tra kết nối mạng rồi thử lại.',true);
     }finally{box.setAttribute('aria-busy','false');btn.disabled=false}
   }
   /* Người đang xem khối tin: dùng chung Realtime Database của trang TTHC (nhánh newsViewers); tự xóa khi rời trang/ẩn tab. */
