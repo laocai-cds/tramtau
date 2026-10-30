@@ -1461,7 +1461,7 @@ function jsonp(url,ms){return new Promise((res,rej)=>{const cb='__tt_'+Date.now(
   const fin=(e,v)=>{clearTimeout(tm);delete window[cb];sc.remove();e?rej(e):res(v)};const tm=setTimeout(()=>fin(new Error('timeout')),ms||8000);
   window[cb]=d=>{ok=true;fin(null,d)};sc.onerror=()=>fin(new Error('load'));sc.src=url+(url.includes('?')?'&':'?')+'callback='+cb+'&t='+Date.now();document.head.appendChild(sc)})}
 const nkey=x=>String(x||'').toLocaleLowerCase('vi').replace(/[^\p{L}\p{N}]+/gu,'');
-let liveUnits=[],viewKey=null,msnap={};try{msnap=JSON.parse(localStorage.getItem('tmt_msnap')||'{}')||{}}catch(_){}
+let liveStale=false,liveUnits=[],viewKey=null,msnap={};try{msnap=JSON.parse(localStorage.getItem('tmt_msnap')||'{}')||{}}catch(_){}
 const curKey=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')};
 const viewingPast=()=>!!(viewKey&&viewKey!==curKey()&&msnap[viewKey]);
 /* bỏ đơn vị toàn số 0 (không có đảng viên, hồ sơ, tiền) khỏi mọi bảng, biểu đồ, báo cáo */
@@ -1495,9 +1495,13 @@ function applySheet(d){
   if(d.lastSync){const t=new Date(d.lastSync);if(!isNaN(t)){const p=n=>String(n).padStart(2,'0');dataStamp=`${p(t.getDate())}/${p(t.getMonth()+1)}/${t.getFullYear()} ${p(t.getHours())}:${p(t.getMinutes())}`}}
   return hit;
 }
+function staleNote(){const n=$('#loadNote');if(!n||!liveStale)return;n.className='loadnote warn';n.textContent='Chưa đồng bộ số liệu kỳ tháng '+(new Date().getMonth()+1)+' — đang hiển thị số liệu kỳ trước. Số liệu mới sẽ tự cập nhật sau khi đồng bộ.';n.hidden=false}
 async function loadFromSheet(){const ep=sheetEndpoint();if(!ep){dataSrc='backup';return{state:'noep'}}
   const done=r=>{dataSrc=r.state==='ok'?'sheet':(dataSrc==='sheet'||dataSrc==='cache'?dataSrc:'backup');if(r.state==='ok'){setLoading(false);showBackupNote(false)}return r};
-  try{const d=await jsonp(ep+'?action=read');if(!d||!d.ok)return done({state:'bad'});const hit=applySheet(d);
+  try{let d=null,hit=0,stale=false;try{d=await jsonp(ep+'?action=read&tab='+encodeURIComponent(monthTab(curKey())))}catch(_){}
+    if(d&&d.ok)hit=applySheet(d);
+    if(!hit){stale=true;d=await jsonp(ep+'?action=read');if(!d||!d.ok)return done({state:'bad'});hit=applySheet(d)}
+    liveStale=stale&&!!hit;setTimeout(staleNote,0);
     if(hit){try{localStorage.setItem('tmt_cache',JSON.stringify({headers:d.headers,rows:d.rows,lastSync:d.lastSync||null,t:Date.now()}))}catch(_){}}
     if(!hit){const h2=await loadFromTableTab(ep);if(h2)return done({state:'ok',hit:h2,lastSync:d.lastSync})}
     return done(hit?{state:'ok',hit,lastSync:d.lastSync}:{state:'empty',lastSync:d.lastSync})}catch(e){return done({state:'fail'})}}
@@ -1585,6 +1589,7 @@ async function syncMonthly(){
   let remote=null;
   try{const d=await jsonp(ep+'?action=read&tab='+encodeURIComponent(MONTH_TAB),9000);if(d&&d.ok&&Array.isArray(d.rows))remote=d.rows}catch(_){}
   if(dataSrc!=='sheet'){(remote||[]).forEach(r=>{const k=String(r[0]||'').trim(),c=pnum(r[1]);if(/^\d{4}-\d{2}$/.test(k)&&c>=0&&!(k in monthly))monthly[k]={cum:c}});return renderMonthly()}
+  if(liveStale)return renderMonthly();
   let purged=0;
   {const live=sigOf(liveUnits),cur=curKey();Object.keys(msnap).forEach(k=>{if(k!==cur&&sigOf(msnap[k].rows)===live){delete msnap[k];delete monthly[k];purged++}});
    const lc=totals().paid;(remote||[]).forEach(r=>{const k=String(r[0]||'').trim(),c=pnum(r[1]);if(/^\d{4}-\d{2}$/.test(k)&&c>=0&&!(k in monthly)){if(k!==cur&&c===lc&&!msnap[k]){purged++;return}monthly[k]={cum:c}}});
@@ -2156,7 +2161,7 @@ $('#syncBtn').onclick=async()=>{
     const ep0=sheetEndpoint();if(ep0)pushMonthly(ep0,mk);render();
     syncMsg(`Đã lưu số liệu vào tháng ${mk.slice(5)}/${mk.slice(0,4)}. Bấm vào cột tháng đó ở Tổng quan để xem.`,'ok');toast('Đã lưu số liệu tháng '+mk.slice(5)+'/'+mk.slice(0,4));return}
   // Đọc mốc "lastSync" hiện tại NGAY (chạy song song lúc người dùng đang xem hộp xác nhận) để không tốn thêm thời gian chờ sau khi bấm Đồng ý.
-  const baseP=jsonp(url+'?action=read',8000).then(d=>d&&d.ok?(d.lastSync||''):null).catch(()=>null);
+  const baseP=jsonp(url+'?action=read&tab='+encodeURIComponent(monthTab(curKey())),8000).then(d=>d&&d.ok?(d.lastSync||''):null).catch(()=>null);
   if(!confirm(`Gửi ${pendingRows.length} dòng Excel tới Google Sheet (tháng hiện tại)?\nDữ liệu sẽ thay thế nội dung trang tính đích.`))return;
   const b=$('#syncBtn');b.disabled=true;
   // Bộ đếm giây: chạy liên tục từ lúc bấm đến khi Google Sheet xác nhận, có tách thời gian "gửi" và "xác nhận".
@@ -2168,12 +2173,12 @@ $('#syncBtn').onclick=async()=>{
     const before=await baseP;
     let tSent=null,postErr=null;
     // Gửi dữ liệu (không chờ phản hồi để bắt đầu xác nhận): Apps Script mới ghi xong là báo lastSync ngay, trước cả khi định dạng/nhật ký xong.
-    const postP=fetch(url,{method:'POST',mode:'no-cors',redirect:'follow',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({headers:(()=>{const w=Math.max(pendingHeaders.length,...pendingRows.map(r=>r.length)),h=[...pendingHeaders];while(h.length<w)h.push('');return h})(),rows:normRows(),token,source:'website-tram-tau',sentAt:new Date().toISOString()})}).then(()=>{tSent=performance.now()-t0;stage='Đã gửi, đang chờ Google Sheet xác nhận';btnTxt='Đang xác nhận'},e=>{postErr=e});
+    const postP=fetch(url,{method:'POST',mode:'no-cors',redirect:'follow',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({tab:monthTab(curKey()),headers:(()=>{const w=Math.max(pendingHeaders.length,...pendingRows.map(r=>r.length)),h=[...pendingHeaders];while(h.length<w)h.push('');return h})(),rows:normRows(),token,source:'website-tram-tau',sentAt:new Date().toISOString()})}).then(()=>{tSent=performance.now()-t0;stage='Đã gửi, đang chờ Google Sheet xác nhận';btnTxt='Đang xác nhận'},e=>{postErr=e});
     if(before!==null){ // script có hỗ trợ đọc: xác nhận thật bằng thời điểm đồng bộ mới
       stage='Đang ghi vào Google Sheet';
       // Cứ mỗi 1 giây hỏi lại (tối đa 3 lần hỏi cùng lúc), lần nào thấy lastSync đổi trước thì dùng. Chạy song song với lúc gửi.
       const d=await new Promise(resolve=>{let done=false,inflight=0;const end=v=>{if(done)return;done=true;clearInterval(iv);resolve(v)},
-        fire=()=>{inflight++;jsonp(url+'?action=read',8000).then(x=>{if(x&&x.ok&&(x.lastSync||'')!==before)end(x)}).catch(()=>{}).finally(()=>{inflight--})},
+        fire=()=>{inflight++;jsonp(url+'?action=read&tab='+encodeURIComponent(monthTab(curKey())),8000).then(x=>{if(x&&x.ok&&(x.lastSync||'')!==before)end(x)}).catch(()=>{}).finally(()=>{inflight--})},
         t1=performance.now(),iv=setInterval(()=>{if(done)return;if(postErr){end(null);return}if(performance.now()-t1>30000){end(null);return}if(inflight<3)fire()},1000)});
       clearInterval(tick);if(postErr)throw postErr;const total=performance.now()-t0,
         det=`⏱ Dữ liệu đã lên Google Sheet sau ${sec(total)} giây${tSent!=null?` (Apps Script xử lý xong sau ${sec(tSent)} giây)`:' (Apps Script còn hoàn tất định dạng và nhật ký)'}.`;
@@ -2246,7 +2251,7 @@ function apiBookmarklet(C){
     }catch(e){say('✕ '+(e&&e.name==='AbortError'?'API phản hồi quá chậm (quá 30 giây). Kiểm tra mạng rồi bấm lại.':e.message)+'   (sau '+f1(performance.now()-T0)+')',true);setTimeout(()=>box.remove(),20000)}
   })();
 }
-function apiBmSrc(){return '('+apiBookmarklet.toString()+')('+JSON.stringify({pid:2124966,name:'Đảng bộ xã Trạm Tấu',k:'tmt_apipw',src:'website-tram-tau-api',m:false,ep:(sheetEndpoint())||''})+');void 0'}
+function apiBmSrc(){return '('+apiBookmarklet.toString()+')('+JSON.stringify({pid:2124966,name:'Đảng bộ xã Trạm Tấu',k:'tmt_apipw',src:'website-tram-tau-api',m:true,ep:(sheetEndpoint())||''})+');void 0'}
 (function(){
   const a=document.getElementById('apiBm'),c=document.getElementById('apiCopy'),cj=document.getElementById('apiCopyJs'),m=document.getElementById('apiMsg');if(!a)return;
   const say=t=>{m.hidden=false;m.textContent=t};
