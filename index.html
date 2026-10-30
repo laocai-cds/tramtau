@@ -2532,9 +2532,9 @@ const FB_CFG={databaseURL:'https://tramtau-default-rtdb.firebaseio.com'};
   anchor.insertAdjacentElement('afterend',box);
   const h2=box.querySelector('h2'),sub=box.querySelector('.un-sub'),sel=box.querySelector('select'),btn=box.querySelector('.un-refresh'),holder=box.querySelector('.un-body-wrap');
   const PROV='Tỉnh Lào Cai';
-  /* Tỉnh Lào Cai: cùng điều kiện khối tin — bài phải của báo Lào Cai hoặc nhắc rõ Lào Cai / tên xã, phường của tỉnh (tiêu đề hoặc câu đầu tóm tắt). */
+  /* Tỉnh Lào Cai: bài phải nhắc rõ Lào Cai / tên xã, phường của tỉnh (tiêu đề hoặc câu đầu tóm tắt); không còn tính mọi bài của Báo Lào Cai. */
   const UKEYS=UNITS.map(u=>[u,bare(u)]);
-  const inProv=i=>/Lào Cai/i.test(String(i.source||''))||(()=>{const t=(i.title||'')+' '+((i.desc||'').split(/(?<=[.!?…])\s+/)[0]||'').slice(0,220);return /Lào Cai|Yên Bái/i.test(t)||UKEYS.some(([u])=>mentions(t,u))})();{const o=el('option',null,PROV);o.value=PROV;sel.append(o)}
+  const inProv=i=>(()=>{const t=(i.title||'')+' '+((i.desc||'').split(/(?<=[.!?…])\s+/)[0]||'').slice(0,220);return /Lào Cai|Yên Bái/i.test(t)||UKEYS.some(([u])=>mentions(t,u))})();{const o=el('option',null,PROV);o.value=PROV;sel.append(o)}
   [...UNITS].sort((a,b)=>a.split(' ').slice(1).join(' ').localeCompare(b.split(' ').slice(1).join(' '),'vi')).forEach(u=>{const o=el('option',null,cap(u));o.value=u;sel.append(o)});
   sel.value=cur;
   sel.addEventListener('change',()=>{cur=sel.value;load()});
