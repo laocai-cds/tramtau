@@ -702,8 +702,8 @@ body::before{display:none}
 
 /* thẻ số liệu */
 .kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-bottom:28px}
-.fp-banner{display:block;margin:0 0 28px;border-radius:var(--r);overflow:hidden;box-shadow:var(--sh);line-height:0;background:#0b1626;transition:transform .25s ease,box-shadow .25s ease}
-.fp-banner img{display:block;width:100%;height:auto;aspect-ratio:1200/630;object-fit:cover}
+.fp-banner{display:block;max-width:100%;margin:0 0 28px;border-radius:var(--r);overflow:hidden;box-shadow:var(--sh);line-height:0;background:#0b1626;transition:transform .25s ease,box-shadow .25s ease}
+.fp-banner img{display:block;width:100%;height:auto;aspect-ratio:1200/300;object-fit:cover}
 .fp-banner:hover{transform:translateY(-2px);box-shadow:0 14px 34px rgba(11,22,38,.28)}
 .fp-banner:focus-visible{outline:3px solid #f4c45c;outline-offset:3px}
 @media(max-width:760px){.fp-banner{margin-bottom:18px}}
@@ -1100,7 +1100,7 @@ go();document.addEventListener('DOMContentLoaded',go);
 
     <!-- Banner Fanpage: nằm ngay trên khối tin tức địa phương -->
     <a class="fp-banner" href="https://www.facebook.com/share/1MB9vVYNYA/" target="_blank" rel="noopener noreferrer" aria-label="Trạm Tấu mến yêu - mở Fanpage trên Facebook">
-      <img src="banner-tram-tau-men-yeu.jpg" width="1200" height="630" alt="Trạm Tấu mến yêu - Fanpage" loading="lazy" decoding="async">
+      <img src="banner-tram-tau-ngang.jpg" width="1200" height="300" alt="Trạm Tấu mến yêu - Fanpage" loading="lazy" decoding="async">
     </a>
 
     <p class="glabel">Tổng quan nhanh</p>
