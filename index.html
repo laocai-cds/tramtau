@@ -1536,17 +1536,17 @@ function showBackupNote(on){const n=$('#loadNote');if(!n)return;if(on){n.classNa
 
 /* ===== Thu theo tháng ===== */
 const MONTH_TAB='Thu theo tháng';
-const monthTab=k=>'Thang'+(+k.slice(5))+(+k.slice(0,4)===new Date().getFullYear()?'':'-'+k.slice(0,4));// mỗi tháng một sheet: Thang1…Thang12 (năm khác: Thang10-2025)
+const MONTH_Y0=2026;// năm 2026 giữ tên sheet Thang1…Thang12; các năm khác kèm năm: Thang1-2027, Thang10-2025…
+const monthTab=k=>'Thang'+(+k.slice(5))+(+k.slice(0,4)===MONTH_Y0?'':'-'+k.slice(0,4));
 const MCOLS=['STT','Tên đơn vị','Tổng sl đảng viên (1)','Số lượng ĐV sinh hoạt chính thức (2)','Số lượng ĐV sinh hoạt tạm thời (3)','Số lượng ĐV đã chuyển sinh hoạt đảng tạm thời (4)','Số lượng được miễn giảm ĐP (5)','Chưa duyệt (6)','Đã duyệt, chưa nộp (7)','Đã duyệt, đã nộp (8)','Số đảng viên chưa có hồ sơ (9)','Tổng tiền theo hồ sơ đã khai báo','Tổng tiền đã nộp','Tỷ lệ hoàn thành\n đảng phí thực tế'];
 const MGROUP=['STT','Tên đơn vị','Đảng viên','','','','','Hồ sơ đảng phí','','','','Số tiền','',''];
 let monthly={};try{monthly=JSON.parse(localStorage.getItem('tmt_monthly')||'{}')||{}}catch(_){}
 const mkey=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
 const mshort=n=>n>=1e6?(Math.round(n/1e5)/10).toLocaleString('vi-VN')+' tr':n>=1e3?Math.round(n/1e3).toLocaleString('vi-VN')+' k':String(n);
-function monthlySeries(year){
-  const keys=Object.keys(monthly).sort();const out=[];
+function monthlySeries(year){/* mỗi sheet tháng là số đã nộp của riêng kỳ tháng đó (API lọc kỳ nộp 01 → cuối tháng) */
+  const out=[];
   for(let m=1;m<=12;m++){const k=year+'-'+String(m).padStart(2,'0');if(!(k in monthly)){out.push({m,k,has:false,v:0});continue}
-    const prev=keys.filter(x=>x<k).pop();const cum=monthly[k].cum;
-    out.push({m,k,has:true,cum,first:prev===undefined,v:prev===undefined?cum:Math.max(0,cum-monthly[prev].cum)})}
+    const c=monthly[k].cum;out.push({m,k,has:true,cum:c,v:c})}
   return out}
 let selMonth=null,selYear=null;
 function pickMonth(m){selMonth=m;const k=selYear+'-'+String(m).padStart(2,'0');
@@ -1574,8 +1574,8 @@ function renderMonthly(){
   const upto=S.filter(x=>x.m<=sel.m).reduce((a,x)=>a+x.v,0);
   let cmp='—',cc='';if(sel.has&&prev&&prev.v>0){const d=(sel.v-prev.v)/prev.v*100;cmp=(d>=0?'▲ +':'▼ ')+d.toFixed(1).replace('.',',')+'%';cc=d>=0?'up':'dn'}
   $('#monthKpi').innerHTML=`<div style="--c:#2563eb"><small>Thu trong tháng ${sel.m}/${y}</small><b>${sel.has?money(sel.v):'Chưa có số liệu'}</b></div><div style="--c:#16a34a"><small>So với tháng trước${prev?' (T'+prev.m+')':''}</small><b class="${cc}">${cmp}</b></div><div style="--c:#c8282f"><small>Lũy kế từ đầu năm đến hết T${sel.m}</small><b>${money(upto)}</b></div>`;
-  const n=Object.keys(monthly).length;
-  $('#monthNote').textContent=n<=1?'Hệ thống bắt đầu ghi nhận từ tháng này; từ các tháng sau, số thu mỗi tháng = số lũy kế đã nộp − số lũy kế cuối tháng trước.':'Chọn tháng ở góc phải hoặc bấm vào cột. Số thu mỗi tháng = lũy kế đã nộp − lũy kế cuối tháng trước (tab “'+MONTH_TAB+'” trong Google Sheet).';
+  const yTot=S.reduce((a,x)=>a+x.v,0),ly=monthly[(y-1)+'-'+String(sel.m).padStart(2,'0')];
+  $('#monthNote').textContent='Chọn năm, tháng ở góc phải hoặc bấm vào cột. Mỗi cột là số đã nộp của kỳ tháng đó; lũy kế = cộng các tháng từ T1. Cả năm '+y+': '+money(yTot)+(ly?' · Cùng kỳ T'+sel.m+'/'+(y-1)+': '+money(ly.cum):'')+'. Tháng nào chưa có cột: dùng nút API chọn tháng đó để lấy bổ sung.';
 }
 function fillSyncMonth(){const el=$('#syncMonth');if(!el)return;const now=new Date();let h='';for(let i=0;i<12;i++){const d=new Date(now.getFullYear(),now.getMonth()-i,1),k=mkey(d);h+=`<option value="${k}">Tháng ${d.getMonth()+1}/${d.getFullYear()}${i===0?' (hiện tại)':''}</option>`}el.innerHTML=h}
 function pushMonthly(ep,k){
@@ -1585,7 +1585,7 @@ function pushMonthly(ep,k){
   if(k&&msnap[k]){const rows=msnap[k].rows.map(r=>MCOLS.map((h,i)=>{const x=r[h];if(x==null)return '';return i>=2&&i<=12?pnum(x):(i===13?v(r,'progress'):x)}));
     post({tab:monthTab(k),headers:MGROUP,rows:[MCOLS,...rows],token:tk,source:'website-month-sheet'})}
   const stamp='Lúc '+new Date().toLocaleString('vi-VN',{hour12:false});
-  post({tab:MONTH_TAB,headers:['Tháng','Lũy kế đã nộp (₫)','Ghi nhận'],rows:Object.keys(monthly).sort().map(k=>[k,monthly[k].cum,stamp]),token:tk,source:'website-monthly'})}
+  post({tab:MONTH_TAB,headers:['Tháng','Đã nộp trong kỳ (₫)','Ghi nhận'],rows:Object.keys(monthly).sort().map(k=>[k,monthly[k].cum,stamp]),token:tk,source:'website-monthly'})}
 const sigOf=rows=>rows.map(r=>[v(r,'members'),v(r,'paidCount'),v(r,'paid')].join(',')).join(';');
 async function loadMonthTab(k){const ep=sheetEndpoint();if(!ep||msnap[k])return !!msnap[k];
   try{const d=await jsonp(ep+'?action=read&tab='+encodeURIComponent(monthTab(k)),9000);
@@ -1598,12 +1598,12 @@ async function syncMonthly(){
   const ep=sheetEndpoint();if(!ep)return;
   let remote=null;
   try{const d=await jsonp(ep+'?action=read&tab='+encodeURIComponent(MONTH_TAB),9000);if(d&&d.ok&&Array.isArray(d.rows))remote=d.rows}catch(_){}
-  if(dataSrc!=='sheet'){(remote||[]).forEach(r=>{const k=String(r[0]||'').trim(),c=pnum(r[1]);if(/^\d{4}-\d{2}$/.test(k)&&c>=0&&!(k in monthly))monthly[k]={cum:c}});return renderMonthly()}
+  if(dataSrc!=='sheet'){(remote||[]).forEach(r=>{const k=String(r[0]||'').trim(),c=pnum(r[1]);if(/^\d{4}-\d{2}$/.test(k)&&c>=0&&(!(k in monthly)||monthly[k].cum!==c)){monthly[k]={cum:c};delete msnap[k]}});return renderMonthly()}
   if(liveStale)return renderMonthly();
-  let purged=0;
+  let purged=0,upd=0;
   {const live=sigOf(liveUnits),cur=curKey();Object.keys(msnap).forEach(k=>{if(k!==cur&&sigOf(msnap[k].rows)===live){delete msnap[k];delete monthly[k];purged++}});
-   const lc=totals().paid;(remote||[]).forEach(r=>{const k=String(r[0]||'').trim(),c=pnum(r[1]);if(/^\d{4}-\d{2}$/.test(k)&&c>=0&&!(k in monthly)){if(k!==cur&&c===lc&&!msnap[k]){purged++;return}monthly[k]={cum:c}}});
-   if(purged)saveMonthly()}
+   const lc=totals().paid;(remote||[]).forEach(r=>{const k=String(r[0]||'').trim(),c=pnum(r[1]);if(/^\d{4}-\d{2}$/.test(k)&&c>=0){if(!(k in monthly)){if(k!==cur&&c===lc&&!msnap[k]){purged++;return}monthly[k]={cum:c}}else if(k!==cur&&monthly[k].cum!==c){monthly[k]={cum:c};delete msnap[k];upd++}}});
+   if(purged||upd)saveMonthly()}
   {const cur0=curKey();let tried={};try{tried=JSON.parse(localStorage.getItem('tmt_mtried')||'{}')||{}}catch(_){}
    const now=Date.now(),want=Object.keys(monthly).filter(k=>k!==cur0&&!msnap[k]&&k<cur0&&!(tried[k]&&now-tried[k]<864e5));
    if(want.length)Promise.all(want.map(async k=>{const ok=await loadMonthTab(k);if(!ok){tried[k]=Date.now();try{localStorage.setItem('tmt_mtried',JSON.stringify(tried))}catch(_){}}return ok})).then(r=>{if(r.some(Boolean))renderMonthly()})}
@@ -2225,24 +2225,25 @@ function apiBookmarklet(C){
       let pw=localStorage.getItem(C.k)||'';
       if(!pw){pw=(prompt('Mã đồng bộ ('+C.name+'):')||'').trim();if(!pw)return}
       /* chọn tháng: chỉ các tháng của năm hiện tại (sheet Thang1…Thang12 không phân biệt năm) */
-      const now=new Date(),cm=now.getMonth()+1,cy=now.getFullYear();
-      const SM=await new Promise(res=>{
+      const now=new Date();
+      const PK=await new Promise(res=>{
         const ov=document.createElement('div');
         ov.style.cssText='position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;font:14px/1.45 system-ui,sans-serif';
-        let o='';for(let m=cm;m>=1;m--)o+='<option value="'+m+'"'+(m===cm?' selected':'')+'>Tháng '+m+'/'+cy+(m===cm?' (hiện tại)':'')+'</option>';
+        let o='';for(let i=0;i<12;i++){const d=new Date(now.getFullYear(),now.getMonth()-i,1),y=d.getFullYear(),m=d.getMonth()+1;o+='<option value="'+y+'-'+m+'"'+(i?'':' selected')+'>Tháng '+m+'/'+y+(i?'':' (hiện tại)')+'</option>'}
         ov.innerHTML='<div style="background:#fff;color:#12315f;padding:20px 24px;border-radius:12px;min-width:300px;box-shadow:0 8px 28px rgba(0,0,0,.35)"><div style="font-weight:700;font-size:16px">Lấy số liệu đảng phí</div><div data-n style="font-size:13px;color:#555;margin-top:2px"></div><select style="width:100%;margin:14px 0;padding:8px;font-size:14px;border:1px solid #bbb;border-radius:8px">'+o+'</select><div style="display:flex;gap:8px;justify-content:flex-end"><button type="button" data-x style="padding:7px 14px;border:1px solid #bbb;background:#fff;border-radius:8px;cursor:pointer">Hủy</button><button type="button" data-ok style="padding:7px 16px;border:0;background:#b3261e;color:#fff;font-weight:700;border-radius:8px;cursor:pointer">Lấy dữ liệu</button></div></div>';
         ov.querySelector('[data-n]').textContent=C.name;
         const sel=ov.querySelector('select'),done=v=>{ov.remove();document.removeEventListener('keydown',kd,true);res(v)};
-        const kd=e=>{if(e.key==='Escape'){e.preventDefault();done(0)}else if(e.key==='Enter'){e.preventDefault();done(+sel.value)}};
-        ov.querySelector('[data-x]').onclick=()=>done(0);ov.querySelector('[data-ok]').onclick=()=>done(+sel.value);
+        const kd=e=>{if(e.key==='Escape'){e.preventDefault();done(0)}else if(e.key==='Enter'){e.preventDefault();done(sel.value)}};
+        ov.querySelector('[data-x]').onclick=()=>done(0);ov.querySelector('[data-ok]').onclick=()=>done(sel.value);
         ov.onclick=e=>{if(e.target===ov)done(0)};document.addEventListener('keydown',kd,true);
         document.body.appendChild(ov);sel.focus();
       });
-      if(!SM)return;
+      if(!PK)return;
+      const cy=+PK.split('-')[0],SM=+PK.split('-')[1];
       T0=performance.now();
       if(navigator.onLine===false)throw new Error('Máy đang mất kết nối mạng. Kiểm tra mạng rồi bấm lại.');
       say('Đang lấy số liệu tháng '+SM+'/'+cy+' từ API…',false,true);
-      const T=C.m?('Thang'+SM):'',rd=C.ep+'?action=read'+(T?'&tab='+encodeURIComponent(T):'');
+      const T=C.m?('Thang'+SM+(cy===2026?'':'-'+cy)):''/* năm 2026: Thang10; năm khác: Thang1-2027 */,rd=C.ep+'?action=read'+(T?'&tab='+encodeURIComponent(T):'');
       const b0P=jp(rd);/* đọc trước lastSync + làm nóng Apps Script song song với lúc chờ API */
       const tA=performance.now();
       const p2=n=>String(n).padStart(2,'0'),mm=p2(SM),yy=cy;
@@ -2268,6 +2269,12 @@ function apiBookmarklet(C){
       const sigRows=a=>{let n=0,s=0,p=0;(a||[]).forEach(r=>{if(r&&/^\d+$/.test(String(r[0]==null?'':r[0]).trim())){n++;s+=Number(String(r[2]).replace(/[^\d]/g,''))||0;p+=Number(String(r[12]).replace(/[^\d]/g,''))||0}});return n+'|'+s+'|'+p},want=sigRows(rows);
       for(let k=0;k<12&&!ok;k++){await new Promise(r2=>setTimeout(r2,1000));const x=await jp(rd,9000);if(x&&x.ok&&((x.lastSync||'')!==before||sigRows(x.rows)===want))ok=x}
       const tF=performance.now();
+      if(ok&&C.m){say('Đang cập nhật tab “Thu theo tháng”…',false,true);
+        const MK=cy+'-'+String(SM).padStart(2,'0'),paid=rows.slice(1).reduce((a,r)=>a+(Number(r[12])||0),0);
+        const x=await jp(C.ep+'?action=read&tab='+encodeURIComponent('Thu theo tháng'),9000);
+        if(x&&x.ok){const map={};(x.rows||[]).forEach(r=>{const k=String(r&&r[0]||'').trim();if(/^\d{4}-\d{2}$/.test(k))map[k]=[k,Number(String(r[1]).replace(/[^\d]/g,''))||0,r[2]||'']});
+          map[MK]=[MK,paid,'Nút API lúc '+new Date().toLocaleString('vi-VN',{hour12:false})];
+          await fetch(C.ep,{method:'POST',mode:'no-cors',redirect:'follow',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({tab:'Thu theo tháng',headers:['Tháng','Đã nộp trong kỳ (₫)','Ghi nhận'],rows:Object.keys(map).sort().map(k=>map[k]),token:pw,source:C.src+'-monthly',sentAt:new Date().toISOString()})})}}
       if(ok){try{localStorage.setItem(C.k,pw)}catch(e){}}else{try{localStorage.removeItem(C.k)}catch(e){}}
       const apiT=tC-tA,nc=navigator.connection||{};
       const speed=apiT<2500?'🟢 Nhanh':apiT<6000?'🟡 Bình thường':'🔴 Chậm';
