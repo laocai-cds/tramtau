@@ -1975,18 +1975,47 @@ ${zero.length?`<p>Đối với ${zero.length} đơn vị chưa có đảng viên
 <div class="ft"><div class="nn"><u>Nơi nhận:</u><br>- Thường trực Đảng ủy xã (b/c);<br>- Các đảng bộ, chi bộ trực thuộc;<br>- Lưu.</div><div class="sg">NGƯỜI LẬP BÁO CÁO</div></div>
 </body></html>`}
 function downloadFile(name,type,data){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['﻿',data],{type}));a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000)}
+function reportYearHTML(y){/* báo cáo cả năm: tổng hợp các tháng + kết quả theo đơn vị */
+  const fm=n=>num(n),pc=n=>(n*100).toFixed(1).replace(/\.0$/,'').replace('.',',')+'%',ck=curKey();
+  const rowsOf=k=>k===ck?liveUnits:(msnap[k]?msnap[k].rows:null);
+  const M=[];let cum=0,last=0;
+  for(let m=1;m<=12;m++){const k=y+'-'+String(m).padStart(2,'0');if(k>ck)break;const R=rowsOf(k);
+    const money=monthly[k]?monthly[k].cum:(R?R.reduce((a,r)=>a+v(r,'paid'),0):null);
+    if(money==null){M.push({m,k,has:false});continue}
+    cum+=money;last=m;
+    const due=R?R.reduce((a,r)=>a+v(r,'due'),0):null,pd=R?R.reduce((a,r)=>a+v(r,'paidCount'),0):null;
+    M.push({m,k,has:true,R,money,cum,due,pd})}
+  const H=M.filter(x=>x.has),best=H.slice().sort((a,b)=>b.money-a.money)[0];
+  const U=new Map();H.forEach(x=>{if(!x.R)return;x.R.forEach(r=>{const key=nkey(nm(r));let o=U.get(key);if(!o){o={name:nm(r),paid:0,months:0,done:0};U.set(key,o)}o.paid+=v(r,'paid');o.months++;if(cls(r)==='complete')o.done++})});
+  const UL=[...U.values()].sort((a,b)=>b.paid-a.paid||b.done-a.done);
+  const d=new Date(),dateStr='ngày '+d.getDate()+' tháng '+(d.getMonth()+1)+' năm '+d.getFullYear();
+  const td=s=>'<td class="c">'+s+'</td>';
+  const t1=M.filter(x=>x.m<=Math.max(last,1)).map(x=>'<tr>'+td('Tháng '+x.m)+(x.has?td(x.due==null?'—':fm(x.due))+td(x.pd==null?'—':fm(x.pd))+td(x.due?pc(x.pd/x.due):'—')+'<td class="n">'+fm(x.money)+'</td><td class="n">'+fm(x.cum)+'</td>':'<td class="c" colspan="5">Chưa có số liệu</td>')+'</tr>').join('');
+  const t2=UL.map((o,i)=>'<tr>'+td(i+1)+'<td>'+esc(o.name)+'</td>'+td(o.done+'/'+o.months)+'<td class="n">'+fm(o.paid)+'</td></tr>').join('');
+  const css='@page{size:A4;margin:18mm 16mm}body{font:14px/1.5 "Noto Serif","Times New Roman",Times,serif;color:#1a1a1a;background:#fff;margin:0 auto;padding:22px 30px;max-width:780px}.top{display:flex;justify-content:space-between;align-items:flex-start;gap:20px}.top .l{flex:1;text-align:center;font-weight:700;font-size:13px}.top .r{flex:1.1;text-align:center}.top .r b{display:inline-block;font-size:16px;padding-bottom:4px;border-bottom:1px solid #333}.top .r i{display:block;margin-top:10px;font-size:14px}.tt{text-align:center;margin:26px 0 8px}.tt h1{font-size:18px;margin:0}.tt h2{font-size:15px;margin:2px 0}.tt .src{font-style:italic;color:#555;font-size:12.5px;margin-top:6px}h3{color:#8f1018;font-size:15px;text-transform:uppercase;margin:20px 0 6px}p{margin:0 0 8px;text-align:justify;text-indent:28px}.cap{font-weight:700;margin:12px 0 4px;font-size:13.5px;text-indent:0;break-after:avoid;page-break-after:avoid}table{border-collapse:collapse;width:100%;font-size:12.5px;margin-bottom:10px}th{background:#8f1018;color:#fff;padding:5px 6px;border:1px solid #c9a0a3;text-align:center}td{border:1px solid #c9ccd2;padding:3px 7px}tr:nth-child(even) td{background:#f6f7f9}td.c{text-align:center}td.n{text-align:right}tr{page-break-inside:avoid}.ft{display:flex;justify-content:space-between;margin-top:26px;page-break-inside:avoid}.ft .nn{font-size:13px}.ft .nn u{font-size:15px}.ft .sg{width:40%;text-align:center;font-weight:700}';
+  return '<!doctype html><html lang="vi"><head><meta charset="utf-8"><title>Báo cáo thu nộp đảng phí năm '+y+'</title><style>'+css+'</style></head><body>'+
+  '<div class="top"><div class="l">ĐẢNG BỘ XÃ TRẠM TẤU<br>*</div><div class="r"><b>ĐẢNG CỘNG SẢN VIỆT NAM</b><i>Trạm Tấu, '+dateStr+'</i></div></div>'+
+  '<div class="tt"><h1>BÁO CÁO</h1><h2>tình hình thu nộp đảng phí năm '+y+'</h2><div>-----</div><div class="src">Nguồn số liệu: bảng theo dõi thu nộp đảng phí trên môi trường điện tử (kỳ báo cáo: năm '+y+(last?', từ tháng 1 đến hết tháng '+last:'')+')</div></div>'+
+  '<h3>I. Tình hình chung</h3><p>'+(H.length?'Năm '+y+', Đảng bộ xã Trạm Tấu đã ghi nhận số liệu thu nộp đảng phí của '+H.length+' tháng; tổng số tiền đảng phí đã nộp từ đầu năm đến hết tháng '+last+' là '+fm(cum)+' đồng'+(best&&H.length>1?', trong đó tháng '+best.m+' thu cao nhất với '+fm(best.money)+' đồng':'')+'.':'Năm '+y+' chưa có số liệu thu nộp đảng phí.')+'</p>'+
+  '<div class="cap">Bảng 1. Thu nộp đảng phí theo tháng năm '+y+'</div><table><thead><tr><th>Tháng</th><th>ĐV phải nộp</th><th>ĐV đã nộp</th><th>Tỷ lệ</th><th>Đã nộp trong kỳ (đ)</th><th>Lũy kế (đ)</th></tr></thead><tbody>'+t1+'<tr><td class="c"><b>Cả năm</b></td><td colspan="3"></td><td class="n"><b>'+fm(cum)+'</b></td><td></td></tr></tbody></table>'+
+  (UL.length?'<h3>II. Kết quả theo đơn vị</h3><p>Tổng hợp '+UL.length+' đảng bộ, chi bộ trực thuộc theo tổng số tiền đảng phí đã nộp trong năm; cột “Tháng hoàn thành” là số tháng đơn vị có 100% đảng viên phải nộp đã nộp trên số tháng có số liệu.</p><div class="cap">Bảng 2. Kết quả thu nộp theo đơn vị năm '+y+'</div><table><thead><tr><th style="width:40px">TT</th><th>Đơn vị</th><th>Tháng hoàn thành</th><th>Tiền đã nộp (đ)</th></tr></thead><tbody>'+t2+'</tbody></table>':'')+
+  '<div class="ft"><div class="nn"><u>Nơi nhận:</u><br>- Thường trực Đảng ủy xã (b/c);<br>- Các đảng bộ, chi bộ trực thuộc;<br>- Lưu.</div><div class="sg">NGƯỜI LẬP BÁO CÁO</div></div></body></html>'}
 function openReportDialog(){
   let d=$('#rptDlg');if(d)d.remove();
-  const keys=[...new Set([curKey(),...Object.keys(msnap)])].sort().reverse();
-  const def=viewingPast()?viewKey:curKey();
+  const ck=curKey(),cy=+ck.slice(0,4),dk=viewingPast()?viewKey:ck;
+  const years=[...new Set([cy,MONTH_Y0,...Object.keys(monthly).map(k=>+k.slice(0,4)),...Object.keys(msnap).map(k=>+k.slice(0,4))])].filter(y=>y<=cy).sort((a,b)=>b-a);
   d=document.createElement('div');d.id='rptDlg';d.className='rptdlg';
-  d.innerHTML=`<div class="rptbox" role="dialog" aria-label="Tạo báo cáo"><h3>Tạo báo cáo</h3>
-  <label class="f" for="rptMonth">Kỳ báo cáo</label><select class="input" id="rptMonth">${keys.map(k=>`<option value="${k}"${k===def?' selected':''}>Tháng ${+k.slice(5)}/${k.slice(0,4)}${k===curKey()?' (hiện tại)':''}</option>`).join('')}</select>
-  <div class="rptact"><button class="btn solid" data-f="pdf" type="button">In / Lưu PDF</button><button class="btn" data-f="doc" type="button">Tải Word (.doc)</button><button class="btn" data-f="xls" type="button">Tải Excel (.xls)</button></div>
-  <button class="btn rptclose" type="button">Đóng</button></div>`;
+  d.innerHTML='<div class="rptbox" role="dialog" aria-label="Tạo báo cáo"><h3>Tạo báo cáo</h3><label class="f" for="rptYear">Năm</label><select class="input" id="rptYear">'+years.map(y=>'<option value="'+y+'"'+(y===+dk.slice(0,4)?' selected':'')+'>Năm '+y+'</option>').join('')+'</select><label class="f" for="rptMonth" style="margin-top:10px;display:block">Kỳ báo cáo</label><select class="input" id="rptMonth"></select><div class="rptact"><button class="btn solid" data-f="pdf" type="button">In / Lưu PDF</button><button class="btn" data-f="doc" type="button">Tải Word (.doc)</button><button class="btn" data-f="xls" type="button">Tải Excel (.xls)</button></div><button class="btn rptclose" type="button">Đóng</button></div>';
   document.body.appendChild(d);
+  const fill=y=>{let h='';for(let m=12;m>=1;m--){const k=y+'-'+String(m).padStart(2,'0');if(k>ck)continue;const has=k===ck||msnap[k]||monthly[k];h+='<option value="'+k+'"'+(k===dk?' selected':'')+'>Tháng '+m+'/'+y+(k===ck?' (hiện tại)':has?'':' · chưa có số liệu')+'</option>'}h+='<option value="'+y+'">Cả năm '+y+' (tổng hợp các tháng)</option>';$('#rptMonth').innerHTML=h};
+  fill(+dk.slice(0,4));$('#rptYear').onchange=e=>fill(+e.target.value);
   d.onclick=e=>{if(e.target===d||e.target.classList.contains('rptclose'))d.remove()};
-  d.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{const k=$('#rptMonth').value,f=b.dataset.f,html=reportHTML(k),base='bao-cao-dang-phi-tram-tau-'+k;
+  d.querySelectorAll('[data-f]').forEach(b=>b.onclick=async()=>{const k=$('#rptMonth').value,f=b.dataset.f,btns=d.querySelectorAll('[data-f]');let html;btns.forEach(x=>x.disabled=true);
+    try{if(/^\d{4}$/.test(k)){const y=+k,want=[];for(let m=1;m<=12;m++){const kk=y+'-'+String(m).padStart(2,'0');if(kk<ck&&!msnap[kk])want.push(kk)}
+        if(want.length){toast('Đang tải số liệu các tháng năm '+y+'…');await Promise.all(want.map(loadMonthTab))}html=reportYearHTML(y)}
+      else{if(k!==ck&&!msnap[k]){toast('Đang tải số liệu tháng '+(+k.slice(5))+'/'+k.slice(0,4)+'…');if(!(await loadMonthTab(k))){toast('Chưa có số liệu tháng '+(+k.slice(5))+'/'+k.slice(0,4)+' (sheet “'+monthTab(k)+'”). Dùng nút API chọn tháng đó để lấy bổ sung.');return}}html=reportHTML(k)}}
+    finally{btns.forEach(x=>x.disabled=false)}
+    const base='bao-cao-dang-phi-tram-tau-'+k;
     if(f==='doc')downloadFile(base+'.doc','application/msword',html);
     else if(f==='xls')downloadFile(base+'.xls','application/vnd.ms-excel',html);
     else{const ov=document.createElement('div');ov.className='rptov';ov.innerHTML='<div class="rx"><span>Xem trước báo cáo</span><span><button type="button" id="rptPrint">In / Lưu PDF</button> <button type="button" id="rptX">Đóng</button></span></div><iframe title="Báo cáo"></iframe>';document.body.appendChild(ov);
