@@ -1556,7 +1556,7 @@ function pickMonth(m){selMonth=m;const k=selYear+'-'+String(m).padStart(2,'0');
 function renderMonthly(){
   const el=$('#monthChart');if(!el)return;
   const now=new Date(),ck=mkey(now);
-  const years=[...new Set([now.getFullYear(),...Object.keys(monthly).map(k=>+k.slice(0,4))])].sort((a,b)=>b-a);
+  const years=[...new Set([MONTH_Y0,now.getFullYear(),now.getFullYear()+1,...Object.keys(monthly).map(k=>+k.slice(0,4))])].sort((a,b)=>b-a);// luôn có sẵn năm sau (vd. 2027)
   if(selYear==null||!years.includes(selYear))selYear=now.getFullYear();
   const y=selYear,S=monthlySeries(y);
   if(selMonth==null)selMonth=(viewKey&&+viewKey.slice(0,4)===y?+viewKey.slice(5):(y===now.getFullYear()?now.getMonth()+1:12));
