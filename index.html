@@ -234,6 +234,18 @@ a{color:var(--son)}
 .mcol.sel i{background:linear-gradient(180deg,var(--son-l),var(--son-d))}
 .mcol.sel em{color:var(--son);font-weight:700}
 .mcol.none i{background:var(--rule-2)}
+.mchart{position:relative}
+.mtrend{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;overflow:visible;animation:mtfade .6s .7s both}
+@keyframes mtfade{from{opacity:0}to{opacity:1}}
+.mtrend path{fill:none;stroke:#1e6fd9;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 1px 1px #0003)}
+.mtrend circle{fill:#fff;stroke:#1e6fd9;stroke-width:2}
+.mtrend circle.s{fill:#1e6fd9;r:4.5}
+.mdelta{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:8px;margin-top:2px}
+.mdelta span{text-align:center;font-weight:700;font-size:10.5px;line-height:1.4;color:var(--muted,#667070);white-space:nowrap}
+.mdelta span.up{color:#1f7a3d}.mdelta span.dn{color:#c1121f}
+.msum{margin:10px 0 2px;padding:9px 12px;border-radius:10px;background:color-mix(in srgb,var(--lac,var(--son,#b3141c)) 7%,#fff);border:1px solid color-mix(in srgb,var(--lac,var(--son,#b3141c)) 22%,#fff);color:var(--ink,#1d2326);font-size:13px;line-height:1.5}
+.msum b{font-weight:800}.msum .up{color:#1f7a3d}.msum .dn{color:#c1121f}
+@media(max-width:700px){.mdelta{gap:4px}.mdelta span{font-size:10px;overflow:visible}.mdelta span:not(.s){visibility:hidden}}
 .mcol:focus-visible{outline:2px solid var(--son);outline-offset:2px}
 .mlab{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:8px;margin-top:7px;font-size:11px;color:var(--muted);text-align:center}
 .mlab .sel{color:var(--son);font-weight:700}.mlab .cur{color:#8a6b0f}
@@ -1584,11 +1596,27 @@ function renderMonthly(){
   const mx=Math.max(1,...S.map(x=>x.v));
   el.innerHTML=S.map(x=>`<button type="button" class="mcol${x.m===selMonth?' sel':''}${x.k===ck?' cur':''}${x.has?'':' none'}" data-m="${x.m}" title="Tháng ${x.m}: ${x.has?money(x.v):'chưa có số liệu'}"><em>${x.has?mshort(x.v):''}</em><i style="height:${x.has?Math.max(3,x.v/mx*118):3}px"></i></button>`).join('');
   el.querySelectorAll('.mcol').forEach(b=>b.onclick=()=>pickMonth(+b.dataset.m));
+  const drawTrend=()=>{let sv=el.querySelector('.mtrend');if(sv)sv.remove();
+    const H=el.clientHeight,W=el.clientWidth,pts=[];
+    el.querySelectorAll('.mcol').forEach((c,i)=>{const x=S[i];if(!x.has)return;const h=Math.max(3,x.v/mx*118);pts.push({m:x.m,x:c.offsetLeft+c.offsetWidth/2,y:H-h-1})});
+    if(pts.length<2)return;
+    sv=document.createElementNS('http://www.w3.org/2000/svg','svg');sv.setAttribute('class','mtrend');sv.setAttribute('viewBox','0 0 '+W+' '+H);sv.setAttribute('aria-hidden','true');
+    let d='M'+pts[0].x+' '+pts[0].y;for(let i=1;i<pts.length;i++){const a=pts[i-1],b=pts[i],mx2=(a.x+b.x)/2;d+=' C'+mx2+' '+a.y+' '+mx2+' '+b.y+' '+b.x+' '+b.y}
+    sv.innerHTML='<path d="'+d+'"/>'+pts.map(p=>'<circle cx="'+p.x+'" cy="'+p.y+'" r="3.2"'+(p.m===selMonth?' class="s"':'')+'/>').join('');
+    el.appendChild(sv)};
+  drawTrend();if(!window.__mtRs){window.__mtRs=1;addEventListener('resize',()=>{clearTimeout(window.__mtT);window.__mtT=setTimeout(()=>{try{renderMonthly()}catch(e){}},150)})}
   let lab=$('#monthLab');if(!lab){lab=document.createElement('div');lab.id='monthLab';lab.className='mlab';el.after(lab)}
   lab.innerHTML=S.map(x=>`<span class="${x.m===selMonth?'sel':''}${x.k===ck?' cur':''}">T${x.m}</span>`).join('');
+  const dl=S.map((x,i)=>{const p=[...S.slice(0,i)].filter(z=>z.has).pop();if(!x.has||!p||p.v<=0)return'<span>·</span>';const d=(x.v-p.v)/p.v*100;const ad=Math.abs(d);return`<span class="${d>=0?'up':'dn'}${x.m===selMonth?' s':''}" title="So với T${p.m}">${d>=0?'▲':'▼'}${ad>999?'>999':ad.toFixed(0)}%</span>`});
+  let dr=$('#monthDelta');if(!dr){dr=document.createElement('div');dr.id='monthDelta';dr.className='mdelta';lab.after(dr)}
+  dr.innerHTML=dl.join('');
+  let sm=$('#monthSum');if(!sm){sm=document.createElement('div');sm.id='monthSum';sm.className='msum';dr.after(sm)}
   const prev=[...S].filter(x=>x.m<sel.m&&x.has).pop();
   const upto=S.filter(x=>x.m<=sel.m).reduce((a,x)=>a+x.v,0);
   let cmp='—',cc='';if(sel.has&&prev&&prev.v>0){const d=(sel.v-prev.v)/prev.v*100;cmp=(d>=0?'▲ +':'▼ ')+d.toFixed(1).replace('.',',')+'%';cc=d>=0?'up':'dn'}
+  if(!sel.has)sm.innerHTML='Tháng '+sel.m+'/'+y+' chưa có số liệu.';
+  else if(!prev||prev.v<=0)sm.innerHTML='Tháng '+sel.m+'/'+y+' thu <b>'+money(sel.v)+'</b>; chưa có tháng trước để so sánh.';
+  else{const d=(sel.v-prev.v)/prev.v*100,ab=Math.abs(sel.v-prev.v);sm.innerHTML='Tháng '+sel.m+'/'+y+' thu <b>'+money(sel.v)+'</b>, <b class="'+(d>=0?'up':'dn')+'">'+(d>=0?'tăng ':'giảm ')+Math.abs(d).toFixed(1).replace('.',',')+'%</b> ('+(d>=0?'+':'−')+money(ab)+') so với tháng '+prev.m+'.'}
   $('#monthKpi').innerHTML=`<div style="--c:#2563eb"><small>Thu trong tháng ${sel.m}/${y}</small><b>${sel.has?money(sel.v):'Chưa có số liệu'}</b></div><div style="--c:#16a34a"><small>So với tháng trước${prev?' (T'+prev.m+')':''}</small><b class="${cc}">${cmp}</b></div><div style="--c:#c8282f"><small>Lũy kế từ đầu năm đến hết T${sel.m}</small><b>${money(upto)}</b></div>`;
   const yTot=S.reduce((a,x)=>a+x.v,0),ly=monthly[(y-1)+'-'+String(sel.m).padStart(2,'0')];
   $('#monthNote').textContent='Chọn năm, tháng ở góc phải hoặc bấm vào cột. Mỗi cột là số đã nộp của kỳ tháng đó; lũy kế = cộng các tháng từ T1. Cả năm '+y+': '+money(yTot)+(ly?' · Cùng kỳ T'+sel.m+'/'+(y-1)+': '+money(ly.cum):'')+'. Tháng nào chưa có cột: dùng nút API chọn tháng đó để lấy bổ sung.';
