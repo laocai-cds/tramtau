@@ -253,6 +253,14 @@ a{color:var(--son)}
 .remlist .rr:last-child{border-bottom:0}.remlist .rr em{font-style:normal;font-size:12px;font-weight:700;padding:2px 8px;border-radius:99px;justify-self:start}.remlist .ok{background:#e4f4e4;color:#1f7a3d}.remlist .no{background:#fde8e8;color:#b3141c}
 .remlist .rr small{color:var(--muted)}.remhelp{margin-top:14px;font-size:13px}.remhelp summary{cursor:pointer;font-weight:700;color:var(--son-d,var(--lac,#b3141c))}.remhelp ol{padding-left:20px;margin:8px 0}
 @media(max-width:700px){.remgrid{grid-template-columns:1fr}.remgrid>div{grid-column:auto!important}.remlist .rr{grid-template-columns:1fr auto}.remlist .rr small{grid-column:1/-1}}
+.fc .mkpi{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:14px}
+.fc .fk{border:1px solid var(--rule);border-left:4px solid var(--c);border-radius:10px;padding:10px 14px;background:#fafafa}.fc .fk small{display:block;color:var(--muted);font-size:12px}.fc .fk b{display:block;font-size:24px;font-weight:800;line-height:1.3}.fc .fk b.dn{color:#c1121f}.fc .fk b.up{color:#1f7a3d}.fc .fk i{font-style:normal;font-size:12px;color:var(--muted)}
+.fgrid{display:grid;grid-template-columns:1.25fr 1fr;gap:18px}html:not(.is-admin) .fgrid{grid-template-columns:1fr}
+.fleg{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:4px}.fleg span:before{content:"";display:inline-block;width:18px;height:3px;margin-right:6px;vertical-align:middle;border-radius:2px;background:var(--c)}
+.fh{margin:0 0 8px;font-size:14px}.frows>div{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr) auto;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--rule-2,#eee);font-size:13px}.frows small{color:var(--muted)}
+.frows em{font-style:normal;font-size:11.5px;font-weight:700;padding:2px 9px;border-radius:99px}.frows .hi{background:#fde8e8;color:#b3141c}.frows .md{background:#fff3cd;color:#8a6208}.frows .lo{background:#e4f4e4;color:#1f7a3d}
+.fc[hidden]{display:none!important}
+@media(max-width:900px){.fgrid{grid-template-columns:1fr}.fc .mkpi{grid-template-columns:1fr}}
 .mcol:focus-visible{outline:2px solid var(--son);outline-offset:2px}
 .mlab{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:8px;margin-top:7px;font-size:11px;color:var(--muted);text-align:center}
 .mlab .sel{color:var(--son);font-weight:700}.mlab .cur{color:#8a6b0f}
@@ -1159,6 +1167,15 @@ go();document.addEventListener('DOMContentLoaded',go);
     </div>
 
     <p class="glabel">Cần đôn đốc và dẫn đầu</p>
+    <div class="panel pad fc" id="fcPanel" style="margin-bottom:20px" hidden>
+      <div class="ph"><h2>Dự báo cuối tháng</h2><small id="fcSub"></small></div>
+      <div class="mkpi" id="fcKpi"></div>
+      <div class="fgrid" id="fcGrid">
+        <div><div id="fcChart"></div><div class="fleg"><span style="--c:#2f7d4f">Thực tế</span><span style="--c:#c1121f">Dự báo</span><span style="--c:#9aa">Tháng trước (so sánh)</span></div></div>
+        <div class="admin-only"><h3 class="fh">Chi bộ có nguy cơ không kịp</h3><div class="frows" id="fcRows"></div><p class="mnote" id="fcCnt" style="margin-top:8px"></p></div>
+      </div>
+      <p class="mnote" id="fcNote"></p>
+    </div>
     <div class="g g-11">
       <div class="panel pad" id="trang-thai">
         <div class="ph"><h2>Trạng thái các đơn vị</h2><small>Đơn vị còn hồ sơ tồn nhiều nhất lên đầu</small></div>
@@ -2512,6 +2529,67 @@ if($('#remSave')){
     if(ok){try{localStorage.setItem('tmt_token',tk)}catch(_){}m.className='hint';m.textContent='Đã lưu cài đặt nhắc việc lên Google Sheet.';toast('Đã lưu cài đặt nhắc việc.')}
     else bad('Chưa lưu được. Kiểm tra mã đồng bộ rồi thử lại.')};
   setTimeout(remLoad,2500)}
+/* ===== Dự báo cuối tháng ===== */
+const FC_TAB='Lịch sử ngày',FC_TARGET=0.9;let fcHist=null,fcDl=25;
+const fcDay=x=>{const s=String(x||'').trim();const m=s.match(/^(\d{4})-(\d{2})-(\d{2})$/);if(m)return s;const d=new Date(s);if(isNaN(d))return null;const p=n=>String(n).padStart(2,'0');return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())};
+async function fcLoad(){const ep=sheetEndpoint();if(!ep)return;
+  try{const d=await jsonp(ep+'?action=read&tab='+encodeURIComponent(FC_TAB),15000);
+    if(d&&d.ok&&Array.isArray(d.rows)){fcHist={};d.rows.forEach(r=>{const day=fcDay(r[0]);if(!day||!r[1])return;(fcHist[day]||(fcHist[day]={}))[nkey(r[1])]=[pnum(r[2]),pnum(r[3])]})}}catch(_){}
+  try{const d=await jsonp(ep+'?action=read&tab='+encodeURIComponent(REM_TAB),9000);const r=d&&d.ok&&d.rows&&d.rows[0];if(r){const x=parseInt(r[1]);if(x>=1&&x<=31)fcDl=x}}catch(_){}
+  fcRender()}
+/* chuỗi tỷ lệ theo ngày của một tháng: key=null → toàn xã, hoặc khóa đơn vị */
+function fcSeries(ym,key){const out=[];Object.keys(fcHist||{}).filter(d=>d.startsWith(ym)).sort().forEach(d=>{let due=0,paid=0;const o=fcHist[d];
+    if(key){const e=o[key];if(!e)return;due=e[0];paid=e[1]}else for(const k in o){due+=o[k][0];paid+=o[k][1]}
+    if(due>0)out.push([+d.slice(8),Math.min(1,paid/due)])});return out}
+const fcAt=(s,d)=>{let r=null;for(const [x,y] of s){if(x<=d)r=y;else break}return r};
+function fcForecast(ym,key,t,D,pt){
+  const past=Object.keys(fcHist||{}).map(d=>d.slice(0,7)).filter((m,i,a)=>m<ym&&a.indexOf(m)===i).sort().reverse();
+  const gr=[],cmp=[];past.forEach(m=>{const s=fcSeries(m,key);if(!s.length||s[s.length-1][0]<D-2)return;const a=fcAt(s,t),b=fcAt(s,D);if(a!=null&&b!=null){gr.push(b-a);cmp.push(s)}});
+  const cur=fcSeries(ym,key);
+  let add,lo,hi,mode;
+  if(gr.length){add=gr.reduce((a,b)=>a+b,0)/gr.length;lo=Math.min(...gr);hi=Math.max(...gr);mode='history';if(gr.length===1){lo=add*0.75;hi=add*1.25}}
+  else{let slope;if(cur.length>=3&&cur[cur.length-1][0]>cur[0][0]){slope=(cur[cur.length-1][1]-cur[0][1])/(cur[cur.length-1][0]-cur[0][0]);mode='trend'}else{slope=t>0?pt/t:0;mode='rough'}
+    add=Math.max(0,slope)*(D-t);lo=add*0.65;hi=add*1.35}
+  const f=x=>Math.max(pt,Math.min(1,pt+Math.max(0,x)));
+  return{f:f(add),lo:f(lo),hi:f(hi),mode,n:gr.length,prev:cmp.length?cmp[0]:null,cur}}
+const fcP=x=>Math.round(x*100)+'%';
+function fcRender(){const P=$('#fcPanel');if(!P)return;
+  const late=units.filter(r=>v(r,'due')>0);if(!late.length||viewingPast()){P.hidden=true;return}
+  const now=new Date(),ym=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0'),t=now.getDate(),dim=new Date(now.getFullYear(),now.getMonth()+1,0).getDate(),D=Math.min(fcDl,dim);
+  const T=totals(),pt=T.due?T.paidCount/T.due:0;
+  if(!fcHist)fcHist={};
+  const F=fcForecast(ym,null,Math.min(t,D),D,pt);
+  P.hidden=false;
+  const left=D-t,days=Math.min(t,D);
+  const slope=F.cur.length>=2&&F.cur[F.cur.length-1][0]>F.cur[0][0]?(pt-F.cur[0][1])/(t-F.cur[0][0]):(t>0?pt/t:0);
+  const need=left>0&&pt<FC_TARGET?(FC_TARGET-pt)/left:0;
+  const lastPrev=F.prev?fcAt(F.prev,D):null;
+  const modeTxt=F.mode==='history'?`Dựa trên ${F.n} tháng có số liệu hằng ngày.`:F.mode==='trend'?'Đang tích lũy số liệu hằng ngày: ước lượng theo tốc độ nộp trong tháng này.':'Chưa có số liệu hằng ngày nên chưa dự báo được. Sau khi bật ghi số liệu hằng ngày trong Apps Script, vài ngày sau dự báo sẽ xuất hiện.';
+  $('#fcSub').textContent=`Ước tính tỷ lệ nộp đến hạn ngày ${D}/${now.getMonth()+1}`;
+  const over=t>=D;
+  $('#fcKpi').innerHTML=`<div class="fk" style="--c:#d99a06"><small>Hôm nay (ngày ${t}/${now.getMonth()+1}${over?', đã qua hạn':', còn '+left+' ngày đến hạn'})</small><b>${pct(pt)}</b><i>đảng viên đã nộp</i></div>`
+   +`<div class="fk" style="--c:${F.mode==='rough'&&!over?'#9aa':(F.f>=FC_TARGET?'#2f7d4f':'#c1121f')}"><small>${over?'Tỷ lệ tại hạn nộp':'Dự báo đến hạn '+D+'/'+(now.getMonth()+1)}</small><b class="${F.mode==='rough'&&!over?'':(F.f>=FC_TARGET?'up':'dn')}">${over?pct(pt):(F.mode==='rough'?'Chưa đủ dữ liệu':'≈ '+fcP(F.f))}</b><i>${over?'':(F.mode==='rough'?'đang tích lũy số liệu hằng ngày':'khoảng '+fcP(F.lo)+' – '+fcP(F.hi))}${lastPrev!=null&&F.mode!=='rough'?(over?'':' · ')+(F.f<lastPrev?'thấp':'cao')+' hơn tháng trước ('+fcP(lastPrev)+')':''}</i></div>`
+   +`<div class="fk" style="--c:#2f7d4f"><small>Để đạt mục tiêu ${fcP(FC_TARGET)}</small><b class="${need>slope*1.15?'dn':'up'}">${over?(pt>=FC_TARGET?'Đã đạt':'Chưa đạt'):(pt>=FC_TARGET?'Đã đạt':'+'+(need*100).toFixed(1).replace('.',',')+'%/ngày')}</b><i>${F.mode==='rough'?'chưa đủ số liệu hằng ngày để tính tốc độ nộp':'hiện đang nộp +'+(slope*100).toFixed(1).replace('.',',')+'%/ngày'}</i></div>`;
+  /* biểu đồ */
+  const W=640,H=276,x=d=>46+(d-1)/Math.max(1,D-1)*584,y=r=>248-r*230,pts=a=>a.map(([d,r])=>x(d).toFixed(1)+','+y(r).toFixed(1)).join(' ');
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block" role="img" aria-label="Đường tiến độ nộp trong tháng và dự báo"><g font-size="11" fill="#889">${[1,.75,.5,.25,0].map(r=>`<text x="6" y="${y(r)+4}">${Math.round(r*100)}%</text>`).join('')}</g><g stroke="#eee">${[1,.75,.5,.25].map(r=>`<line x1="46" y1="${y(r)}" x2="630" y2="${y(r)}"/>`).join('')}<line x1="46" y1="248" x2="630" y2="248" stroke="#bbb"/></g>`;
+  s+=`<line x1="46" y1="${y(FC_TARGET)}" x2="630" y2="${y(FC_TARGET)}" stroke="#2f8f4e" stroke-dasharray="5 4"/><text x="560" y="${y(FC_TARGET)-5}" font-size="11" fill="#1f7a3d">Mục tiêu ${fcP(FC_TARGET)}</text>`;
+  if(F.prev){const pp=F.prev.filter(([d])=>d<=D);if(pp.length>1)s+=`<polyline fill="none" stroke="#9aa" stroke-width="2.4" stroke-dasharray="2 4" points="${pts(pp)}"/>`}
+  if(!over&&F.mode!=='rough'){s+=`<polygon points="${x(days).toFixed(1)},${y(pt).toFixed(1)} ${x(D).toFixed(1)},${y(F.hi).toFixed(1)} ${x(D).toFixed(1)},${y(F.lo).toFixed(1)}" fill="#c1121f" opacity=".12"/><polyline fill="none" stroke="#c1121f" stroke-width="2.6" stroke-dasharray="7 5" points="${x(days).toFixed(1)},${y(pt).toFixed(1)} ${x(D).toFixed(1)},${y(F.f).toFixed(1)}"/><circle cx="${x(D)}" cy="${y(F.f)}" r="5" fill="#c1121f"/><text x="${x(D)-40}" y="${y(F.f)-9}" font-size="11" fill="#c1121f" font-weight="700">≈${fcP(F.f)}</text>`}
+  const act=F.cur.filter(([d])=>d<days);act.push([days,pt]);
+  if(act.length>1)s+=`<polyline fill="none" stroke="#2f7d4f" stroke-width="3" points="${pts(act)}"/>`;
+  s+=`<circle cx="${x(days)}" cy="${y(pt)}" r="5" fill="#2f7d4f"/><text x="${Math.min(x(days)-24,520)}" y="${y(pt)-10}" font-size="11" fill="#1d4d33" font-weight="700">Hôm nay ${pct(pt)}</text><g font-size="11" fill="#889"><text x="46" y="268">1/${now.getMonth()+1}</text><text x="${x(D)-52}" y="268">${D}/${now.getMonth()+1} (hạn)</text></g></svg>`;
+  $('#fcChart').innerHTML=s;
+  /* từng đơn vị */
+  if(F.mode==='rough'&&!over){$('#fcRows').innerHTML='<small>Danh sách nguy cơ sẽ hiện khi đã có số liệu hằng ngày của vài ngày (Apps Script ghi mỗi ngày lúc 23h).</small>';$('#fcCnt').textContent='';$('#fcNote').textContent=modeTxt+' Dự báo chỉ mang tính tham khảo.';return}
+  const rows=late.filter(r=>cls(r)!=='complete').map(r=>{const key=nkey(nm(r)),p=v(r,'progress'),u=fcForecast(ym,key,Math.min(t,D),D,p);return{r,p,f:over?p:u.f}}).sort((a,b)=>a.f-b.f);
+  const lv=f=>f<.5?['Rất cao','hi']:f<.7?['Cao','hi']:f<.9?['Trung bình','md']:['Thấp','lo'];
+  const cnt={hi:0,md:0,lo:0};rows.forEach(o=>{const c=lv(o.f)[1];cnt[c]++});
+  $('#fcRows').innerHTML=rows.slice(0,6).map(o=>{const l=lv(o.f);return `<div><span>${esc(nm(o.r))}</span><small>${pct(o.p)}${over?'':' → ≈ '+fcP(o.f)}</small><em class="${l[1]}">${l[0]}</em></div>`}).join('')||'<small>Tất cả đơn vị đã hoàn thành.</small>';
+  $('#fcCnt').textContent=`${cnt.hi} đơn vị nguy cơ cao · ${cnt.md} trung bình · ${cnt.lo} thấp`;
+  $('#fcNote').textContent=modeTxt+' Dự báo chỉ mang tính tham khảo.'}
+{const _rm=renderMonthly;renderMonthly=function(){_rm.apply(this,arguments);try{fcRender()}catch(e){}}}
+setTimeout(fcLoad,3200);
 $('#admNt').onclick=ntOpen;
 
 /* ===== Chọn giao diện (admin) — lưu vào tab "Giao diện" ===== */
