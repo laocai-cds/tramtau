@@ -246,6 +246,13 @@ a{color:var(--son)}
 .msum{margin:10px 0 2px;padding:9px 12px;border-radius:10px;background:color-mix(in srgb,var(--lac,var(--son,#b3141c)) 7%,#fff);border:1px solid color-mix(in srgb,var(--lac,var(--son,#b3141c)) 22%,#fff);color:var(--ink,#1d2326);font-size:13px;line-height:1.5}
 .msum b{font-weight:800}.msum .up{color:#1f7a3d}.msum .dn{color:#c1121f}
 @media(max-width:700px){.mdelta{gap:4px}.mdelta span{font-size:10px;overflow:visible}.mdelta span:not(.s){visibility:hidden}}
+.remgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.remchk{display:flex;gap:8px;flex-wrap:wrap}.remchk label{display:flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid var(--rule);border-radius:9px;font-size:13px;cursor:pointer;background:#fff}
+.remchk input{margin:0}.remh{margin:18px 0 8px;font-size:14px}.remh small{font-weight:500;color:var(--muted);margin-left:6px}
+.remlist{border:1px solid var(--rule);border-radius:10px;overflow:hidden}.remlist .rr{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1.3fr) 110px;gap:8px;padding:8px 12px;border-bottom:1px solid var(--rule-2);font-size:13px;align-items:center}
+.remlist .rr:last-child{border-bottom:0}.remlist .rr em{font-style:normal;font-size:12px;font-weight:700;padding:2px 8px;border-radius:99px;justify-self:start}.remlist .ok{background:#e4f4e4;color:#1f7a3d}.remlist .no{background:#fde8e8;color:#b3141c}
+.remlist .rr small{color:var(--muted)}.remhelp{margin-top:14px;font-size:13px}.remhelp summary{cursor:pointer;font-weight:700;color:var(--son-d,var(--lac,#b3141c))}.remhelp ol{padding-left:20px;margin:8px 0}
+@media(max-width:700px){.remgrid{grid-template-columns:1fr}.remgrid>div{grid-column:auto!important}.remlist .rr{grid-template-columns:1fr auto}.remlist .rr small{grid-column:1/-1}}
 .mcol:focus-visible{outline:2px solid var(--son);outline-offset:2px}
 .mlab{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:8px;margin-top:7px;font-size:11px;color:var(--muted);text-align:center}
 .mlab .sel{color:var(--son);font-weight:700}.mlab .cur{color:#8a6b0f}
@@ -1247,6 +1254,31 @@ go();document.addEventListener('DOMContentLoaded',go);
           <div class="thmgrid" id="thmGrid"></div>
           <div class="macts" style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn solid" id="thmSave" type="button">Lưu giao diện</button><button class="btn" id="thmUndo" type="button">Hoàn tác xem trước</button></div>
           <p class="hint" style="margin:10px 0 0" id="thmMsg"></p>
+        </div>
+        <div class="panel pad step" id="remPanel">
+          <div class="ph"><h2>Nhắc việc tự động</h2><button class="btn" id="remReload" type="button">↻ Tải lại</button></div>
+          <p class="hint" style="margin:0 0 12px">Gần hạn nộp, hệ thống tự gửi email nhắc các đơn vị còn thiếu hồ sơ. Việc gửi do Apps Script chạy mỗi ngày (xem hướng dẫn bên dưới), không phụ thuộc có ai mở trang hay không.</p>
+          <div class="remgrid">
+            <div><label class="f" for="remOn">Trạng thái</label><select class="input" id="remOn"><option value="Có">Bật nhắc việc</option><option value="Không">Tạm tắt</option></select></div>
+            <div><label class="f" for="remDay">Hạn nộp hằng tháng (ngày)</label><input class="input" id="remDay" type="number" min="1" max="31" value="25"></div>
+            <div><label class="f" for="remHour">Giờ gửi</label><select class="input" id="remHour"></select></div>
+          </div>
+          <label class="f" style="display:block;margin-top:12px">Nhắc trước hạn</label>
+          <div class="remchk" id="remBefore"><label><input type="checkbox" value="7">7 ngày</label><label><input type="checkbox" value="5" checked>5 ngày</label><label><input type="checkbox" value="3">3 ngày</label><label><input type="checkbox" value="2" checked>2 ngày</label><label><input type="checkbox" value="1">1 ngày</label><label><input type="checkbox" value="0" checked>Đúng hạn</label><label><input type="checkbox" value="-1">Sau hạn 1 ngày</label></div>
+          <div class="remgrid" style="margin-top:12px">
+            <div style="grid-column:span 2"><label class="f" for="remCc">Gửi bản sao (CC) tới</label><input class="input" id="remCc" type="email" placeholder="ví dụ: vanphong@gmail.com (không bắt buộc)" autocomplete="off"></div>
+            <div><label class="f" for="remToken">Mã đồng bộ</label><input class="input" id="remToken" type="password" autocomplete="off" placeholder="Mã đồng bộ"></div>
+          </div>
+          <div class="macts" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button class="btn solid" id="remSave" type="button">Lưu cài đặt</button></div>
+          <p class="hint" style="margin:8px 0 0" id="remMsg"></p>
+          <h3 class="remh">Đơn vị sẽ nhận nhắc <small id="remCount"></small></h3>
+          <div id="remList" class="remlist"></div>
+          <details class="remhelp"><summary>Hướng dẫn bật gửi tự động (làm một lần)</summary>
+            <ol><li>Trong Google Sheet của xã, tạo tab <b>Liên hệ nhắc việc</b> với các cột: <b>Đơn vị</b> | <b>Email</b> | <b>Zalo</b> | <b>Ghi chú</b>. Mỗi đơn vị một dòng, tên đơn vị viết đúng như trong bảng số liệu.</li>
+            <li>Mở Apps Script của xã, thêm file mới, dán nội dung <b>apps-script/NhacViec.gs</b> (có trong kho mã của site), lưu lại.</li>
+            <li>Chạy hàm <b>nvSetup</b> một lần và cấp quyền gửi thư. Chạy thử <b>nvTest</b> để nhận 1 thư thử.</li>
+            <li>Bấm “Lưu cài đặt” ở đây; nhắc việc sẽ chạy theo giờ đã chọn. Lịch sử gửi nằm ở tab <b>Nhật ký nhắc việc</b> trong Google Sheet.</li></ol>
+            <p class="hint">Gmail thường gửi tối đa khoảng 100 thư mỗi ngày. Nhắc qua Zalo chưa bật: cần đăng ký Zalo Official Account và gói tin ZNS.</p></details>
         </div>
         <div class="panel pad step" id="statPanel">
           <div class="ph"><h2>Thống kê truy cập và thông báo</h2></div>
@@ -2445,6 +2477,41 @@ $('#admAdd').onclick=()=>{const inp=$('#admEmail'),e=inp.value.trim().toLowerCas
 $('#admEmail').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('#admAdd').click()}});
 $('#admBody').addEventListener('click',e=>{const b=e.target.closest('[data-admdel]');if(!b)return;const em=b.dataset.admdel;
   if(confirm('Xóa quyền quản trị của '+em+'?'))admApply('admin_remove',em)});
+/* ===== Nhắc việc tự động ===== */
+const REM_TAB='Nhắc việc',REM_CT='Liên hệ nhắc việc';let remCt={},remCtOk=null;
+(function(){const h=$('#remHour');if(h)h.innerHTML=Array.from({length:24},(_,i)=>`<option value="${i}"${i===8?' selected':''}>${String(i).padStart(2,'0')}:00</option>`).join('')})();
+function remPaintList(){const el=$('#remList');if(!el)return;
+  const need=r=>v(r,'noRecord')+v(r,'pending')+v(r,'approved');
+  const late=units.filter(r=>v(r,'due')>0&&cls(r)!=='complete').sort((a,b)=>need(b)-need(a));
+  const withMail=late.filter(r=>remCt[nkey(nm(r))]).length;
+  $('#remCount').textContent=late.length?`· ${late.length} đơn vị còn thiếu · ${withMail} đã có email`+(remCtOk===false?' · chưa đọc được tab “'+REM_CT+'”':''):'';
+  el.innerHTML=late.length?late.slice(0,10).map(r=>{const e=remCt[nkey(nm(r))],bits=[];if(v(r,'noRecord'))bits.push(v(r,'noRecord')+' chưa có hồ sơ');if(v(r,'pending'))bits.push(v(r,'pending')+' chưa duyệt');if(v(r,'approved'))bits.push(v(r,'approved')+' chưa nộp');
+    return `<div class="rr"><span>${esc(nm(r))}</span><small>${bits.join(' · ')}</small><em class="${e?'ok':'no'}">${e?'Có email':'Chưa có email'}</em></div>`}).join('')+(late.length>10?`<div class="rr"><small style="grid-column:1/-1">… và ${late.length-10} đơn vị khác</small></div>`:''):'<div class="rr"><small style="grid-column:1/-1">Chưa có đơn vị nào còn thiếu (hoặc chưa có số liệu).</small></div>'}
+function remApply(r){if(!r)return;$('#remOn').value=/^(có|co|1|true|bật|bat)$/i.test(String(r[0]).trim())?'Có':'Không';$('#remDay').value=Math.min(31,Math.max(1,parseInt(r[1])||25));
+  const set=new Set(String(r[2]||'').split(/[,;\s]+/).filter(Boolean));$('#remBefore').querySelectorAll('input').forEach(i=>i.checked=set.has(i.value));
+  $('#remHour').value=String(Math.min(23,Math.max(0,parseInt(r[3])||8)));$('#remCc').value=String(r[4]||'')}
+async function remLoad(){const ep=sheetEndpoint();if(!ep)return;
+  try{const d=await jsonp(ep+'?action=read&tab='+encodeURIComponent(REM_TAB),9000);if(d&&d.ok&&Array.isArray(d.rows)&&d.rows[0])remApply(d.rows[0])}catch(_){}
+  try{const d=await jsonp(ep+'?action=read&tab='+encodeURIComponent(REM_CT),9000);remCt={};if(d&&d.ok&&Array.isArray(d.rows)){remCtOk=true;d.rows.forEach(r=>{if(r[0]&&/@/.test(String(r[1]||'')))remCt[nkey(r[0])]=String(r[1]).trim()})}else remCtOk=false}catch(_){remCtOk=false}
+  remPaintList()}
+if($('#remSave')){
+  try{$('#remToken').value=localStorage.getItem('tmt_token')||''}catch(_){}
+  $('#remReload').onclick=remLoad;
+  $('#remSave').onclick=async()=>{const m=$('#remMsg'),btn=$('#remSave'),bad=t=>{m.textContent=t;m.className='hint fieldmsg bad'};
+    if(!AUTH.isAdmin()){AUTH.ask();return}
+    const tk=$('#remToken').value.trim();if(!tk)return bad('Nhập mã đồng bộ để lưu cài đặt.');
+    const ep=sheetEndpoint();if(!ep)return bad('Chưa kết nối Google Sheet.');
+    const before=[...$('#remBefore').querySelectorAll('input:checked')].map(i=>i.value).join(','),
+      row=[$('#remOn').value,$('#remDay').value,before,$('#remHour').value,$('#remCc').value.trim(),new Date().toLocaleString('vi-VN',{hour12:false})];
+    btn.disabled=true;m.className='hint';m.textContent='Đang gửi lên Google Sheet...';
+    let base='';try{const d0=await jsonp(ep+'?action=read&tab='+encodeURIComponent(REM_TAB),9000);base=d0&&d0.ok&&d0.rows&&d0.rows[0]?String(d0.rows[0][5]||''):''}catch(_){}
+    try{fetch(ep,{method:'POST',mode:'no-cors',redirect:'follow',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({tab:REM_TAB,headers:['Bật','Hạn nộp (ngày)','Nhắc trước (ngày)','Giờ gửi','CC','Cập nhật'],rows:[row],token:tk,idToken:AUTH.t(),source:'website-reminder'})})}catch(_){}
+    let ok=false;for(let i=0;i<4&&!ok;i++){await new Promise(r=>setTimeout(r,i?1800:2200));
+      try{const d=await jsonp(ep+'?action=read&tab='+encodeURIComponent(REM_TAB),9000);const r=d&&d.ok&&d.rows&&d.rows[0];ok=!!(r&&String(r[5]||'')!==base&&String(r[1])===String(row[1]))}catch(_){}}
+    btn.disabled=false;
+    if(ok){try{localStorage.setItem('tmt_token',tk)}catch(_){}m.className='hint';m.textContent='Đã lưu cài đặt nhắc việc lên Google Sheet.';toast('Đã lưu cài đặt nhắc việc.')}
+    else bad('Chưa lưu được. Kiểm tra mã đồng bộ rồi thử lại.')};
+  setTimeout(remLoad,2500)}
 $('#admNt').onclick=ntOpen;
 
 /* ===== Chọn giao diện (admin) — lưu vào tab "Giao diện" ===== */
@@ -3110,6 +3177,7 @@ if(typeof admApply==='function'){const o=admApply;admApply=async function(a,m){l
   const GROUPS=[
     {id:'tc',t:'🛠 Tùy chỉnh',d:'Thông báo · thương hiệu · mục tiêu',p:['#scPanel']},
     {id:'tq',t:'📊 Tổng quan',d:'Truy cập · thông báo',p:['#statPanel']},
+    {id:'nv',t:'⏰ Nhắc việc',d:'Email nhắc gần hạn nộp',p:['#remPanel']},
     {id:'gd',t:'🎨 Giao diện',d:'Màu sắc của site',p:['#thmPanel']},
     {id:'dl',t:'📥 Dữ liệu',d:'Kết nối · nhập Excel · đồng bộ',p:['#endpoint','#drop','#syncBtn','#apiPanel']},
     {id:'pq',t:'🔐 Phân quyền',d:'Tài khoản quản trị',p:['#admPanel']},
