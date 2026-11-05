@@ -2862,7 +2862,8 @@ document.addEventListener('keydown',function(e){const o=ov();if(e.key==='Escape'
 var API='https://script.google.com/macros/s/AKfycbzbbPi7NVH9Ks9zhiyMKAO7hJwUwQYmx8nV05fkRpIhA7r7B5toOymgEuM3VCwe0bWWAg/exec',LS='tt_units';
 var FALLBACK=[['Đảng bộ xã Bảo Thắng','baothang'],['Đảng bộ xã Lương Thịnh','luongthinh'],['Đảng bộ xã Nghĩa Đô','nghiado'],['Đảng bộ xã Phình Hồ','phinhho'],['Đảng bộ xã Võ Lao','volao']].map(function(x){return{name:x[0],url:'https://laocai-cds.github.io/'+x[1]+'/'}});
 var list=FALLBACK.slice();
-function clean(l){return(Array.isArray(l)?l:[]).map(function(u){return{name:String(u&&u.name||'').trim(),url:String(u&&u.url||'').trim()}}).filter(function(u){return u.name&&/^https?:\/\//i.test(u.url)&&!/\/tramtau\/?$/i.test(u.url)&&!/tr[aạ]m\s*t[aấ]u/i.test(u.name)})}
+function fold(t){return String(t).normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/đ/gi,"d")}
+function clean(l){return(Array.isArray(l)?l:[]).map(function(u){return{name:String(u&&u.name||'').trim(),url:String(u&&u.url||'').trim()}}).filter(function(u){return u.name&&/^https?:\/\//i.test(u.url)&&!/(tramtau|tram\s*tau)/i.test(fold(u.url+' '+u.name))})}
 try{var c=JSON.parse(localStorage.getItem(LS)||'null');if(Array.isArray(c)&&c.length)list=clean(c)}catch(_){}
 function esc(t){return String(t).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 function paint(){var g=document.getElementById('lnkGrid');if(!g)return;
