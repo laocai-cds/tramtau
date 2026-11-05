@@ -1036,6 +1036,17 @@ tbody tr:hover td{background:#f5f8ff}
 @media(max-width:1023px){.lnk-ov{padding:0}.lnk-box{border-radius:0;max-height:100%;height:100%}}
 
 @media(max-width:1023px){.mkt-ov{padding:0}.mkt-box{border-radius:0}}
+
+.tabsum{margin-bottom:22px}.tabsum>.ph{margin-bottom:6px}
+.tsTabs{display:flex;gap:6px;border-bottom:2px solid var(--rule);margin:0 0 14px;overflow-x:auto;scrollbar-width:none}.tsTabs::-webkit-scrollbar{display:none}
+.tsTabs button{flex:none;border:0;background:none;padding:10px 18px;font:700 14px inherit;font-family:inherit;color:#667;border-radius:10px 10px 0 0;cursor:pointer;margin-bottom:-2px;border-bottom:3px solid transparent;white-space:nowrap}
+.tsTabs button[hidden]{display:none}.tabsum #monthPanel,.tabsum .tsPane>.fc{margin:0}.tabsum .tsPane>.fc{border:0;box-shadow:none;padding:0;background:none}.tabsum .tsPane>.fc>.ph{display:none}
+.tabsum .tsPane>.tablepanel{margin:0}.tabsum .cols{margin-bottom:0}.tabsum .cols>.panel{border:0;box-shadow:none;padding:0;background:none}.tabsum .cols>.panel>.ph{display:none}
+.tsTabs button:hover{color:var(--son)}.tsTabs button.on{color:var(--son);border-bottom-color:var(--son);background:rgba(179,20,28,.06)}
+.tsPane{display:none}.tsPane.on{display:block}
+.tabsum .tsPane>.panel,.tabsum .tomtat{border:0;box-shadow:none;padding:0;margin:0;background:none;border-radius:0}
+.tabsum .tomtat{border-left:0}.tabsum .tsPane>.panel>.ph{display:none}.tabsum .tsPane>.tomtat>.ph{display:flex;justify-content:flex-end}.tabsum .tsPane>.tomtat>.ph h2{display:none}
+.tsSub{display:block;color:#667;font-size:12.5px;margin:0 0 12px}
 </style>
 
 </head>
@@ -1148,11 +1159,23 @@ go();document.addEventListener('DOMContentLoaded',go);
 
     <p class="glabel">Tổng quan nhanh</p>
     <div class="g g-21">
-      <section class="panel pad tomtat" id="tom-tat" aria-label="Tóm tắt tình hình">
+<div class="panel pad tabsum" id="tabSum">
+<div class="ph"><h2>Tổng hợp tình hình</h2></div>
+<div class="tsTabs" role="tablist"><button type="button" class="on" data-p="a">Tình hình chung</button><button type="button" data-p="b">Tiến trình hồ sơ</button><button type="button" data-p="c">Tỷ lệ thu theo tiền</button></div>
+<div class="tsPane on" data-p="a">
+<section class="panel pad tomtat" id="tom-tat" aria-label="Tóm tắt tình hình">
         <div class="ph"><h2>Tóm tắt tình hình</h2><div class="tt-acts"><button class="btn solid tt-copy" id="ttRemind" type="button"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8.5 8.5 0 0 1-12.4 7.6L3 21l1.4-5.4A8.5 8.5 0 1 1 21 12z"/></svg>Đôn đốc đơn vị chưa đạt</button><button class="btn tt-copy" id="ttCopy" type="button"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg>Sao chép</button></div></div>
     <p class="tt-text" id="ttText"></p>
     <p class="tt-hint">Đoạn này tự viết từ số liệu đang hiển thị, dán thẳng vào báo cáo hoặc tin nhắn được. Bấm tên một đơn vị trong bảng để xem thẻ và nhắn tin đôn đốc riêng đơn vị đó.</p>
       </section>
+</div>
+<div class="tsPane" data-p="b">
+<div class="panel pad" id="tien-trinh-ho-so"><div class="ph"><h2>Tiến trình hồ sơ đảng phí</h2><small>Số đảng viên qua từng bước: kê khai → duyệt → nộp</small></div><div id="funnel"></div></div>
+</div>
+<div class="tsPane" data-p="c">
+<div class="panel pad" id="thu-theo-tien"><div class="ph"><h2>Tỷ lệ thu theo tiền</h2><small>Đã nộp so với số tiền kê khai</small></div><div id="moneyRate"></div></div>
+</div>
+</div>
       <aside class="dpanel" aria-label="Biểu đồ tròn tình hình thu">
         <div class="dhead"><b>Tình hình thu toàn Đảng bộ</b><small>Vòng ngoài là đảng viên, vòng trong là đơn vị</small></div>
         <div class="dbody">
@@ -1161,13 +1184,36 @@ go();document.addEventListener('DOMContentLoaded',go);
         </div>
       </aside>
     </div>
-    <div class="g g-11" id="chi-tieu">
-      <div class="panel pad" id="tien-trinh-ho-so"><div class="ph"><h2>Tiến trình hồ sơ đảng phí</h2><small>Số đảng viên qua từng bước: kê khai → duyệt → nộp</small></div><div id="funnel"></div></div>
-      <div class="panel pad" id="thu-theo-tien"><div class="ph"><h2>Tỷ lệ thu theo tiền</h2><small>Đã nộp so với số tiền kê khai</small></div><div id="moneyRate"></div></div>
-    </div>
 
-    <p class="glabel">Cần đôn đốc và dẫn đầu</p>
-    <div class="panel pad fc" id="fcPanel" style="margin-bottom:20px" hidden>
+    <p class="glabel">Xếp hạng và diễn biến</p>
+    <div class="panel pad tabsum" id="tabRank" style="margin-bottom:20px">
+      <div class="ph"><h2>Xếp hạng đơn vị</h2></div>
+      <div class="tsTabs" role="tablist"><button type="button" class="on" data-p="a">Top 3 dẫn đầu</button><button type="button" data-p="b">Tiến độ theo đơn vị</button></div>
+      <div class="tsPane on" data-p="a">
+        <small class="tsSub">Xếp theo tiến độ; đồng hạng thì xét số tiền đã nộp</small>
+        <div class="podium" id="podium"></div>
+      </div>
+      <div class="tsPane" data-p="b">
+        <small class="tsSub">Đảng viên đã nộp trên tổng số đảng viên (trừ miễn giảm), mỗi cột là một đơn vị</small>
+        <div class="chartwrap play">
+          <div class="yax" aria-hidden="true"><span>100%</span><span>50%</span><span>0%</span></div>
+          <div class="cscroll"><div class="plot" id="colchart" role="img"></div><div class="names" id="colnames" aria-hidden="true"></div></div>
+        </div>
+        <div class="legend" id="chartlegend" style="margin:16px 0 0"></div>
+      </div>
+    </div>
+    <div class="panel pad tabsum" id="tabMonth" style="margin-bottom:20px">
+      <div class="ph"><h2>Thu đảng phí theo tháng</h2><small id="monthYear"></small></div>
+      <div class="tsTabs" role="tablist"><button type="button" class="on" data-p="a">Thu theo tháng</button><button type="button" data-p="b" id="tabFcBtn" hidden>Dự báo cuối tháng</button></div>
+      <div class="tsPane on" data-p="a">
+<div id="monthPanel">
+      <div class="mkpi" id="monthKpi"></div>
+      <div class="mchart" id="monthChart" role="img" aria-label="Biểu đồ số tiền thu theo từng tháng"></div>
+      <p class="mnote" id="monthNote"></p>
+    </div>
+      </div>
+      <div class="tsPane" data-p="b">
+<div class="panel pad fc" id="fcPanel" hidden>
       <div class="ph"><h2>Dự báo cuối tháng</h2><small id="fcSub"></small></div>
       <div class="mkpi" id="fcKpi"></div>
       <div class="fgrid" id="fcGrid">
@@ -1176,38 +1222,24 @@ go();document.addEventListener('DOMContentLoaded',go);
       </div>
       <p class="mnote" id="fcNote"></p>
     </div>
-    <div class="g g-11">
-      <div class="panel pad" id="trang-thai">
+      </div>
+    </div>
+
+    <p class="glabel">Chi tiết từng đơn vị</p>
+    <div class="panel pad tabsum" id="tabUnits" style="margin-bottom:20px">
+      <div class="ph"><h2>Các đơn vị trực thuộc</h2></div>
+      <div class="tsTabs" role="tablist"><button type="button" class="on" data-p="a">Trạng thái các đơn vị</button><button type="button" data-p="b">Tình hình các đơn vị</button></div>
+      <div class="tsPane on" data-p="a">
+<div class="panel pad" id="trang-thai">
         <div class="ph"><h2>Trạng thái các đơn vị</h2><small>Đơn vị còn hồ sơ tồn nhiều nhất lên đầu</small></div>
         <div class="split" id="split" role="img"></div>
         <div class="legend" id="splitlegend"></div>
         <p class="sub">Cần đôn đốc hồ sơ</p>
         <div id="chase"></div>
       </div>
-      <div class="panel pad" id="dan-dau">
-        <div class="ph"><h2>Top 3 đơn vị dẫn đầu</h2><small>Xếp theo tiến độ; đồng hạng thì xét số tiền đã nộp</small></div>
-        <div class="podium" id="podium"></div>
       </div>
-    </div>
-
-    <p class="glabel">Diễn biến và so sánh</p>
-    <div class="panel pad" id="monthPanel">
-      <div class="ph"><h2>Thu đảng phí theo tháng</h2><small id="monthYear"></small></div>
-      <div class="mkpi" id="monthKpi"></div>
-      <div class="mchart" id="monthChart" role="img" aria-label="Biểu đồ số tiền thu theo từng tháng"></div>
-      <p class="mnote" id="monthNote"></p>
-    </div>
-    <div class="panel pad" id="tien-do">
-      <div class="ph"><h2>Tiến độ theo đơn vị</h2><small>Đảng viên đã nộp trên tổng số đảng viên (trừ miễn giảm), mỗi cột là một đơn vị</small></div>
-      <div class="chartwrap play">
-        <div class="yax" aria-hidden="true"><span>100%</span><span>50%</span><span>0%</span></div>
-        <div class="cscroll"><div class="plot" id="colchart" role="img"></div><div class="names" id="colnames" aria-hidden="true"></div></div>
-      </div>
-      <div class="legend" id="chartlegend" style="margin:16px 0 0"></div>
-    </div>
-
-    <p class="glabel">Chi tiết từng đơn vị</p>
-    <div class="panel tablepanel">
+      <div class="tsPane" data-p="b">
+<div class="panel tablepanel">
       <div class="thead">
         <div class="ph"><h2>Tình hình các đơn vị</h2><small id="rowcount"></small></div>
         <div class="ctrls">
@@ -1229,6 +1261,9 @@ go();document.addEventListener('DOMContentLoaded',go);
       <div id="noresult" class="noresult" hidden>Không có đơn vị nào khớp. Thử xóa từ khóa hoặc chọn “Tất cả”.</div>
       <div class="tfoot" id="totalunits"></div>
     </div>
+      </div>
+    </div>
+
   </div>
 </section>
 
@@ -3282,5 +3317,13 @@ if(typeof admApply==='function'){const o=admApply;admApply=async function(a,m){l
   nav.addEventListener('click',e=>{const b=e.target.closest('button[data-g="nk"]');const r=document.getElementById('logReload');if(b&&r)setTimeout(()=>r.click(),50)});
 })();
 </script>
+<script>(()=>{document.querySelectorAll('.tabsum').forEach(T=>{
+const go=p=>{T.querySelectorAll(':scope>.tsTabs button').forEach(b=>b.classList.toggle('on',b.dataset.p===p));T.querySelectorAll(':scope>.tsPane').forEach(x=>x.classList.toggle('on',x.dataset.p===p));dispatchEvent(new Event('resize'))};
+T.querySelectorAll(':scope>.tsTabs button').forEach(b=>b.onclick=()=>go(b.dataset.p));T._go=go});
+const S=document.getElementById('tabSum');if(!S)return;
+const hash=()=>{const h=location.hash;if(h==='#tien-trinh-ho-so'){S._go('b');S.scrollIntoView()}else if(h==='#thu-theo-tien'){S._go('c');S.scrollIntoView()}else if(h==='#tom-tat')S._go('a')};
+addEventListener('hashchange',hash);hash();
+const M=document.getElementById('tabMonth'),F=document.getElementById('fcPanel'),B=document.getElementById('tabFcBtn');
+if(M&&F&&B){const sync=()=>{B.hidden=F.hidden;if(F.hidden)M._go('a')};new MutationObserver(sync).observe(F,{attributes:true,attributeFilter:['hidden']});sync()}})()</script>
 </body>
 </html>
