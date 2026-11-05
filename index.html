@@ -1098,7 +1098,6 @@ go();document.addEventListener('DOMContentLoaded',go);
     <div class="barright">
       <button class="btn" id="goldBtn" type="button" aria-haspopup="dialog" title="Xem bản tin thị trường: tỷ giá USD và giá vàng"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M15 9.2c-.5-1-1.6-1.6-3-1.6-1.7 0-3 .9-3 2.2 0 3 6.2 1.4 6.2 4.4 0 1.3-1.3 2.2-3.2 2.2-1.5 0-2.7-.7-3.2-1.8"/><path d="M12 6v1.6M12 16.4V18"/></svg><span class="lbl">Bản tin thị trường</span></button>
       <button class="btn" id="reportBtn" title="Tạo báo cáo (In/PDF, Excel, Word)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h4"/></svg><span class="lbl">Tạo báo cáo</span></button>
-      <button class="btn" id="sumBtn" type="button" title="In bản tổng hợp 1 trang A4"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="7" rx="1"/></svg><span class="lbl">In tổng hợp</span></button>
       <button class="btn" id="exportBtn" title="Xuất bảng tính Excel"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="m7 11 5 5 5-5"/><path d="M5 20h14"/></svg><span class="lbl">Xuất Excel</span></button>
       <button class="btn" id="loginBtn" type="button" title="Đăng nhập quản trị bằng Gmail"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="m10 17 5-5-5-5"/><path d="M15 12H3"/></svg><span class="lbl" id="loginLbl">Đăng nhập</span></button>
     </div>
@@ -2107,33 +2106,6 @@ $('#ntSave').onclick=async()=>{const msg=$('#ntInput').value.trim(),m=$('#ntMsg'
   else bad('Chưa lưu được lên Google Sheet. Kiểm tra mã đồng bộ (mã tạo bởi setupSheet() trong Apps Script Trạm Tấu) rồi thử lại.')};
 ntApply();setTimeout(ntLoad,1500);
 
-/* ===== In bản tổng hợp (1 trang A4) ===== */
-function sumHTML(){
-  const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-  const t=totals(),rate=t.due?t.paidCount/t.due:0,done=units.filter(r=>cls(r)==='complete').length;
-  const bn=(document.querySelector('.brand b')||{}).textContent||document.title;
-  const d=new Date(),dt=d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear();
-  const per=viewingPast()?('tháng '+(+viewKey.slice(5))+'/'+viewKey.slice(0,4)):('tháng '+(d.getMonth()+1)+'/'+d.getFullYear());
-  const need=r=>v(r,'noRecord')+v(r,'pending')+v(r,'approved');
-  const late=units.filter(r=>v(r,'due')>0&&cls(r)!=='complete').sort((a,b)=>need(b)-need(a)||v(a,'progress')-v(b,'progress'));
-  const MAXR=26,show=late.slice(0,MAXR),more=late.length-show.length;
-  const rows=show.map((r,i)=>`<tr><td class="c">${i+1}</td><td>${esc(nm(r))}</td><td class="n">${v(r,'paidCount')}/${v(r,'due')}</td><td class="n">${pct(v(r,'progress'))}</td><td class="n">${v(r,'noRecord')}</td><td class="n">${v(r,'pending')}</td><td class="n">${v(r,'approved')}</td><td class="n">${need(r)}</td></tr>`).join('');
-  const css='@page{size:A4;margin:12mm}*{box-sizing:border-box}body{margin:0;font:12px/1.45 "Times New Roman",serif;color:#111}h1{margin:0;text-align:center;font-size:17px;text-transform:uppercase;letter-spacing:.02em}.sub{text-align:center;margin:3px 0 12px;color:#444}.hd{display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:6px}.hd b{font-size:13px;white-space:nowrap}.kp{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0 14px}.kp div{border:1px solid #333;padding:8px 6px;text-align:center}.kp b{display:block;font-size:16px}.kp small{font-size:10.5px;color:#444}h2{font-size:13px;margin:12px 0 5px}table{width:100%;border-collapse:collapse;font-size:11.5px}th,td{border:1px solid #444;padding:3px 5px}th{background:#eee;font-weight:700}td.c{text-align:center;width:26px}td.n{text-align:right;white-space:nowrap}.note{margin-top:6px;font-size:10.5px;color:#444;font-style:italic}.sg{display:flex;justify-content:space-between;margin-top:18px;text-align:center}.sg div{width:44%}.sg i{display:block;margin-top:46px}';
-  return '<!doctype html><html lang="vi"><head><meta charset="utf-8"><title>Bản tổng hợp '+esc(per)+'</title><style>'+css+'</style></head><body>'
-   +'<div class="hd"><span><b>'+esc(bn.trim().toLocaleUpperCase('vi'))+'</b></span><span style="text-align:right">Ngày '+dt+'</span></div>'
-   +'<h1>Bản tổng hợp tình hình thu nộp đảng phí</h1><div class="sub">Kỳ '+esc(per)+' · số liệu cập nhật: '+esc(dataStamp||'—')+'</div>'
-   +'<div class="kp"><div><b>'+money(t.paid)+'</b><small>Tổng số tiền đã thu</small></div><div><b>'+t.paidCount+'/'+t.due+'</b><small>Đảng viên đã nộp / phải nộp</small></div><div><b>'+pct(rate)+'</b><small>Tỷ lệ hoàn thành</small></div><div><b>'+done+'/'+units.length+'</b><small>Đơn vị hoàn thành</small></div></div>'
-   +'<h2>Danh sách đơn vị chưa hoàn thành ('+late.length+')</h2>'
-   +(late.length?'<table><thead><tr><th>TT</th><th>Đơn vị</th><th>Đã nộp/Phải nộp</th><th>Tỷ lệ</th><th>Chưa có hồ sơ</th><th>Chưa duyệt</th><th>Chưa nộp</th><th>Còn thiếu</th></tr></thead><tbody>'+rows+'</tbody></table>'+(more>0?'<div class="note">… và '+more+' đơn vị khác chưa hoàn thành (xem chi tiết trên hệ thống).</div>':''):'<p>'+(units.length&&t.due?'Tất cả đơn vị đã hoàn thành.':'Chưa có số liệu để tổng hợp.')+'</p>')
-   +'<div class="note">Tỷ lệ = đảng viên đã nộp / (tổng đảng viên − miễn giảm − chuyển sinh hoạt tạm thời). "Còn thiếu" = chưa có hồ sơ + chưa duyệt + đã duyệt chưa nộp.</div>'
-   +'<div class="sg"><div>Người lập biểu<i></i></div><div>Bí thư/Phó Bí thư<i></i></div></div></body></html>'}
-function openSum(){
-  const html=sumHTML(),ov=document.createElement('div');ov.className='rptov';
-  ov.innerHTML='<div class="rx"><span>Bản tổng hợp A4 — xem trước</span><span><button type="button" id="sumPrint">In / Lưu PDF</button> <button type="button" id="sumX">Đóng</button></span></div><iframe title="Bản tổng hợp"></iframe>';
-  document.body.appendChild(ov);const fr=ov.querySelector('iframe');fr.srcdoc=html;
-  ov.querySelector('#sumX').onclick=()=>ov.remove();
-  ov.querySelector('#sumPrint').onclick=()=>{try{fr.contentWindow.focus();fr.contentWindow.print()}catch(_){toast('Không in được từ khung xem trước.')}}}
-{const b=document.getElementById('sumBtn');if(b)b.onclick=openSum}
 $('#reportBtn').onclick=openReportDialog;
 let __exj=null;function loadExcelJS(){if(window.ExcelJS)return Promise.resolve();return __exj||(__exj=new Promise((res,rej)=>{const sc=document.createElement('script');sc.src='https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js';sc.onload=res;sc.onerror=()=>{__exj=null;rej(new Error('exceljs'))};document.head.appendChild(sc)}))}
 function exportCsvFallback(){
