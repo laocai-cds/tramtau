@@ -2883,6 +2883,17 @@ document.addEventListener('click',function(e){var t=e.target;if(!t||!t.closest)r
 document.addEventListener('keydown',function(e){var o=ov();if(e.key==='Escape'&&o&&o.classList.contains('on'))closeLnk()});
 })();
 </script>
+<style id="ibCss">
+/* nút chức năng trên banner: chỉ biểu tượng, dồn phải */
+@media(min-width:1024px){
+.bar .wrap{display:flex;align-items:center}
+.bar .tabs{flex:0 1 auto}
+.bar .barright{margin-left:auto!important;flex:none;gap:8px}
+.bar .barright .btn{width:40px;height:40px;padding:0;border-radius:12px;justify-content:center}
+.bar .barright .btn .lbl{display:none!important}
+.bar .barright .btn svg{width:19px;height:19px}
+}
+</style>
 <style id="scCss">
 .scban{padding:9px 16px;text-align:center;font:600 13.5px/1.4 inherit;font-family:inherit}
 .scban.maint{background:#fff3cd;color:#7a4f00;border-bottom:2px solid #f0c040}
