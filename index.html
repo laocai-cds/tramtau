@@ -1160,7 +1160,8 @@ go();document.addEventListener('DOMContentLoaded',go);
   <div class="wrap">
     <div class="brand">
       <div class="seal"><img src="logo.png" alt="Cờ Đảng" width="40" height="40" decoding="async"></div>
-      <div><b>Đảng bộ xã Trạm Tấu</b><small>Theo dõi thu nộp đảng phí</small></div>
+      <div><i class="bd-eb">Đảng Cộng sản Việt Nam</i><b>Đảng bộ xã Trạm Tấu</b><small>Hệ thống theo dõi thu nộp đảng phí</small></div>
+      <div class="brand-info" id="brandInfo"><span class="bi"><span class="bi-l">Hôm nay</span><span class="bi-v" data-k="d"></span></span><span class="bi"><span class="bi-l">Kỳ thu</span><span class="bi-v" data-k="m"></span></span></div>
     </div>
     <nav class="tabs" aria-label="Chuyên mục">
       <button class="tab" data-page="overview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg><span>Tổng quan</span></button>
@@ -3519,6 +3520,33 @@ document.addEventListener('keydown',function(e){var o=ov();if(e.key==='Escape'&&
 @media(max-width:560px){#stats .kp-hero{flex-direction:column;align-items:stretch;gap:16px;padding:18px!important}.kp-ring{width:130px;margin:0 auto}#stats .kp-mini{padding:14px!important}}
 @media(prefers-reduced-motion:reduce){.kp-dot{animation:none}}
 </style>
+<style id="bannerBCss">/* Trạm Tấu: banner mẫu 2 — nền trắng, khối cờ đỏ vát chéo, ô thông tin nhanh */
+.bar .brand{position:relative;align-items:center!important}
+.bar .seal{position:relative;z-index:1;flex:none;width:58px!important;height:58px!important;border-radius:14px!important;background:#fff!important;box-shadow:0 6px 14px -6px #000a!important}
+.bar .brand>div:nth-child(2){min-width:0;position:relative;z-index:1}
+.bd-eb{display:flex;align-items:center;gap:8px;font-style:normal;font-size:11px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:#b8860b}
+.bd-eb::after{content:'';width:46px;height:2px;background:linear-gradient(90deg,#d4a53a,transparent)}
+.bar .brand b{display:block!important;font-family:var(--sans)!important;font-weight:900!important;font-size:clamp(20px,2.1vw,27px)!important;line-height:1.2!important;letter-spacing:.02em!important;text-transform:uppercase;margin:3px 0 2px!important;padding:0!important;white-space:nowrap;background:none!important;-webkit-text-fill-color:#8c0f16!important;color:#8c0f16!important;filter:none}
+.bar .brand small{display:block!important;margin:0!important;font-size:13px!important;font-weight:500!important;color:#6b5f5a!important;letter-spacing:0!important;text-transform:none!important}
+.brand-info{margin-left:auto;display:flex;gap:10px;flex:none}
+.bi{display:flex;flex-direction:column;align-items:flex-start;padding:8px 14px;border-radius:12px;border:1px solid #f0dcc9;background:linear-gradient(180deg,#fffaf3,#fff4e6)}
+.bi-l{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#a0835c}
+.bi-v{font-size:14px;font-weight:800;color:#5a2a12;white-space:nowrap}
+@media(min-width:1024px){
+.bar .wrap{padding-top:4px!important}
+.bar .brand{margin:0 -26px!important;width:calc(100% + 52px)!important;flex-basis:calc(100% + 52px)!important;padding:16px 26px 16px 28px!important;gap:40px!important;column-gap:40px!important}
+.bar .brand::before{content:'';position:absolute;left:0;top:0;bottom:0;width:118px;background:linear-gradient(135deg,#c8102e,#8c0f16);clip-path:polygon(0 0,100% 0,84% 100%,0 100%)}
+.bar .brand>div:nth-child(2){margin-left:24px}
+}
+@media(max-width:1023px){
+.bd-eb,.brand-info{display:none}
+.bar .seal{width:42px!important;height:42px!important;border-radius:11px!important}
+.bar .brand b{font-size:clamp(14px,4vw,18px)!important;white-space:normal;margin:0 0 1px!important}
+.bar .brand small{font-size:11px!important}
+}
+</style>
+<script>(()=>{const el=document.getElementById('brandInfo');if(!el)return;const d=new Date(),p=n=>String(n).padStart(2,'0');
+el.querySelector('[data-k=d]').textContent=p(d.getDate())+'/'+p(d.getMonth()+1)+'/'+d.getFullYear();el.querySelector('[data-k=m]').textContent='Tháng '+p(d.getMonth()+1)+'/'+d.getFullYear()})();</script>
 <script src="xa-bar.js"></script>
 </body>
 </html>
