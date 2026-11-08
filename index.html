@@ -3418,6 +3418,23 @@ document.addEventListener('click',function(e){var t=e.target;if(!t||!t.closest)r
 document.addEventListener('keydown',function(e){var o=ov();if(e.key==='Escape'&&o&&o.classList.contains('on'))closeAi()});
 })();
 </script>
+<style>/* Trạm Tấu: cân đối 2 khối "Tổng hợp tình hình" và "Tình hình thu toàn Đảng bộ" */
+.g-21{grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);align-items:stretch}
+#tabSum{margin:0;display:flex;flex-direction:column}
+#tabSum>.ph{margin-bottom:12px}
+#tabSum>.tsPane.on{flex:1;display:flex;flex-direction:column}
+#tabSum>.tsPane.on>*{flex:1}
+#tabSum .tomtat{display:flex;flex-direction:column}
+#tabSum .tomtat .tt-hint{margin-top:auto;padding-top:14px}
+.g-21>.dpanel{padding:20px 22px}
+.dhead b{display:flex;align-items:center;font:700 15px/1.35 var(--sans);color:#0f172a}
+.dhead b::before{content:'';flex:none;width:4px;height:15px;border-radius:2px;background:linear-gradient(180deg,var(--son),var(--vang));margin-right:9px}
+.dhead small{display:block;margin:4px 0 0 13px}
+.dbody{grid-template-columns:minmax(0,190px) minmax(0,1fr);gap:26px;align-items:center;margin-top:16px}
+.donut{width:100%;max-width:190px;margin:0 auto}
+@media(max-width:1100px){.g-21{grid-template-columns:1fr}}
+@media(max-width:760px){.dbody{grid-template-columns:1fr}.donut{max-width:180px}}
+</style>
 <script src="xa-bar.js"></script>
 </body>
 </html>
