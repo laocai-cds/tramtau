@@ -3583,9 +3583,9 @@ el.querySelector('[data-k=d]').textContent=p(d.getDate())+'/'+p(d.getMonth()+1)+
 </style>
 <script>(()=>{const bar=document.querySelector('.bar'),br=bar&&bar.querySelector('.brand');if(!bar||!br)return;
 const mq=matchMedia('(min-width:1024px)');
-const set=()=>{if(!mq.matches){bar.style.removeProperty('--bar-top');return}const tb=bar.querySelector('.tabs'),top=(tb?tb.getBoundingClientRect().top:br.getBoundingClientRect().bottom)-bar.getBoundingClientRect().top;bar.style.setProperty('--bar-top',(-Math.round(top))+'px')};
-const st=()=>{bar.classList.toggle('stuck',scrollY>40);if(!mq.matches||scrollY<400)return;const tb=bar.querySelector('.tabs');if(!tb)return;const d=tb.getBoundingClientRect().top;if(Math.abs(d)>.5&&Math.abs(d)<60){const cur=parseFloat(bar.style.getPropertyValue('--bar-top'))||0;bar.style.setProperty('--bar-top',(cur-d).toFixed(1)+'px')}};
-addEventListener('resize',set);addEventListener('load',set);addEventListener('scroll',st,{passive:true});set();st();setTimeout(set,1500)})();</script>
+const set=()=>{if(!mq.matches){bar.style.removeProperty('--bar-top');return}const tb=bar.querySelector('.tabs'),top=(tb?tb.getBoundingClientRect().top:br.getBoundingClientRect().bottom)-bar.getBoundingClientRect().top;bar.style.setProperty('--bar-top',(-Math.round(top+(parseFloat(getComputedStyle(bar).marginTop)||0)))+'px')};
+const st=()=>{bar.classList.toggle('stuck',scrollY>40);if(!mq.matches||scrollY<150)return;const tb=bar.querySelector('.tabs');if(!tb)return;const d=tb.getBoundingClientRect().top;if(Math.abs(d)>.5&&Math.abs(d)<60){const cur=parseFloat(bar.style.getPropertyValue('--bar-top'))||0;bar.style.setProperty('--bar-top',(cur-d).toFixed(1)+'px')}};
+addEventListener('resize',set);addEventListener('load',set);addEventListener('scroll',st,{passive:true});addEventListener('scrollend',()=>{st();requestAnimationFrame(st)});set();st();setTimeout(set,1500)})();</script>
 <script src="xa-bar.js"></script>
 </body>
 </html>
