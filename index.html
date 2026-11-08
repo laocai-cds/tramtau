@@ -1877,9 +1877,11 @@ function render(){
    const IC=['<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 2.6 2.6L16 9.6"/></svg>','<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/><path d="M7 15h3"/></svg>','<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"/><path d="M5 21V10l7-5 7 5v11"/><path d="M9 21v-6h6v6"/></svg>','<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4h6l1 2h3v14H5V6h3z"/><path d="M9 11h6M9 15h4"/></svg>'];
    const mini=(k,i,lab,val,sub,bar)=>`<div class="stat kp-mini ${k}"><i class="ico" aria-hidden="true">${IC[i]}</i><span>${lab}</span>${val}${bar!=null?`<div class="kp-bar"><i style="width:${Math.max(bar>0?1.5:0,bar*100).toFixed(1)}%"></i></div>`:''}<small>${sub}</small></div>`;
    $('#stats').classList.add('kpB');
-   $('#stats').innerHTML=`<div class="stat kp-hero"><i class="kp-drum" aria-hidden="true"></i><div class="kp-ring"><svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="52" class="kp-trk"/><circle cx="60" cy="60" r="52" class="kp-val" stroke-dasharray="0 ${C.toFixed(1)}" data-len="${(C*Math.min(1,rate)).toFixed(1)}" data-c2="${C.toFixed(1)}"/></svg><div class="kp-rc"><b id="kpPct">0,00%</b><em>đã nộp</em></div></div>`+
-    `<div class="kp-hb"><span>Đảng viên đã nộp đảng phí</span><div class="kp-hv"><strong data-c="${t.paidCount}" data-f="num">0</strong><em>/ ${num(t.due)}</em></div>`+
-    `<ul><li><span>Tổng số đảng viên</span><b>${num(t.members)}</b></li><li><span>Miễn giảm</span><b>${num(t.exempt)}</b></li><li><span>Còn phải nộp</span><b>${num(Math.max(0,t.due-t.paidCount))}</b></li></ul></div></div>`+
+   $('#stats').innerHTML=`<div class="stat kp-hero cardx"><i class="kp-drum" aria-hidden="true"></i>`+
+    `<div class="cx-top"><div class="cx-brand"><img src="logo.png" alt="" width="34" height="34"><div><b>Đảng bộ xã Trạm Tấu</b><small>Thẻ theo dõi đảng phí</small></div></div><div class="cx-tag">ĐẢNG PHÍ<em>Kỳ ${String(new Date().getMonth()+1).padStart(2,'0')}/${String(new Date().getFullYear()).slice(2)}</em></div></div>`+
+    `<div class="cx-mid"><span class="cx-chip" aria-hidden="true"></span><svg class="cx-nfc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8.5 8.5a5 5 0 0 1 0 7"/><path d="M12 6a8.5 8.5 0 0 1 0 12"/><path d="M15.5 3.5a12 12 0 0 1 0 17"/></svg><div class="cx-pct"><b id="kpPct">0,00%</b><small>đảng viên đã nộp</small></div></div>`+
+    `<div class="cx-num">${[[t.paidCount,'Đã nộp'],[t.due,'Phải nộp'],[t.exempt,'Miễn giảm'],[Math.max(0,t.due-t.paidCount),'Còn lại']].map(([x,l])=>`<div><b>${String(Math.round(x||0)).padStart(4,'0')}</b><small>${l}</small></div>`).join('')}</div>`+
+    `<div class="cx-bot"><div class="cx-holder"><small>Tổng số đảng viên</small><b>${num(t.members)} đảng viên</b></div><div class="cx-bar" style="--w:${(Math.min(1,rate)*100).toFixed(2)}%"><small><span>Tiến độ</span><span>${pct2(rate).replace(' %','%')}</span></small><i></i></div><svg class="cx-mark" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2.5l2.8 6.6 7.2.6-5.5 4.7 1.7 7-6.2-3.8-6.2 3.8 1.7-7L2 9.7l7.2-.6z"/></svg></div></div>`+
     mini('k3',0,'Đã thu trong kỳ',`<strong data-c="${t.paid}" data-f="money">0</strong>`,`<b>${pct(mr)}</b> của ${money(t.declared)}`,mr)+
     mini('k2',1,'Tổng tiền kê khai',`<strong data-c="${t.declared}" data-f="money">0</strong>`,`Còn phải thu <b>${money(left)}</b>`)+
     mini('k5',2,'Đơn vị hoàn thành',`<strong><span data-c="${us.done}" data-f="num">0</span><em> / ${active.length}</em></strong>`,`<b>${us.part}</b> đang thu · <b>${us.empty}</b> chưa phát sinh`,active.length?us.done/active.length:0)+
@@ -3594,6 +3596,46 @@ addEventListener('resize',set);addEventListener('load',set);addEventListener('sc
 #stats .stat.kp-hero>.kp-drum{position:absolute!important;inset:0!important;z-index:0!important;pointer-events:none;background:url(trong-dong.png) right -80px center/340px no-repeat;opacity:.15}
 #stats .stat.kp-hero>.kp-ring,#stats .stat.kp-hero>.kp-hb{position:relative;z-index:1}
 @media(max-width:560px){#stats .stat.kp-hero>.kp-drum{background-position:center 30%;background-size:300px}}
+</style>
+<style id="cardxCss">/* Trạm Tấu: thẻ chính kiểu thẻ ngân hàng */
+html body #stats .stat.kp-hero.cardx{display:flex!important;flex-direction:column!important;align-items:stretch!important;justify-content:space-between;gap:0;padding:22px 26px 20px!important;border-radius:20px!important;min-height:260px}
+.cx-top,.cx-mid,.cx-num,.cx-bot{position:relative;z-index:1}
+.cx-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.cx-brand{display:flex;align-items:center;gap:10px;min-width:0}
+.cx-brand img{width:34px;height:34px;border-radius:9px;background:#fff;padding:3px;box-shadow:0 0 0 1.5px #ffe7a3;flex:none}
+#stats .cardx .cx-brand b{display:block;font:800 14px/1.15 var(--sans);letter-spacing:.06em;color:#fff;text-transform:uppercase;white-space:nowrap}
+#stats .cardx .cx-brand small{display:block;font-size:10.5px!important;letter-spacing:.14em;text-transform:uppercase;color:#ffe7a3;margin-top:2px}
+.cx-tag{font:900 italic 18px/1 var(--sans);letter-spacing:.04em;color:#fff;text-align:right;flex:none}.cx-tag em{display:block;font:600 normal 10.5px/1.3 var(--sans);letter-spacing:.12em;color:#ffe7a3;margin-top:3px}
+.cx-mid{display:flex;align-items:center;gap:14px;margin-top:14px}
+.cx-chip{flex:none;width:52px;height:40px;border-radius:8px;background:linear-gradient(135deg,#f9e29c,#d4a53a 45%,#f5d77a 60%,#b8862b);position:relative;box-shadow:inset 0 0 0 1px #8a6418aa,0 2px 4px #0005}
+.cx-chip::before{content:'';position:absolute;inset:8px 14px;border:1.4px solid #8a641899;border-radius:5px}
+.cx-chip::after{content:'';position:absolute;left:0;right:0;top:50%;height:1.4px;background:#8a641899;box-shadow:0 -9px 0 #8a641866,0 9px 0 #8a641866}
+.cx-nfc{flex:none;width:26px;height:26px;color:#fff;opacity:.9}
+.cx-pct{margin-left:auto;text-align:right}
+#stats .cardx .cx-pct b{display:block;font:800 30px/1 var(--sans)!important;color:#fff;text-shadow:0 2px 4px #2a0d0688;white-space:nowrap}
+#stats .cardx .cx-pct small{font-size:11px!important;letter-spacing:.1em;text-transform:uppercase;color:#ffe7a3}
+.cx-num{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px}
+#stats .cardx .cx-num b{display:block;font:600 27px/1 'Courier New',ui-monospace,monospace!important;letter-spacing:.12em;color:#fff7ea;text-shadow:0 1px 0 #ffffff55,0 -1px 0 #0006,0 2px 3px #2a0d0688}
+#stats .cardx .cx-num small{display:block;margin-top:6px;font-size:10px!important;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#f3cdb8}
+.cx-bot{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-top:16px}
+#stats .cardx .cx-holder small{display:block;font-size:9.5px!important;letter-spacing:.16em;text-transform:uppercase;color:#f3cdb8}
+#stats .cardx .cx-holder b{display:block;font:600 15px/1.2 'Courier New',ui-monospace,monospace!important;letter-spacing:.1em;color:#fff;text-transform:uppercase;margin-top:3px;white-space:nowrap}
+.cx-bar{flex:1;max-width:230px}
+#stats .cardx .cx-bar small{display:flex;justify-content:space-between;margin-bottom:5px}
+#stats .cardx .cx-bar small span{display:inline;padding:0;font-size:10px!important;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#f3cdb8!important}
+.cx-bar i{display:block;height:6px;border-radius:6px;background:#ffffff2e;overflow:hidden}
+.cx-bar i::before{content:'';display:block;height:100%;width:var(--w);border-radius:6px;background:linear-gradient(90deg,#ffe7a3,#ffd56b);transition:width 1.2s cubic-bezier(.2,.75,.25,1)}
+.cx-mark{flex:none;width:34px;height:34px;color:#ffd56b;filter:drop-shadow(0 2px 3px #2a0d0688)}
+@media(max-width:560px){
+html body #stats .stat.kp-hero.cardx{padding:18px!important;min-height:0}
+#stats .cardx .cx-brand b{white-space:normal;font-size:12.5px}
+.cx-tag{font-size:15px}
+#stats .cardx .cx-pct b{font-size:24px!important}
+.cx-num{gap:6px}
+#stats .cardx .cx-num b{font-size:18px!important;letter-spacing:.04em}
+#stats .cardx .cx-num small{font-size:9px!important;letter-spacing:.06em}
+.cx-bot{flex-wrap:wrap}.cx-bar{max-width:none;flex-basis:100%;order:3}
+}
 </style>
 <script src="xa-bar.js"></script>
 </body>
