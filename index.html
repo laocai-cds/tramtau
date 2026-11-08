@@ -1877,7 +1877,7 @@ function render(){
    const IC=['<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 2.6 2.6L16 9.6"/></svg>','<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/><path d="M7 15h3"/></svg>','<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"/><path d="M5 21V10l7-5 7 5v11"/><path d="M9 21v-6h6v6"/></svg>','<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4h6l1 2h3v14H5V6h3z"/><path d="M9 11h6M9 15h4"/></svg>'];
    const mini=(k,i,lab,val,sub,bar)=>`<div class="stat kp-mini ${k}"><i class="ico" aria-hidden="true">${IC[i]}</i><span>${lab}</span>${val}${bar!=null?`<div class="kp-bar"><i style="width:${Math.max(bar>0?1.5:0,bar*100).toFixed(1)}%"></i></div>`:''}<small>${sub}</small></div>`;
    $('#stats').classList.add('kpB');
-   $('#stats').innerHTML=`<div class="stat kp-hero"><div class="kp-ring"><svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="52" class="kp-trk"/><circle cx="60" cy="60" r="52" class="kp-val" stroke-dasharray="0 ${C.toFixed(1)}" data-len="${(C*Math.min(1,rate)).toFixed(1)}" data-c2="${C.toFixed(1)}"/></svg><div class="kp-rc"><b id="kpPct">0,00%</b><em>đã nộp</em></div></div>`+
+   $('#stats').innerHTML=`<div class="stat kp-hero"><i class="kp-drum" aria-hidden="true"></i><div class="kp-ring"><svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="52" class="kp-trk"/><circle cx="60" cy="60" r="52" class="kp-val" stroke-dasharray="0 ${C.toFixed(1)}" data-len="${(C*Math.min(1,rate)).toFixed(1)}" data-c2="${C.toFixed(1)}"/></svg><div class="kp-rc"><b id="kpPct">0,00%</b><em>đã nộp</em></div></div>`+
     `<div class="kp-hb"><span>Đảng viên đã nộp đảng phí</span><div class="kp-hv"><strong data-c="${t.paidCount}" data-f="num">0</strong><em>/ ${num(t.due)}</em></div>`+
     `<ul><li><span>Tổng số đảng viên</span><b>${num(t.members)}</b></li><li><span>Miễn giảm</span><b>${num(t.exempt)}</b></li><li><span>Còn phải nộp</span><b>${num(Math.max(0,t.due-t.paidCount))}</b></li></ul></div></div>`+
     mini('k3',0,'Đã thu trong kỳ',`<strong data-c="${t.paid}" data-f="money">0</strong>`,`<b>${pct(mr)}</b> của ${money(t.declared)}`,mr)+
@@ -3589,6 +3589,12 @@ const mq=matchMedia('(min-width:1024px)');
 const set=()=>{if(!mq.matches){bar.style.removeProperty('--bar-top');return}const tb=bar.querySelector('.tabs'),top=(tb?tb.getBoundingClientRect().top:br.getBoundingClientRect().bottom)-bar.getBoundingClientRect().top;bar.style.setProperty('--bar-top',(-Math.round(top+(parseFloat(getComputedStyle(bar).marginTop)||0)))+'px')};
 const st=()=>{bar.classList.toggle('stuck',scrollY>40);if(!mq.matches||scrollY<150)return;const tb=bar.querySelector('.tabs');if(!tb)return;const d=tb.getBoundingClientRect().top;if(Math.abs(d)>.5&&Math.abs(d)<60){const cur=parseFloat(bar.style.getPropertyValue('--bar-top'))||0;bar.style.setProperty('--bar-top',(cur-d).toFixed(1)+'px')}};
 addEventListener('resize',set);addEventListener('load',set);addEventListener('scroll',st,{passive:true});addEventListener('scrollend',()=>{st();requestAnimationFrame(st)});set();st();setTimeout(set,1500)})();</script>
+<style id="kpDrumCss">/* Trạm Tấu: trống đồng chìm bên phải thẻ chính */
+#stats .stat.kp-hero{isolation:isolate;overflow:hidden}
+#stats .stat.kp-hero>.kp-drum{position:absolute!important;inset:0!important;z-index:0!important;pointer-events:none;background:url(trong-dong.png) right -80px center/340px no-repeat;opacity:.15}
+#stats .stat.kp-hero>.kp-ring,#stats .stat.kp-hero>.kp-hb{position:relative;z-index:1}
+@media(max-width:560px){#stats .stat.kp-hero>.kp-drum{background-position:center 30%;background-size:300px}}
+</style>
 <script src="xa-bar.js"></script>
 </body>
 </html>
