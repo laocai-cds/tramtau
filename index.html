@@ -3521,29 +3521,32 @@ document.addEventListener('keydown',function(e){var o=ov();if(e.key==='Escape'&&
 @media(prefers-reduced-motion:reduce){.kp-dot{animation:none}}
 #stats .kp-hero .kp-hb,#stats .kp-hero .kp-rc{text-shadow:0 1px 2px #2d5a1255}
 </style>
-<style id="bannerBCss">/* Trạm Tấu: banner mẫu 2 — nền trắng, khối cờ đỏ vát chéo, ô thông tin nhanh */
-.bar .brand{position:relative;align-items:center!important}
-.bar .seal{position:relative;z-index:1;flex:none;width:58px!important;height:58px!important;border-radius:14px!important;background:#fff!important;box-shadow:0 6px 14px -6px #000a!important}
-.bar .brand>div:nth-child(2){min-width:0;position:relative;z-index:1}
-.bd-eb{display:flex;align-items:center;gap:8px;font-style:normal;font-size:11px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:#b8860b}
-.bd-eb::after{content:'';width:46px;height:2px;background:linear-gradient(90deg,#d4a53a,transparent)}
-.bar .brand b{display:block!important;font-family:var(--sans)!important;font-weight:900!important;font-size:clamp(20px,2.1vw,27px)!important;line-height:1.2!important;letter-spacing:.02em!important;text-transform:uppercase;margin:3px 0 2px!important;padding:0!important;white-space:nowrap;background:none!important;-webkit-text-fill-color:#8c0f16!important;color:#8c0f16!important;filter:none}
-.bar .brand small{display:block!important;margin:0!important;font-size:13px!important;font-weight:500!important;color:#6b5f5a!important;letter-spacing:0!important;text-transform:none!important}
-.brand-info{margin-left:auto;display:flex;gap:10px;flex:none}
-.bi{display:flex;flex-direction:column;align-items:flex-start;padding:8px 14px;border-radius:12px;border:1px solid #f0dcc9;background:linear-gradient(180deg,#fffaf3,#fff4e6)}
-.bi-l{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#a0835c}
-.bi-v{font-size:14px;font-weight:800;color:#5a2a12;white-space:nowrap}
+<style id="bannerBCss">/* Trạm Tấu: banner trang trọng — nền đỏ đậm, hoa văn trống đồng vàng mờ, chữ có chân vàng kim */
+.bar .brand{position:relative;align-items:center!important;gap:18px!important;overflow:hidden}
+.bar .seal{position:relative;z-index:1;flex:none;width:60px!important;height:60px!important;border-radius:14px!important;background:#fff!important;box-shadow:0 0 0 2px #f5c04a,0 0 0 5px #ffffff1f,0 10px 22px -10px #2a0206cc!important}
+.bar .brand>div:nth-child(2){position:relative;z-index:1;min-width:0;padding-left:18px;border-left:1px solid #f5c04a88}
+.bd-eb{display:block;font-style:normal;font-size:11px;font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:#ffd98a;margin-bottom:3px}
+.bd-eb::after{display:none}
+.bar .brand b{display:block!important;font-family:'Noto Serif',Georgia,serif!important;font-weight:700!important;font-size:clamp(22px,2.3vw,30px)!important;line-height:1.25!important;letter-spacing:.045em!important;text-transform:uppercase;margin:0!important;padding:0 0 1px!important;white-space:nowrap;background:linear-gradient(180deg,#fffbe6 0%,#ffe08a 45%,#e9a821 100%)!important;-webkit-background-clip:text!important;background-clip:text!important;-webkit-text-fill-color:transparent!important;color:transparent!important;filter:drop-shadow(0 2px 2px #3a040a88)!important}
+.bar .brand small{display:block!important;margin-top:4px!important;font-size:13.5px!important;font-weight:500!important;color:#f8dcd8!important;letter-spacing:.01em!important;text-transform:none!important}
+.brand-info{position:relative;z-index:1;margin-left:auto;display:flex;gap:10px;flex:none}
+.bi{display:flex;flex-direction:column;align-items:flex-start;padding:8px 16px;border-radius:12px;background:#ffffff17;border:1px solid #ffffff38;box-shadow:inset 0 1px 0 #ffffff2e,0 8px 18px -12px #2a0206aa;backdrop-filter:blur(4px)}
+.bi-l{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#ffd98a}
+.bi-v{font-size:16px;font-weight:800;color:#fff;white-space:nowrap}
 @media(min-width:1024px){
-.bar .wrap{padding-top:4px!important}
-.bar .brand{margin:0 -26px!important;width:calc(100% + 52px)!important;flex-basis:calc(100% + 52px)!important;padding:16px 26px 16px 28px!important;gap:40px!important;column-gap:40px!important}
-.bar .brand::before{content:'';position:absolute;left:0;top:0;bottom:0;width:118px;background:linear-gradient(135deg,#c8102e,#8c0f16);clip-path:polygon(0 0,100% 0,84% 100%,0 100%)}
-.bar .brand>div:nth-child(2){margin-left:24px}
+.bar .wrap{padding-top:0!important}
+.bar .brand{margin:0 -26px!important;width:calc(100% + 52px)!important;flex-basis:calc(100% + 52px)!important;padding:18px 28px 20px!important;
+ background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200' opacity='.2'%3E%3Cg fill='none' stroke='%23f5c04a'%3E%3Ccircle cx='100' cy='100' r='97'/%3E%3Ccircle cx='100' cy='100' r='86' stroke-dasharray='1.5 3.5'/%3E%3Ccircle cx='100' cy='100' r='74'/%3E%3Ccircle cx='100' cy='100' r='62' stroke-dasharray='7 4'/%3E%3Ccircle cx='100' cy='100' r='48'/%3E%3Ccircle cx='100' cy='100' r='34' stroke-dasharray='2 3'/%3E%3C/g%3E%3Cpath fill='%23f5c04a' d='M100 72l6.6 20.3h21.4l-17.3 12.6 6.6 20.3L100 112.6l-17.3 12.6 6.6-20.3-17.3-12.6h21.4z'/%3E%3C/svg%3E") right -60px center/300px no-repeat,radial-gradient(120% 220% at 0% 0%,#e11d48 0,#c8102e 30%,#9b0c22 65%,#6e0b11 100%)!important}
+.bar .brand::before{display:none!important}
+.bar .brand>div:nth-child(2){margin-left:0!important}
+.bar .brand::after{content:'';position:absolute;left:0;right:0;bottom:0;height:4px;background:linear-gradient(90deg,transparent,#ffd98a88 20%,#ffd98a88 80%,transparent) top/100% 1px no-repeat,linear-gradient(90deg,#c48a12,#ffe08a 50%,#c48a12) bottom/100% 2px no-repeat}
 }
 @media(max-width:1023px){
 .bd-eb,.brand-info{display:none}
-.bar .seal{width:42px!important;height:42px!important;border-radius:11px!important}
-.bar .brand b{font-size:clamp(14px,4vw,18px)!important;white-space:normal;margin:0 0 1px!important}
-.bar .brand small{font-size:11px!important}
+.bar .brand>div:nth-child(2){padding-left:0;border-left:0}
+.bar .seal{width:42px!important;height:42px!important;border-radius:11px!important;box-shadow:0 0 0 1.5px #f5c04a,0 6px 14px -8px #6e0b11aa!important}
+.bar .brand b{font-size:clamp(14px,4vw,18px)!important;letter-spacing:.02em!important;white-space:normal;background:none!important;-webkit-text-fill-color:#9b0c22!important;color:#9b0c22!important;filter:none!important}
+.bar .brand small{font-size:11px!important;color:#6b5f5a!important}
 }
 </style>
 <script>(()=>{const el=document.getElementById('brandInfo');if(!el)return;const d=new Date(),p=n=>String(n).padStart(2,'0');
