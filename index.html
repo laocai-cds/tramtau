@@ -3548,6 +3548,44 @@ document.addEventListener('keydown',function(e){var o=ov();if(e.key==='Escape'&&
 </style>
 <script>(()=>{const el=document.getElementById('brandInfo');if(!el)return;const d=new Date(),p=n=>String(n).padStart(2,'0');
 el.querySelector('[data-k=d]').textContent=p(d.getDate())+'/'+p(d.getMonth()+1)+'/'+d.getFullYear();el.querySelector('[data-k=m]').textContent='Tháng '+p(d.getMonth()+1)+'/'+d.getFullYear()})();</script>
+<style id="readCss">/* Trạm Tấu: chữ to rõ hơn, khung gọn khi cuộn */
+/* 1) Cỡ chữ tối thiểu dễ đọc */
+#overview .podium .hd .nm em{font-size:11.5px!important}
+#overview .dgroup>p,#overview .un-eyebrow,#overview #trang-thai>p.sub{font-size:12px!important}
+#overview .mdelta span,#overview .mlab span,#overview .chase i.rk,#overview .kp-rc em{font-size:12px!important}
+#overview .mkpi small,#overview .chase .cc u,#overview .dcenter span,#overview .glabel{font-size:12.5px!important}
+#overview .dcenter span{max-width:120px!important}
+#overview .dhead small,#overview .podium .step .meta span,#overview .podium .step .val small,#overview #splitlegend em,#overview .eyebrow,#overview .eyebrow span,#overview .mnote,#overview .tt-hint,#overview .un-foot{font-size:13px!important}
+#overview #heroline small,#overview .podium .step .go,#overview .kp-mini>small,#overview .kp-mini>span,#overview .tsSub,#overview .dgroup div span,#overview .dgroup div b,#overview .loadnote,#overview .tt-copy,#overview .un-sub,#overview .un-refresh span{font-size:13.5px!important}
+#overview .chase .cm span,#overview .msum,#overview .un-empty span,#overview .un-empty button,#overview .kp-hb li,#overview .kp-hb li span,#overview .kp-hb li b{font-size:14px!important}
+#overview .kp-hero .kp-hb>span{font-size:14.5px!important}
+#overview .tt-text{font-size:16px!important;line-height:1.75!important}
+#overview .ph h2,#overview .dhead b{font-size:16px!important}
+#overview .tsTabs button{font-size:15px!important}
+#overview .lede{font-size:14.5px!important}
+#overview .ovhead h1{font-size:clamp(26px,2.5vw,34px)!important}
+#overview .stat strong{letter-spacing:-.01em}
+/* 2) Thanh đầu trang: khi cuộn chỉ giữ dòng menu, không hở khe phía trên */
+@media(min-width:1024px){
+.bar{top:var(--bar-top,0px)!important;margin-top:12px!important;transition:box-shadow .2s}
+.bar.stuck{box-shadow:0 10px 24px -14px #9b0c2255!important}
+}
+@media(max-width:760px){
+.bar .brand small{display:none!important}
+.bar .brand b{font-size:15px!important;line-height:1.25!important}
+#overview .kp-mini>span{font-size:12.5px!important;padding-right:34px!important;line-height:1.3}
+#overview .kp-mini>small{font-size:12.5px!important;line-height:1.45}
+#overview .kp-mini strong{font-size:1.25rem!important}
+#overview .tt-text{font-size:15px!important}
+#overview .ph h2,#overview .dhead b{font-size:15px!important}
+#overview .tsTabs button{font-size:14px!important}
+}
+</style>
+<script>(()=>{const bar=document.querySelector('.bar'),br=bar&&bar.querySelector('.brand');if(!bar||!br)return;
+const mq=matchMedia('(min-width:1024px)');
+const set=()=>{if(!mq.matches){bar.style.removeProperty('--bar-top');return}const tb=bar.querySelector('.tabs'),top=(tb?tb.getBoundingClientRect().top:br.getBoundingClientRect().bottom)-bar.getBoundingClientRect().top;bar.style.setProperty('--bar-top',(-Math.round(top))+'px')};
+const st=()=>{bar.classList.toggle('stuck',scrollY>40);if(!mq.matches||scrollY<400)return;const tb=bar.querySelector('.tabs');if(!tb)return;const d=tb.getBoundingClientRect().top;if(Math.abs(d)>.5&&Math.abs(d)<60){const cur=parseFloat(bar.style.getPropertyValue('--bar-top'))||0;bar.style.setProperty('--bar-top',(cur-d).toFixed(1)+'px')}};
+addEventListener('resize',set);addEventListener('load',set);addEventListener('scroll',st,{passive:true});set();st();setTimeout(set,1500)})();</script>
 <script src="xa-bar.js"></script>
 </body>
 </html>
