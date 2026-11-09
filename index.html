@@ -1451,9 +1451,9 @@ go();document.addEventListener('DOMContentLoaded',go);
 
 <footer class="foot"><div class="wrap ft">
   <div class="ft-main">
-    <div class="ft-credit"><span class="ft-k">Thiết kế và phát triển</span><b>Vũ Thế Cường</b><span class="ft-o">Văn phòng Đảng ủy xã Trạm Tấu</span></div>
+    <span class="ft-ic" aria-hidden="true">★</span><div class="ft-credit"><span class="ft-k">Thiết kế và phát triển</span><b>Vũ Thế Cường</b></div>
   </div>
-  <p class="ft-copy"><span aria-hidden="true">©</span> Bản quyền 2026 · <b>Đảng ủy xã Trạm Tấu</b></p>
+  <p class="ft-copy"><span aria-hidden="true">©</span> Bản quyền 2026 <b>Đảng ủy xã Trạm Tấu</b></p>
 </div></footer>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -3768,6 +3768,14 @@ html body .foot>.wrap.ft{display:block;padding:30px 32px 18px}
 .ft-copy{margin:14px 0 0;text-align:center;font-size:12.5px;color:#f1c9c5}
 .ft-copy b{color:#f7e08a;font-weight:700}
 @media(max-width:700px){html body .foot>.wrap.ft{padding:24px 18px 16px}.ft-main{gap:0}}
+html body .foot>.wrap.ft{display:flex!important;flex-direction:row!important;align-items:center!important;text-align:left!important;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:16px 28px!important}
+.ft-main{padding:0!important;border:0!important;justify-content:flex-start!important;gap:12px!important;flex-wrap:nowrap!important}
+.ft-ic{flex:none;display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:#ffffff1f;border:1px solid #e9cf7a99;color:#ffe36e;font-size:1rem}
+.ft-credit{align-items:flex-start!important;text-align:left!important;gap:2px!important}
+.ft-credit b{font:800 15px/1.2 'Playfair Display',Georgia,serif!important;letter-spacing:.02em;color:#ffe36e!important}
+.ft-k{font-size:10.5px!important}
+.ft-copy{margin:0!important;text-align:right!important;padding-left:16px;border-left:1px solid #ffffff33;font-size:12px!important}
+@media(max-width:700px){html body .foot>.wrap.ft{padding:14px 16px!important}.ft-copy{border-left:0;padding-left:0;text-align:left!important}}
 @media print{.foot{background:#fff!important;color:#000}.foot *{color:#000!important}}
 </style>
 <style id="phIconCss">/* Tiêu đề mục: băng-rôn xanh thấp, chiều ngang vừa bằng tiêu đề, biểu tượng đầu mục, sọc chéo ở đầu bên phải */
