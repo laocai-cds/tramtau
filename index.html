@@ -3761,21 +3761,23 @@ html body .foot>.wrap.ft{display:block;padding:30px 32px 18px}
 @media(max-width:700px){html body .foot>.wrap.ft{padding:24px 18px 16px}.ft-main{gap:0}}
 @media print{.foot{background:#fff!important;color:#000}.foot *{color:#000!important}}
 </style>
-<style id="bannerHeadCss">/* Tiêu đề mục dạng băng-rôn đỏ ngắn có sọc chéo (băng-rôn chỉ dài bằng tiêu đề) */
-html body .ph,html body .dhead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;padding:0;border:0;background:none;overflow:visible}
-html body .ph::after,html body .dhead::after{display:none}
-html body .ph h2,html body .dhead b{position:relative;overflow:hidden;display:inline-flex;align-items:center;width:fit-content;max-width:100%;margin:0;padding:8px 78px 8px 16px;border-radius:5px;font:800 14.5px/1.35 var(--sans);letter-spacing:.02em;text-transform:uppercase;color:#fff;background:linear-gradient(90deg,var(--son-d),var(--son) 75%,var(--son-l))}
-html body .ph h2::before,html body .dhead b::before{display:block;content:"";position:absolute;right:0;top:0;bottom:0;height:auto;width:66px;margin:0;border-radius:0;background:linear-gradient(115deg,transparent 0 14%,#fff 14% 26%,transparent 26% 37%,#fff 37% 49%,transparent 49% 60%,#f4f4f6 60% 100%)}
-html body .ph small{margin:0;font-size:12px;color:var(--muted);text-align:right;font-weight:500}
-html body .dhead{flex-direction:column;align-items:flex-start;gap:6px}
+<style id="bannerHeadCss">/* Tiêu đề mục dạng băng-rôn đỏ thấp, trải hết chiều ngang, sọc chéo ở đầu bên phải */
+html body .ph{position:relative;overflow:hidden;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;min-height:34px;padding:0 96px 0 16px;border:0;border-radius:4px;background:linear-gradient(90deg,var(--son-d),var(--son) 70%,var(--son-l))}
+html body .ph::after{content:"";position:absolute;right:0;top:0;bottom:0;width:84px;pointer-events:none;background:linear-gradient(115deg,transparent 0 16%,#fff 16% 27%,transparent 27% 38%,#fff 38% 49%,transparent 49% 60%,#f4f4f6 60% 100%)}
+html body .ph>*{position:relative;z-index:1}
+html body .ph h2{margin:0;padding:0;font:800 14px/34px var(--sans);letter-spacing:.02em;text-transform:uppercase;color:#fff;display:flex;align-items:center}
+html body .ph h2::before{display:none}
+html body .ph small{margin:0;font-size:11.5px;color:#ffe4e0;text-align:right;font-weight:500}
+html body .dhead{display:flex;flex-direction:column;align-items:stretch;gap:6px;margin-bottom:14px;padding:0;background:none;border:0}
+html body .dhead b{position:relative;overflow:hidden;display:flex;align-items:center;min-height:34px;margin:0;padding:0 96px 0 16px;border-radius:4px;font:800 14px/34px var(--sans);letter-spacing:.02em;text-transform:uppercase;color:#fff;background:linear-gradient(90deg,var(--son-d),var(--son) 70%,var(--son-l))}
+html body .dhead b::before{display:block;content:"";position:absolute;right:0;top:0;bottom:0;height:auto;width:84px;margin:0;border-radius:0;background:linear-gradient(115deg,transparent 0 16%,#fff 16% 27%,transparent 27% 38%,#fff 38% 49%,transparent 49% 60%,#f4f4f6 60% 100%)}
 html body .dhead small{margin:0;font-size:12px;color:var(--muted)}
-html body .step .ph{background:none;padding:0}
-html body .step .ph h2{padding:0;background:none;color:inherit;text-transform:none;font:inherit;border-radius:0;overflow:visible}
-html body .step .ph h2::before{display:none}
-html body .thead .ph h2,html body .tabsum .tsPane>.tomtat>.ph h2{padding:0;background:none}
-html body .thead .ph h2::before,html body .tabsum .tsPane>.tomtat>.ph h2::before{display:none}
-@media(max-width:700px){html body .ph{flex-wrap:wrap}html body .ph h2,html body .dhead b{font-size:13px;padding:7px 62px 7px 12px}html body .ph h2::before,html body .dhead b::before{width:52px}}
-@media print{html body .ph h2::before,html body .dhead b::before{display:none}}
+html body .step .ph,html body .thead .ph,html body .tabsum .tsPane>.tomtat>.ph{background:none;padding:0;min-height:0;border-radius:0;overflow:visible}
+html body .step .ph::after,html body .thead .ph::after,html body .tabsum .tsPane>.tomtat>.ph::after{display:none}
+html body .step .ph h2{color:inherit;text-transform:none;font:inherit;line-height:1.3}
+html body .step .ph small,html body .thead .ph small{color:var(--muted)}
+@media(max-width:700px){html body .ph{padding:0 66px 0 12px}html body .ph::after,html body .dhead b::before{width:56px}html body .dhead b{padding:0 66px 0 12px}html body .ph h2,html body .dhead b{font-size:12.5px}}
+@media print{html body .ph::after,html body .dhead b::before{display:none}}
 </style>
 
 
