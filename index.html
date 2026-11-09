@@ -1165,9 +1165,9 @@ go();document.addEventListener('DOMContentLoaded',go);
     </div>
     <nav class="tabs" aria-label="Chuyên mục">
       <button class="tab" data-page="overview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg><span>Tổng quan</span></button>
-      <button class="tab" data-page="units"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"/><path d="M5 21V10l7-5 7 5v11"/><path d="M9 21v-6h6v6"/></svg><span>Đơn vị trực thuộc</span></button>
-<button class="tab" id="lnkBtn" type="button" aria-haspopup="dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3A4 4 0 0 0 11 18.7l1-1"/></svg><span>Liên kết website</span></button>
-      <button class="tab" id="aiBtn" type="button" aria-haspopup="dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="8" width="16" height="11" rx="3"/><path d="M12 4v4"/><circle cx="12" cy="3.5" r="1"/><circle cx="9" cy="13" r="1.2"/><circle cx="15" cy="13" r="1.2"/><path d="M9.5 16.5h5"/></svg><span>Trợ lý AI TTHC</span></button>
+      <button class="tab" data-page="units"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"/><path d="M5 21V10l7-5 7 5v11"/><path d="M9 21v-6h6v6"/></svg><span><b class="lf">Đơn vị trực thuộc</b><b class="ls">Đơn vị</b></span></button>
+<button class="tab" id="lnkBtn" type="button" aria-haspopup="dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3A4 4 0 0 0 11 18.7l1-1"/></svg><span><b class="lf">Liên kết website</b><b class="ls">Liên kết</b></span></button>
+      <button class="tab" id="aiBtn" type="button" aria-haspopup="dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="8" width="16" height="11" rx="3"/><path d="M12 4v4"/><circle cx="12" cy="3.5" r="1"/><circle cx="9" cy="13" r="1.2"/><circle cx="15" cy="13" r="1.2"/><path d="M9.5 16.5h5"/></svg><span><b class="lf">Trợ lý AI TTHC</b><b class="ls">Trợ lý AI</b></span></button>
       <button class="tab admin-only" data-page="import"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.2 8.3-8 9-4.8-.7-8-4.5-8-9V6z"/><path d="m9 12 2 2 4-4"/></svg><span>Quản trị</span></button>
     </nav>
     <div class="barright">
@@ -3846,6 +3846,13 @@ document.addEventListener('click',e=>{const t=e.target;if(!t.closest)return;
  if(M.classList.contains('on')&&t.closest('#rankList .uname[data-cb]'))close()},true);
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&M.classList.contains('on'))close()});
 })();</script>
+<style id="mobileMenuFix">/* Trạm Tấu: nhãn menu dưới trên điện thoại ngắn gọn, mỗi mục một dòng */
+.bar .tabs .tab span b{font-weight:inherit}.bar .tabs .tab .ls{display:none}
+@media(max-width:1023px){
+html body .bar .tabs .tab{white-space:nowrap!important;min-width:0}
+html body .bar .tabs .tab .ls{display:inline}html body .bar .tabs .tab .lf{display:none}
+}
+</style>
 <script src="xa-bar.js"></script>
 </body>
 </html>
