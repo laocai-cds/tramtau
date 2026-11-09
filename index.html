@@ -3761,6 +3761,21 @@ html body .foot>.wrap.ft{display:block;padding:30px 32px 18px}
 @media(max-width:700px){html body .foot>.wrap.ft{padding:24px 18px 16px}.ft-main{gap:0}}
 @media print{.foot{background:#fff!important;color:#000}.foot *{color:#000!important}}
 </style>
+<style id="bannerHeadCss">/* Tiêu đề mục dạng băng-rôn đỏ có sọc chéo */
+html body .ph,html body .dhead{position:relative;overflow:hidden;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;padding:10px 104px 10px 18px;border:0;border-radius:6px;background:linear-gradient(90deg,var(--son-d),var(--son) 70%,var(--son-l))}
+html body .ph::after,html body .dhead::after{content:"";position:absolute;right:0;top:0;bottom:0;width:92px;width:92px;pointer-events:none;background:linear-gradient(115deg,transparent 0 17%,#fff 17% 28%,transparent 28% 38%,#fff 38% 49%,transparent 49% 60%,#f4f4f6 60% 100%)}
+html body .ph>*,html body .dhead>*{position:relative;z-index:1}
+html body .ph h2,html body .dhead b{margin:0;font:800 15px/1.35 var(--sans);letter-spacing:.02em;text-transform:uppercase;color:#fff;display:flex;align-items:center}
+html body .ph h2::before,html body .dhead b::before{display:none}
+html body .ph small,html body .dhead small{margin:0;font-size:12px;color:#ffe4e0;text-align:right;font-weight:500}
+html body .dhead{flex-direction:row}
+html body .step .ph,html body .thead .ph,html body .tabsum .tsPane>.tomtat>.ph{background:none;padding:0;border-radius:0;overflow:visible}
+html body .step .ph::after,html body .thead .ph::after,html body .tabsum .tsPane>.tomtat>.ph::after{display:none}
+html body .step .ph h2{color:inherit;text-transform:none}
+@media(max-width:700px){html body .ph,html body .dhead{padding:9px 70px 9px 14px;flex-wrap:wrap}html body .ph::after,html body .dhead::after{width:60px}html body .ph h2,html body .dhead b{font-size:13.5px}}
+@media print{html body .ph::after,html body .dhead::after{display:none}}
+</style>
+
 
 
 <script>(()=>{const M=document.getElementById('rankModal');if(!M)return;
