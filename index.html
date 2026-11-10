@@ -1069,6 +1069,7 @@ tbody tr:hover td{background:#f5f8ff}
 @keyframes pbFlow{to{background-position:-200% 0}}
 .podium .step.s1::after{background:linear-gradient(135deg,#d62828,#f77f00);color:#fff;border:0;box-shadow:0 4px 10px rgba(214,40,40,.4)}
 .podium .step .meta>span{background:rgba(255,255,255,.75)!important;border-color:rgba(0,0,0,.08)!important}
+.cbp-done{margin:10px 0 0}.cbp-done .doneChip{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:99px;background:linear-gradient(135deg,#d62828,#f77f00);color:#fff;font:600 13px var(--sans);box-shadow:0 4px 10px rgba(214,40,40,.3)}.cbp-done .doneChip b{color:#fff}
 .podium .step .meta .doneChip{background:linear-gradient(135deg,#d62828,#f77f00)!important;color:#fff!important;border:0!important;font-weight:600;box-shadow:0 4px 10px rgba(214,40,40,.3)}.podium .step .meta .doneChip b{color:#fff}
 .firstPaid{position:relative;overflow:hidden;display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin:6px 0 18px;padding:14px 22px;border:0;border-radius:20px;color:#fff;background:linear-gradient(110deg,#8f1018 0%,#c8192a 36%,#ee4a2b 68%,#f6a609 100%);box-shadow:0 14px 30px -10px rgba(200,25,42,.6),inset 0 1px 0 rgba(255,255,255,.4)}
 .firstPaid::before{content:'';position:absolute;inset:0;background:linear-gradient(105deg,transparent 32%,rgba(255,255,255,.4) 50%,transparent 68%);transform:translateX(-120%);animation:fpShine 3.6s ease-in-out infinite;pointer-events:none}
@@ -2129,7 +2130,7 @@ function openCb(slug,refresh){
   <div class="cbm-body">
   <section class="cbp-sum cbp-${sc}"><div class="cbp-sumtop"><div class="cbp-pc"><strong>${pct(p)}</strong><span class="pill ${sc}">${st}</span></div><div class="cbp-rank"><small>Xếp hạng</small><b>${rk}<i>/${units.length}</i></b></div></div>
   <div class="track"><i class="${cls(r)}" style="width:${(p*100).toFixed(1)}%"></i></div>
-  <p class="cbp-cnt"><b>${num(v(r,'paidCount'))}/${num(v(r,'due'))}</b> đảng viên đã nộp đảng phí</p></section>
+  <p class="cbp-cnt"><b>${num(v(r,'paidCount'))}/${num(v(r,'due'))}</b> đảng viên đã nộp đảng phí</p>${doneChip(r)?`<p class="cbp-done">${doneChip(r)}</p>`:''}</section>
   <div class="cbp-row">${cell('Chưa có hồ sơ',num(nr),nr)}${cell('Chưa được duyệt',num(pe),pe)}${cell('Đã duyệt, chưa nộp',num(ap),ap)}${cell('Kê khai',money(v(r,'declared')))}${cell('Đã nộp',money(v(r,'paid')))}${cell('Còn phải thu',money(left),left,!left&&v(r,'declared')>0)}</div>
   <div class="cbp-mh"><label class="cbp-h" for="cbMsg">Tin nhắn gửi chi bộ</label><span>Chỉnh sửa được · <span id="cbLen"></span></span></div>
   <textarea class="input cbm-msg" id="cbMsg" rows="3">${esc(unitMsg(r))}</textarea>
