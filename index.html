@@ -1075,8 +1075,8 @@ tbody tr:hover td{background:#f5f8ff}
 .firstPaid::before{content:'';position:absolute;inset:0;background:linear-gradient(105deg,transparent 32%,rgba(255,255,255,.4) 50%,transparent 68%);transform:translateX(-120%);animation:fpShine 3.6s ease-in-out infinite;pointer-events:none}
 @keyframes fpShine{0%,25%{transform:translateX(-120%)}70%,100%{transform:translateX(120%)}}
 .firstPaid>*{position:relative}
-.firstPaid .fpIc{flex:none;width:48px;height:48px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 32% 28%,#fff6c4,#ffcf3d 55%,#d19a10);animation:fpPulse 2.2s ease-in-out infinite}
-.firstPaid .fpIc svg{width:26px;height:26px;color:#9b1c1c}
+.firstPaid .fpIc{flex:none;width:48px;height:48px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 32% 28%,#ffffff,#fff3c4 55%,#ffd96a);animation:fpPulse 2.2s ease-in-out infinite}
+.firstPaid .fpIc img{width:36px;height:36px;object-fit:contain;filter:drop-shadow(0 2px 3px rgba(120,0,0,.45))}
 @keyframes fpPulse{0%,100%{box-shadow:0 0 0 4px rgba(255,255,255,.3),0 0 0 0 rgba(255,214,90,.8),0 6px 14px rgba(0,0,0,.25)}50%{box-shadow:0 0 0 4px rgba(255,255,255,.3),0 0 0 14px rgba(255,214,90,0),0 6px 14px rgba(0,0,0,.25)}}
 .firstPaid .fpTx{display:flex;flex-direction:column;align-items:flex-start;gap:5px;min-width:0;flex:1 1 260px}
 .firstPaid .fpTx i{background:#fff3b0;color:#8f1018;border:0;padding:3px 11px;box-shadow:0 2px 6px rgba(0,0,0,.2)}
@@ -1704,7 +1704,7 @@ function doneAtText(r){try{if(!(v(r,'due')>0&&v(r,'paidCount')>=v(r,'due')))retu
 function firstPaidHtml(){const k=viewKey&&viewingPast()?viewKey:curKey(),mo=ftMap&&ftMap[k];if(!mo)return '';let best=null;
   units.forEach(r=>{const e=mo[nkey(nm(r))];if(e&&!isNaN(e[0])&&v(r,'paidCount')>0&&(!best||e[0]<best.t))best={r,t:e[0]}});
   if(!best)return '';const d=new Date(best.t+7*3600e3),p=n=>String(n).padStart(2,'0');
-  return `<span class="fpIc"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.3 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8z"/></svg></span><span class="fpTx"><i>Đơn vị thu đầu tiên</i><b>${esc(nm(best.r))}</b></span><small>bắt đầu thu lúc ${p(d.getUTCHours())}:${p(d.getUTCMinutes())}:${p(d.getUTCSeconds())} ngày ${p(d.getUTCDate())}/${p(d.getUTCMonth()+1)}/${d.getUTCFullYear()}</small>`}
+  return `<span class="fpIc"><img src="logo.png" alt="Cờ Đảng" width="34" height="34"></span><span class="fpTx"><i>Đơn vị thu đầu tiên</i><b>${esc(nm(best.r))}</b></span><small>bắt đầu thu lúc ${p(d.getUTCHours())}:${p(d.getUTCMinutes())}:${p(d.getUTCSeconds())} ngày ${p(d.getUTCDate())}/${p(d.getUTCMonth()+1)}/${d.getUTCFullYear()}</small>`}
 /* Chip "Hoàn thành 100% lúc ..." trên thẻ Dẫn đầu */
 function doneChip(r){try{if(!(v(r,'due')>0&&v(r,'paidCount')>=v(r,'due')))return '';const k=viewKey&&viewingPast()?viewKey:curKey(),e=ftMap&&ftMap[k]&&ftMap[k][nkey(nm(r))];if(!e||isNaN(e[1]))return '';
   const d=new Date(e[1]+7*3600e3),p=n=>String(n).padStart(2,'0');return `<span class="doneChip" title="Thời gian hoàn thành 100%">✓ Hoàn thành 100% lúc <b>${p(d.getUTCHours())}:${p(d.getUTCMinutes())}:${p(d.getUTCSeconds())} ${p(d.getUTCDate())}/${p(d.getUTCMonth()+1)}/${d.getUTCFullYear()}</b></span>`}catch(_){return ''}}
