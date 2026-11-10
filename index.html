@@ -1239,7 +1239,7 @@ go();document.addEventListener('DOMContentLoaded',go);
       <div class="ph"><h2>Xếp hạng đơn vị</h2></div>
       <div class="tsTabs" role="tablist"><button type="button" class="on" data-p="a">Top 3 dẫn đầu</button><button type="button" data-p="b">Tiến độ theo đơn vị</button></div>
       <div class="tsPane on" data-p="a">
-        <small class="tsSub">Xếp theo tiến độ; đồng hạng thì đơn vị thu đầu tiên sớm hơn xếp trước, rồi xét số tiền đã nộp</small>
+        <small class="tsSub">Xếp theo tiến độ; đồng hạng thì đơn vị hoàn thành (hoặc bắt đầu thu) sớm hơn xếp trước, rồi xét số tiền đã nộp</small>
         <div class="podium" id="podium"></div>
       </div>
       <div class="tsPane" data-p="b">
@@ -1478,7 +1478,7 @@ go();document.addEventListener('DOMContentLoaded',go);
 </div>
 <div class="back" id="rankModal" role="dialog" aria-modal="true" aria-labelledby="rankTitle">
   <div class="modal rk-modal">
-    <div class="rkm-head"><div><h3 id="rankTitle">Xếp hạng đơn vị</h3><p id="rankSub">Xếp theo tiến độ; đồng hạng thì đơn vị thu đầu tiên sớm hơn xếp trước, rồi xét số tiền đã nộp</p></div><button type="button" class="rkm-x" data-rank-close aria-label="Đóng">×</button></div>
+    <div class="rkm-head"><div><h3 id="rankTitle">Xếp hạng đơn vị</h3><p id="rankSub">Xếp theo tiến độ; đồng hạng thì đơn vị hoàn thành (hoặc bắt đầu thu) sớm hơn xếp trước, rồi xét số tiền đã nộp</p></div><button type="button" class="rkm-x" data-rank-close aria-label="Đóng">×</button></div>
     <div class="rkm-sum" id="rankSum"></div>
     <div class="rkm-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="search" id="rankQ" placeholder="Tìm tên đơn vị…" autocomplete="off" aria-label="Tìm tên đơn vị"><span id="rankCnt"></span><button type="button" class="rkm-clear" id="rankClr" aria-label="Xóa tìm kiếm" title="Xóa tìm kiếm" hidden>×</button></div>
     <div class="rkm-list" id="rankList"></div>
@@ -1655,7 +1655,16 @@ let hiddenUnits=[];// đơn vị không hiện trong bảng, xếp hạng; số 
 const foldName=x=>String(x||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/gi,'d').toLowerCase().replace(/[^a-z0-9]+/g,'');
 const isHiddenUnit=r=>foldName(nm(r))==='dangbocaccoquandang';
 function applyView(){const all=(viewingPast()?msnap[viewKey].rows:liveUnits).filter(r=>hasData(r));hiddenUnits=all.filter(isHiddenUnit);const src=all.filter(r=>!isHiddenUnit(r));
-  units=[...src].sort((a,b)=>v(b,'progress')-v(a,'progress')||firstPaidDay(a)-firstPaidDay(b)||v(b,'paid')-v(a,'paid'));rankOf=new Map();units.forEach((r,i)=>rankOf.set(r,i+1));if(window.SITECFG)SITECFG.post()}
+  units=[...src].sort((a,b)=>v(b,'progress')-v(a,'progress')||rankTime(a)-rankTime(b)||v(b,'paid')-v(a,'paid'));rankOf=new Map();units.forEach((r,i)=>rankOf.set(r,i+1));if(window.SITECFG)SITECFG.post()}
+/* Giờ xếp hạng: đơn vị đạt 100% tính theo giờ hoàn thành 100%, còn lại theo giờ bắt đầu thu (tab "Thu đầu tiên" do Apps Script ghi mỗi phút) */
+let ftMap=null;
+const ftMs=x=>{const t=String(x||'').trim();if(!t)return NaN;const m=t.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2}):(\d{2})/);if(m)return Date.UTC(+m[1],+m[2]-1,+m[3],+m[4]-7,+m[5],+m[6]);const d=Date.parse(t);return isNaN(d)?NaN:d};
+function rankTime(r){try{const k=viewKey&&viewingPast()?viewKey:curKey(),key=nkey(nm(r)),e=ftMap&&ftMap[k]&&ftMap[k][key];
+  if(e){const full=v(r,'due')>0&&v(r,'paidCount')>=v(r,'due');const t=full&&!isNaN(e[1])?e[1]:e[0];if(!isNaN(t))return t}
+  return 4e12+firstPaidDay(r)}catch(_){return 5e12}}
+async function ftLoad(){const ep=sheetEndpoint();if(!ep)return;
+  try{const d=await jsonp(ep+'?action=read&tab='+encodeURIComponent('Thu đầu tiên'),12000);
+    if(d&&d.ok&&Array.isArray(d.rows)){const m={};d.rows.forEach(r=>{const mo=String(r[0]||'').trim().slice(0,7),n=nkey(r[1]);if(!mo||!n)return;const s=ftMs(r[2]),f=ftMs(r[3]);(m[mo]||(m[mo]={}))[n]=[isNaN(s)?f:s,f]});ftMap=m;try{applyView();if(typeof fillTables==='function')fillTables()}catch(_){}}}catch(_){}}
 /* Ngày thu đầu tiên của đơn vị trong tháng đang xem (từ tab "Lịch sử ngày"): đồng hạng thì đơn vị thu sớm hơn xếp trước; chưa có lịch sử thì coi là muộn nhất */
 function firstPaidDay(r){try{const k=viewKey&&viewingPast()?viewKey:curKey(),h=fcHist;if(!h)return 99;const key=nkey(nm(r));let best=99;for(const d in h){if(d.slice(0,7)!==k)continue;const e=h[d][key];if(e&&e[1]>0){const n=+d.slice(8);if(n<best)best=n}}return best}catch(_){return 99}}
 function renderBanner(){let b=$('#viewBanner');if(!b){b=document.createElement('div');b.id='viewBanner';const o=$('#overview');o.insertBefore(b,o.firstChild)}
@@ -2121,7 +2130,7 @@ $('#savePayment').onclick=()=>{
 /* export + refresh */
 
 /* ===== Tạo báo cáo ===== */
-function reportUnits(k){const src=((k&&k!==curKey()&&msnap[k])?msnap[k].rows:liveUnits).filter(r=>hasData(r)&&nkey(nm(r))!=='dangbocaccoquandang');return [...src].sort((a,b)=>v(b,'progress')-v(a,'progress')||firstPaidDay(a)-firstPaidDay(b)||v(b,'paid')-v(a,'paid'))}
+function reportUnits(k){const src=((k&&k!==curKey()&&msnap[k])?msnap[k].rows:liveUnits).filter(r=>hasData(r)&&nkey(nm(r))!=='dangbocaccoquandang');return [...src].sort((a,b)=>v(b,'progress')-v(a,'progress')||rankTime(a)-rankTime(b)||v(b,'paid')-v(a,'paid'))}
 function reportHTML(k){
   const U=reportUnits(k),y=+k.slice(0,4),m=+k.slice(5);
   const T=U.reduce((a,r)=>{['members','exempt','due','paidCount','pending','noRecord','approved','paid','declared'].forEach(x=>a[x]=(a[x]||0)+v(r,x));return a},{});
@@ -2656,7 +2665,7 @@ async function fcLoad(){const ep=sheetEndpoint();if(!ep)return;
     if(d&&d.ok&&Array.isArray(d.rows)){fcHist={};d.rows.forEach(r=>{const day=fcDay(r[0]);if(!day||!r[1])return;(fcHist[day]||(fcHist[day]={}))[nkey(r[1])]=[pnum(r[2]),pnum(r[3])]})}}catch(_){}
   try{const d=await jsonp(ep+'?action=read&tab='+encodeURIComponent(REM_TAB),9000);const r=d&&d.ok&&d.rows&&d.rows[0];if(r){const x=parseInt(r[1]);if(x>=1&&x<=31)fcDl=x}}catch(_){}
   try{applyView();if(typeof fillTables==='function')fillTables()}catch(_){}
-  fcRender()}
+  ftLoad();fcRender()}
 /* chuỗi tỷ lệ theo ngày của một tháng: key=null → toàn xã, hoặc khóa đơn vị */
 function fcSeries(ym,key){const out=[];Object.keys(fcHist||{}).filter(d=>d.startsWith(ym)).sort().forEach(d=>{let due=0,paid=0;const o=fcHist[d];
     if(key){const e=o[key];if(!e)return;due=e[0];paid=e[1]}else for(const k in o){due+=o[k][0];paid+=o[k][1]}
