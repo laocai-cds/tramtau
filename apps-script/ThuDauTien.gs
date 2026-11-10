@@ -29,7 +29,9 @@ function ftSnapshot() {
     const vals = src.getDataRange().getValues();
     const hi = vals.findIndex(r => r.some(c => String(c).trim() === FT_COLS.name));
     if (hi < 0) return 'Không thấy dòng tiêu đề';
-    const H = vals[hi].map(c => String(c).trim()), ix = k => H.indexOf(FT_COLS[k]);
+    const hdr = [vals[hi], vals[hi + 1] || []].map(r => r.map(c => String(c).trim()));
+    const ix = k => { for (let j = 0; j < 2; j++) { const p = hdr[j].indexOf(FT_COLS[k]); if (p >= 0) return p; } return -1; };
+    const dataFrom = hi + 1 + (hdr[1].indexOf(FT_COLS.members) >= 0 ? 1 : 0);
     const ym = Utilities.formatDate(now, FT.tz, 'yyyy-MM'), stamp = Utilities.formatDate(now, FT.tz, 'yyyy-MM-dd HH:mm:ss');
 
     /* mốc sớm nhất trong "Lịch sử ngày" của tháng này, dùng để bù cho lần chạy đầu */
@@ -53,7 +55,7 @@ function ftSnapshot() {
     cur.forEach((r, i) => { if (String(r[0]) === ym) at[ftKey_(r[1])] = i; });
 
     let changed = 0;
-    vals.slice(hi + 1).forEach(r => {
+    vals.slice(dataFrom).forEach(r => {
       const name = String(r[ix('name')] || '').trim(); if (!name) return;
       const g = k => ix(k) < 0 ? 0 : ftNum_(r[ix(k)]);
       const due = Math.max(0, g('members') - g('exempt') - g('moved')), paid = g('paidCount');
