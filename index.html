@@ -194,6 +194,7 @@ a{color:var(--son)}
 .podium .step.s1{--bar:#a8841a;background:linear-gradient(160deg,#fff8e2,#fff);border-color:#ead79a}
 .podium .step.s1::after{content:'Dẫn đầu';position:absolute;right:12px;top:12px;font:700 10px var(--sans);letter-spacing:.1em;text-transform:uppercase;color:#8a6b0f;background:var(--vang-bg);border:1px solid #ead79a;padding:2px 8px;border-radius:99px}
 .podium .step.s2{--bar:#6b7280}
+.firstPaid{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:12px 0 0;padding:10px 16px;border:1px solid #ead79a;background:linear-gradient(160deg,#fff8e2,#fff);border-radius:14px;font:500 13.5px var(--sans);color:var(--ink,#222)}.firstPaid[hidden]{display:none}.firstPaid i{font-style:normal;font:700 10.5px var(--sans);letter-spacing:.1em;text-transform:uppercase;color:#8a6b0f;background:var(--vang-bg,#fdf1c7);border:1px solid #ead79a;padding:3px 10px;border-radius:99px;white-space:nowrap}.firstPaid b{font-weight:700}.firstPaid small{color:var(--muted,#6b7280);font-size:12.5px}
 .podium .step.s3{--bar:#9a5b2a}
 
 /* ---------- biểu đồ cột theo đơn vị ---------- */
@@ -1665,6 +1666,11 @@ function rankTime(r){try{const k=viewKey&&viewingPast()?viewKey:curKey(),key=nke
 /* Giờ hoàn thành 100% của đơn vị (từ tab "Thu đầu tiên"), hiện ở cột "Hoàn thành 100%" */
 function doneAtText(r){try{if(!(v(r,'due')>0&&v(r,'paidCount')>=v(r,'due')))return '<span class="hint">–</span>';const k=viewKey&&viewingPast()?viewKey:curKey(),e=ftMap&&ftMap[k]&&ftMap[k][nkey(nm(r))];if(!e||isNaN(e[1]))return '<span class="hint">–</span>';
   const d=new Date(e[1]+7*3600e3),p=n=>String(n).padStart(2,'0');return p(d.getUTCHours())+':'+p(d.getUTCMinutes())+':'+p(d.getUTCSeconds())+' '+p(d.getUTCDate())+'/'+p(d.getUTCMonth()+1)}catch(_){return '–'}}
+/* Đơn vị thu đầu tiên trong tháng: đơn vị có giờ bắt đầu thu sớm nhất (tab "Thu đầu tiên") */
+function firstPaidHtml(){const k=viewKey&&viewingPast()?viewKey:curKey(),mo=ftMap&&ftMap[k];if(!mo)return '';let best=null;
+  units.forEach(r=>{const e=mo[nkey(nm(r))];if(e&&!isNaN(e[0])&&v(r,'paidCount')>0&&(!best||e[0]<best.t))best={r,t:e[0]}});
+  if(!best)return '';const d=new Date(best.t+7*3600e3),p=n=>String(n).padStart(2,'0');
+  return `<i>Đơn vị thu đầu tiên</i><b>${esc(nm(best.r))}</b><small>bắt đầu thu lúc ${p(d.getUTCHours())}:${p(d.getUTCMinutes())}:${p(d.getUTCSeconds())} ngày ${p(d.getUTCDate())}/${p(d.getUTCMonth()+1)}/${d.getUTCFullYear()}</small>`}
 async function ftLoad(){const ep=sheetEndpoint();if(!ep)return;
   try{const d=await jsonp(ep+'?action=read&tab='+encodeURIComponent('Thu đầu tiên'),12000);
     if(d&&d.ok&&Array.isArray(d.rows)){const m={};d.rows.forEach(r=>{const mo=String(r[0]||'').trim().slice(0,7),n=nkey(r[1]);if(!mo||!n)return;const s=ftMs(r[2]),f=ftMs(r[3]);(m[mo]||(m[mo]={}))[n]=[isNaN(s)?f:s,f]});ftMap=m;try{applyView();render()}catch(_){}}}catch(_){}}
@@ -1935,6 +1941,7 @@ function render(){
   // top 3
   const lead=units.filter(r=>v(r,'paidCount')>0).sort((a,b)=>v(b,'progress')-v(a,'progress')||rankTime(a)-rankTime(b)||v(b,'paid')-v(a,'paid')).slice(0,3);
   $('#podium').innerHTML=[0,1,2].filter(i=>lead[i]).map(i=>{const r=lead[i],pc=Math.max(0,Math.min(100,v(r,'progress')*100)),lab=['Dẫn đầu','Hạng nhì','Hạng ba'][i];return `<button type="button" class="step s${i+1}" data-cb="${cbSlug(r)}" aria-label="${lab}: ${esc(nm(r))}, ${pct(v(r,'progress'))}. Bấm để xem chi tiết"><span class="hd"><span class="no">${i+1}</span><span class="nm"><em>${lab}</em><b title="${esc(nm(r))}">${esc(nm(r))}</b></span></span><span class="val"><strong>${pct(v(r,'progress'))}</strong><small>tỷ lệ đã nộp</small></span><i class="pb"><u style="width:${pc}%"></u></i><span class="meta"><span><b>${num(v(r,'paidCount'))}/${num(v(r,'due'))}</b> đảng viên</span><span><b>${money(v(r,'paid'))}</b></span></span><span class="go">Xem chi tiết đơn vị<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></span></button>`}).join('');
+  try{let fp=document.getElementById('firstPaid');if(!fp){fp=document.createElement('div');fp.id='firstPaid';fp.className='firstPaid';$('#podium').insertAdjacentElement('afterend',fp)}fp.innerHTML=firstPaidHtml();fp.hidden=!fp.innerHTML}catch(_){}
 
   // column chart: tiến độ từng đơn vị, theo hạng
   const n=units.length,lab=s=>s.length>64?s.slice(0,63)+'…':s;
