@@ -1667,7 +1667,7 @@ function doneAtText(r){try{if(!(v(r,'due')>0&&v(r,'paidCount')>=v(r,'due')))retu
   const d=new Date(e[1]+7*3600e3),p=n=>String(n).padStart(2,'0');return p(d.getUTCHours())+':'+p(d.getUTCMinutes())+':'+p(d.getUTCSeconds())+' '+p(d.getUTCDate())+'/'+p(d.getUTCMonth()+1)}catch(_){return '–'}}
 async function ftLoad(){const ep=sheetEndpoint();if(!ep)return;
   try{const d=await jsonp(ep+'?action=read&tab='+encodeURIComponent('Thu đầu tiên'),12000);
-    if(d&&d.ok&&Array.isArray(d.rows)){const m={};d.rows.forEach(r=>{const mo=String(r[0]||'').trim().slice(0,7),n=nkey(r[1]);if(!mo||!n)return;const s=ftMs(r[2]),f=ftMs(r[3]);(m[mo]||(m[mo]={}))[n]=[isNaN(s)?f:s,f]});ftMap=m;try{applyView();if(typeof fillTables==='function')fillTables()}catch(_){}}}catch(_){}}
+    if(d&&d.ok&&Array.isArray(d.rows)){const m={};d.rows.forEach(r=>{const mo=String(r[0]||'').trim().slice(0,7),n=nkey(r[1]);if(!mo||!n)return;const s=ftMs(r[2]),f=ftMs(r[3]);(m[mo]||(m[mo]={}))[n]=[isNaN(s)?f:s,f]});ftMap=m;try{applyView();render()}catch(_){}}}catch(_){}}
 /* Ngày thu đầu tiên của đơn vị trong tháng đang xem (từ tab "Lịch sử ngày"): đồng hạng thì đơn vị thu sớm hơn xếp trước; chưa có lịch sử thì coi là muộn nhất */
 function firstPaidDay(r){try{const k=viewKey&&viewingPast()?viewKey:curKey(),h=fcHist;if(!h)return 99;const key=nkey(nm(r));let best=99;for(const d in h){if(d.slice(0,7)!==k)continue;const e=h[d][key];if(e&&e[1]>0){const n=+d.slice(8);if(n<best)best=n}}return best}catch(_){return 99}}
 function renderBanner(){let b=$('#viewBanner');if(!b){b=document.createElement('div');b.id='viewBanner';const o=$('#overview');o.insertBefore(b,o.firstChild)}
@@ -1933,7 +1933,7 @@ function render(){
    $('#moneyRate').innerHTML=`<div class="mr-big"><strong>${pct(r)}</strong><span>số tiền kê khai đã thu được</span></div><div class="mr-track"><i data-w="${(Math.min(1,r)*100).toFixed(1)}%"></i></div><div class="mr-list"><div><span>Đã nộp</span><b>${money(t.paid)}</b></div><div><span>Kê khai theo hồ sơ</span><b>${money(t.declared)}</b></div><div class="due"><span>Còn phải thu</span><b>${money(left)}</b></div><div><span>Bình quân mỗi đảng viên đã nộp</span><b>${money(avg)}</b></div></div><p class="mr-cmp">Theo số người: <b>${pct(rate)}</b> đảng viên đã nộp. Tỷ lệ theo tiền chỉ tính trên những hồ sơ đã kê khai.</p>`;}
 
   // top 3
-  const lead=units.filter(r=>v(r,'paidCount')>0).sort((a,b)=>v(b,'progress')-v(a,'progress')||v(b,'paid')-v(a,'paid')).slice(0,3);
+  const lead=units.filter(r=>v(r,'paidCount')>0).sort((a,b)=>v(b,'progress')-v(a,'progress')||rankTime(a)-rankTime(b)||v(b,'paid')-v(a,'paid')).slice(0,3);
   $('#podium').innerHTML=[0,1,2].filter(i=>lead[i]).map(i=>{const r=lead[i],pc=Math.max(0,Math.min(100,v(r,'progress')*100)),lab=['Dẫn đầu','Hạng nhì','Hạng ba'][i];return `<button type="button" class="step s${i+1}" data-cb="${cbSlug(r)}" aria-label="${lab}: ${esc(nm(r))}, ${pct(v(r,'progress'))}. Bấm để xem chi tiết"><span class="hd"><span class="no">${i+1}</span><span class="nm"><em>${lab}</em><b title="${esc(nm(r))}">${esc(nm(r))}</b></span></span><span class="val"><strong>${pct(v(r,'progress'))}</strong><small>tỷ lệ đã nộp</small></span><i class="pb"><u style="width:${pc}%"></u></i><span class="meta"><span><b>${num(v(r,'paidCount'))}/${num(v(r,'due'))}</b> đảng viên</span><span><b>${money(v(r,'paid'))}</b></span></span><span class="go">Xem chi tiết đơn vị<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></span></button>`}).join('');
 
   // column chart: tiến độ từng đơn vị, theo hạng
@@ -2667,7 +2667,7 @@ async function fcLoad(){const ep=sheetEndpoint();if(!ep)return;
   try{const d=await jsonp(ep+'?action=read&tab='+encodeURIComponent(FC_TAB),15000);
     if(d&&d.ok&&Array.isArray(d.rows)){fcHist={};d.rows.forEach(r=>{const day=fcDay(r[0]);if(!day||!r[1])return;(fcHist[day]||(fcHist[day]={}))[nkey(r[1])]=[pnum(r[2]),pnum(r[3])]})}}catch(_){}
   try{const d=await jsonp(ep+'?action=read&tab='+encodeURIComponent(REM_TAB),9000);const r=d&&d.ok&&d.rows&&d.rows[0];if(r){const x=parseInt(r[1]);if(x>=1&&x<=31)fcDl=x}}catch(_){}
-  try{applyView();if(typeof fillTables==='function')fillTables()}catch(_){}
+  try{applyView();render()}catch(_){}
   ftLoad();fcRender()}
 /* chuỗi tỷ lệ theo ngày của một tháng: key=null → toàn xã, hoặc khóa đơn vị */
 function fcSeries(ym,key){const out=[];Object.keys(fcHist||{}).filter(d=>d.startsWith(ym)).sort().forEach(d=>{let due=0,paid=0;const o=fcHist[d];
