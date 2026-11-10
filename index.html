@@ -1303,7 +1303,7 @@ go();document.addEventListener('DOMContentLoaded',go);
           <th data-sort="rank">Hạng</th><th data-sort="name">Đơn vị</th>
           <th class="n" data-sort="paidCount">Đảng viên đã nộp</th><th class="n" data-sort="pending">Chưa duyệt</th><th class="n" data-sort="noRecord">Chưa có hồ sơ</th>
           <th class="n" data-sort="declared">Đã kê khai</th><th class="n" data-sort="paid">Đã nộp</th>
-          <th data-sort="progress">Tiến độ</th><th>Trạng thái</th>
+          <th data-sort="progress">Tiến độ</th><th class="n">Hoàn thành 100%</th><th>Trạng thái</th>
         </tr></thead>
         <tbody id="tbody"></tbody>
       </table></div>
@@ -1662,6 +1662,9 @@ const ftMs=x=>{const t=String(x||'').trim();if(!t)return NaN;const m=t.match(/^(
 function rankTime(r){try{const k=viewKey&&viewingPast()?viewKey:curKey(),key=nkey(nm(r)),e=ftMap&&ftMap[k]&&ftMap[k][key];
   if(e){const full=v(r,'due')>0&&v(r,'paidCount')>=v(r,'due');const t=full&&!isNaN(e[1])?e[1]:e[0];if(!isNaN(t))return t}
   return 4e12+firstPaidDay(r)}catch(_){return 5e12}}
+/* Giờ hoàn thành 100% của đơn vị (từ tab "Thu đầu tiên"), hiện ở cột "Hoàn thành 100%" */
+function doneAtText(r){try{if(!(v(r,'due')>0&&v(r,'paidCount')>=v(r,'due')))return '<span class="hint">–</span>';const k=viewKey&&viewingPast()?viewKey:curKey(),e=ftMap&&ftMap[k]&&ftMap[k][nkey(nm(r))];if(!e||isNaN(e[1]))return '<span class="hint">–</span>';
+  const d=new Date(e[1]+7*3600e3),p=n=>String(n).padStart(2,'0');return p(d.getUTCHours())+':'+p(d.getUTCMinutes())+':'+p(d.getUTCSeconds())+' '+p(d.getUTCDate())+'/'+p(d.getUTCMonth()+1)}catch(_){return '–'}}
 async function ftLoad(){const ep=sheetEndpoint();if(!ep)return;
   try{const d=await jsonp(ep+'?action=read&tab='+encodeURIComponent('Thu đầu tiên'),12000);
     if(d&&d.ok&&Array.isArray(d.rows)){const m={};d.rows.forEach(r=>{const mo=String(r[0]||'').trim().slice(0,7),n=nkey(r[1]);if(!mo||!n)return;const s=ftMs(r[2]),f=ftMs(r[3]);(m[mo]||(m[mo]={}))[n]=[isNaN(s)?f:s,f]});ftMap=m;try{applyView();if(typeof fillTables==='function')fillTables()}catch(_){}}}catch(_){}}
@@ -1990,7 +1993,7 @@ function fillTables(){
   list=sorted(list);
   $('#rowcount').textContent=`Hiển thị ${list.length} / ${units.length} đơn vị`;
   $('#noresult').hidden=list.length>0;
-  $('#tbody').innerHTML=list.map(r=>{const[s,c]=status(r);return `<tr class="row ${cls(r)}"><td>${rk(r)}</td><td class="uname" data-cb="${cbSlug(r)}" title="Xem thẻ đơn vị">${esc(nm(r))}</td><td class="n pc"><b>${v(r,'paidCount')}</b>/${v(r,'due')}</td>${zc(v(r,'pending'),'amb')}${zc(v(r,'noRecord'),'red')}<td class="n">${money(v(r,'declared'))}</td><td class="n mny"><b>${money(v(r,'paid'))}</b></td><td>${progCell(r)}</td><td><span class="pill ${c}">${s}</span></td></tr>`}).join('');
+  $('#tbody').innerHTML=list.map(r=>{const[s,c]=status(r);return `<tr class="row ${cls(r)}"><td>${rk(r)}</td><td class="uname" data-cb="${cbSlug(r)}" title="Xem thẻ đơn vị">${esc(nm(r))}</td><td class="n pc"><b>${v(r,'paidCount')}</b>/${v(r,'due')}</td>${zc(v(r,'pending'),'amb')}${zc(v(r,'noRecord'),'red')}<td class="n">${money(v(r,'declared'))}</td><td class="n mny"><b>${money(v(r,'paid'))}</b></td><td>${progCell(r)}</td><td class="n doneAt">${doneAtText(r)}</td><td><span class="pill ${c}">${s}</span></td></tr>`}).join('');
   const q2=($('#search2').value||'').toLocaleLowerCase('vi');
   const l2=sorted(units.filter(r=>nm(r).toLocaleLowerCase('vi').includes(q2)));
   $('#tbody2').innerHTML=l2.map(r=>`<tr class="row ${cls(r)}"><td class="hint">${esc(r[KEYS.stt])}</td><td>${rk(r)}</td><td class="uname" data-cb="${cbSlug(r)}" title="Xem thẻ đơn vị">${esc(nm(r))}</td><td class="n">${v(r,'members')}</td>${zc(v(r,'pending'),'amb')}<td class="n pc"><b>${v(r,'paidCount')}</b></td><td class="n mny"><b>${money(v(r,'paid'))}</b></td><td>${progCell(r)}</td></tr>`).join('');
