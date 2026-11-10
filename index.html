@@ -1069,7 +1069,7 @@ tbody tr:hover td{background:#f5f8ff}
 @keyframes pbFlow{to{background-position:-200% 0}}
 .podium .step.s1::after{background:linear-gradient(135deg,#d62828,#f77f00);color:#fff;border:0;box-shadow:0 4px 10px rgba(214,40,40,.4)}
 .podium .step .meta>span{background:rgba(255,255,255,.75)!important;border-color:rgba(0,0,0,.08)!important}
-.firstPaid{position:relative;overflow:hidden;display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin:16px 0 0;padding:14px 22px;border:0;border-radius:20px;color:#fff;background:linear-gradient(110deg,#8f1018 0%,#c8192a 36%,#ee4a2b 68%,#f6a609 100%);box-shadow:0 14px 30px -10px rgba(200,25,42,.6),inset 0 1px 0 rgba(255,255,255,.4)}
+.firstPaid{position:relative;overflow:hidden;display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin:6px 0 18px;padding:14px 22px;border:0;border-radius:20px;color:#fff;background:linear-gradient(110deg,#8f1018 0%,#c8192a 36%,#ee4a2b 68%,#f6a609 100%);box-shadow:0 14px 30px -10px rgba(200,25,42,.6),inset 0 1px 0 rgba(255,255,255,.4)}
 .firstPaid::before{content:'';position:absolute;inset:0;background:linear-gradient(105deg,transparent 32%,rgba(255,255,255,.4) 50%,transparent 68%);transform:translateX(-120%);animation:fpShine 3.6s ease-in-out infinite;pointer-events:none}
 @keyframes fpShine{0%,25%{transform:translateX(-120%)}70%,100%{transform:translateX(120%)}}
 .firstPaid>*{position:relative}
@@ -1973,7 +1973,7 @@ function render(){
   // top 3
   const lead=units.filter(r=>v(r,'paidCount')>0).sort((a,b)=>v(b,'progress')-v(a,'progress')||rankTime(a)-rankTime(b)||v(b,'paid')-v(a,'paid')).slice(0,3);
   $('#podium').innerHTML=[0,1,2].filter(i=>lead[i]).map(i=>{const r=lead[i],pc=Math.max(0,Math.min(100,v(r,'progress')*100)),lab=['Dẫn đầu','Hạng nhì','Hạng ba'][i];return `<button type="button" class="step s${i+1}" data-cb="${cbSlug(r)}" aria-label="${lab}: ${esc(nm(r))}, ${pct(v(r,'progress'))}. Bấm để xem chi tiết"><span class="hd"><span class="no">${i+1}</span><span class="nm"><em>${lab}</em><b title="${esc(nm(r))}">${esc(nm(r))}</b></span></span><span class="val"><strong>${pct(v(r,'progress'))}</strong><small>tỷ lệ đã nộp</small></span><i class="pb"><u style="width:${pc}%"></u></i><span class="meta"><span><b>${num(v(r,'paidCount'))}/${num(v(r,'due'))}</b> đảng viên</span><span><b>${money(v(r,'paid'))}</b></span></span><span class="go">Xem chi tiết đơn vị<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></span></button>`}).join('');
-  try{let fp=document.getElementById('firstPaid');if(!fp){fp=document.createElement('div');fp.id='firstPaid';fp.className='firstPaid';$('#podium').insertAdjacentElement('afterend',fp)}fp.innerHTML=firstPaidHtml();fp.hidden=!fp.innerHTML}catch(_){}
+  try{let fp=document.getElementById('firstPaid');if(!fp){fp=document.createElement('div');fp.id='firstPaid';fp.className='firstPaid';$('#podium').insertAdjacentElement('beforebegin',fp)}fp.innerHTML=firstPaidHtml();fp.hidden=!fp.innerHTML}catch(_){}
 
   // column chart: tiến độ từng đơn vị, theo hạng
   const n=units.length,lab=s=>s.length>64?s.slice(0,63)+'…':s;
