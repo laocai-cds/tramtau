@@ -1239,7 +1239,7 @@ go();document.addEventListener('DOMContentLoaded',go);
       <div class="ph"><h2>Xếp hạng đơn vị</h2></div>
       <div class="tsTabs" role="tablist"><button type="button" class="on" data-p="a">Top 3 dẫn đầu</button><button type="button" data-p="b">Tiến độ theo đơn vị</button></div>
       <div class="tsPane on" data-p="a">
-        <small class="tsSub">Xếp theo tiến độ; đồng hạng thì đơn vị hoàn thành (hoặc bắt đầu thu) sớm hơn xếp trước, rồi xét số tiền đã nộp</small>
+        <small class="tsSub">Tiến độ hoàn thành 100% theo thời gian</small>
         <div class="podium" id="podium"></div>
       </div>
       <div class="tsPane" data-p="b">
@@ -1478,7 +1478,7 @@ go();document.addEventListener('DOMContentLoaded',go);
 </div>
 <div class="back" id="rankModal" role="dialog" aria-modal="true" aria-labelledby="rankTitle">
   <div class="modal rk-modal">
-    <div class="rkm-head"><div><h3 id="rankTitle">Xếp hạng đơn vị</h3><p id="rankSub">Xếp theo tiến độ; đồng hạng thì đơn vị hoàn thành (hoặc bắt đầu thu) sớm hơn xếp trước, rồi xét số tiền đã nộp</p></div><button type="button" class="rkm-x" data-rank-close aria-label="Đóng">×</button></div>
+    <div class="rkm-head"><div><h3 id="rankTitle">Xếp hạng đơn vị</h3><p id="rankSub">Tiến độ hoàn thành 100% theo thời gian</p></div><button type="button" class="rkm-x" data-rank-close aria-label="Đóng">×</button></div>
     <div class="rkm-sum" id="rankSum"></div>
     <div class="rkm-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="search" id="rankQ" placeholder="Tìm tên đơn vị…" autocomplete="off" aria-label="Tìm tên đơn vị"><span id="rankCnt"></span><button type="button" class="rkm-clear" id="rankClr" aria-label="Xóa tìm kiếm" title="Xóa tìm kiếm" hidden>×</button></div>
     <div class="rkm-list" id="rankList"></div>
